@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANGRY 😡</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #050505;
+      color: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: 0 auto;
+    }
+
+    header {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+      background:
+        radial-gradient(circle at top, rgba(255, 90, 0, 0.18), transparent 45%),
+        #050505;
+    }
+
+    .hero {
+      max-width: 760px;
+    }
+
+    .logo {
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 28px;
+      box-shadow: 0 0 45px rgba(255, 80, 0, 0.3);
+    }
+
+    h1 {
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -3px;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      color: #ff5a00;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    .intro {
+      max-width: 680px;
+      margin: 0 auto;
+      font-size: 1.05rem;
+      color: #cccccc;
+    }
+
+    .scroll {
+      margin-top: 35px;
+      display: inline-block;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    section {
+      padding: 90px 0;
+      border-top: 1px solid #151515;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 7vw, 3.5rem);
+      margin-bottom: 28px;
+    }
+
+    .orange {
+      color: #ff5a00;
+    }
+
+    .angry-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-top: 35px;
+    }
+
+    .angry-item {
+      background: #0d0d0d;
+      border: 1px solid #1d1d1d;
+      padding: 18px 20px;
+      border-radius: 14px;
+      font-size: 1.05rem;
+    }
+
+    .text-block {
+      max-width: 800px;
+      color: #c9c9c9;
+      font-size: 1.05rem;
+    }
+
+    .text-block p {
+      margin-bottom: 20px;
+    }
+
+    .big-line {
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 30px 0;
+    }
+
+    .warning {
+      background: linear-gradient(180deg, #150700, #090909);
+    }
+
+    .warning-box {
+      max-width: 850px;
+      border: 1px solid #5c2100;
+      background: rgba(255, 90, 0, 0.06);
+      border-radius: 18px;
+      padding: 30px;
+    }
+
+    .warning-box p {
+      margin-bottom: 18px;
+      color: #d1d1d1;
+    }
+
+    .coming-soon {
+      margin-top: 40px;
+      padding: 28px;
+      border: 1px dashed #333;
+      border-radius: 16px;
+      text-align: center;
+      color: #888;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 13px 22px;
+      border-radius: 999px;
+      border: 1px solid #333;
+      background: #111;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+
+    footer {
+      text-align: center;
+      padding: 45px 20px;
+      border-top: 1px solid #151515;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        min-height: 92vh;
+      }
+
+      .logo {
+        width: 165px;
+        height: 165px;
+      }
+
+      section {
+        padding: 65px 0;
+      }
+
+      .warning-box {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="hero">
+      <!--
+        Simpan gambar logo kamu dengan nama:
+        angry-logo.png
+
+        Lalu taruh di folder yang sama dengan index.html
+      -->
+      <img src="angry-logo.png" alt="ANGRY logo" class="logo" />
+
+      <h1>ANGRY 😡</h1>
+
+      <div class="tagline">
+        JUST AN ANGRY MEME.
+      </div>
+
+      <p class="intro">
+        ANGRY is a meme coin that represents frustration with scams,
+        fraud, theft, rug pulls, manipulation, false promises, lies,
+        and wrongdoing in any form.
+      </p>
+
+      <span class="scroll">↓ Scroll down</span>
+    </div>
+  </header>
+
+
+  <section>
+    <div class="container">
+      <h2>WHAT MAKES <span class="orange">ANGRY</span> ANGRY?</h2>
+
+      <div class="angry-list">
+        <div class="angry-item">😡 Scams</div>
+        <div class="angry-item">😡 Fraud</div>
+        <div class="angry-item">😡 Theft</div>
+        <div class="angry-item">😡 Rug pulls</div>
+        <div class="angry-item">😡 Manipulation</div>
+        <div class="angry-item">😡 False promises</div>
+        <div class="angry-item">😡 Lies</div>
+        <div class="angry-item">😡 Wrongdoing in any form</div>
+      </div>
+    </div>
+  </section>
+
+
+  <section>
+    <div class="container">
+      <h2>ABOUT <span class="orange">ANGRY</span></h2>
+
+      <div class="text-block">
+        <p>
+          ANGRY was born from one simple expression: anger toward scams,
+          manipulation, and all forms of dishonesty.
+        </p>
+
+        <p>
+          There is no complicated story behind it.
+        </p>
+
+        <p>
+          ANGRY is not an AI project with sophisticated-sounding technology.
+          There is no complicated utility created just to make it look
+          impressive, and there are no claims that ANGRY will change the world.
+        </p>
+
+        <div class="big-line">
+          ANGRY is simply a meme coin. 😡
+        </div>
+
+        <p>
+          A meme that represents frustration with scams, rug pulls,
+          manipulation, lies, and people who profit by deceiving others.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="warning">
+    <div class="container">
+      <h2>⚠️ BEFORE BUYING <span class="orange">ANGRY</span></h2>
+
+      <div class="warning-box">
+        <p>
+          If you find ANGRY and decide to buy it, please be careful.
+        </p>
+
+        <p>
+          <strong>ANGRY does not promise profits.</strong>
+        </p>
+
+        <p>
+          Meme coins are highly volatile. Prices can rise quickly and can also
+          fall quickly. Don't FOMO just because you see one candle rising
+          sharply — the move may only be temporary and could reverse within
+          minutes.
+        </p>
+
+        <p>
+          Do not buy with the assumption that the price will definitely go up.
+        </p>
+
+        <p>
+          Use your money wisely, understand the risks, and make your own
+          decisions.
+        </p>
+
+        <div class="big-line">
+          ANGRY does not promise wealth.<br />
+          ANGRY is just an angry meme. 😡
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section>
+    <div class="container">
+      <h2 style="text-align:center;">ANGRY IS <span class="orange">COMING</span></h2>
+
+      <div class="coming-soon">
+        Token contract, X and Telegram will be added here after launch.
+
+        <div class="links">
+          <div class="btn">Contract — Coming Soon</div>
+          <div class="btn">X — Coming Soon</div>
+          <div class="btn">Telegram — Coming Soon</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    ANGRY 😡 — Just an angry meme.
+  </footer>
+
+</body>
+</html>
