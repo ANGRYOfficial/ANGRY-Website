@@ -163,11 +163,27 @@
     }
 
     .btn {
+      display: inline-block;
       padding: 13px 22px;
       border-radius: 999px;
       border: 1px solid #333;
       background: #111;
-      color: #aaa;
+      color: #cfcfcf;
+      transition: 0.2s ease;
+    }
+
+    a.btn {
+      cursor: pointer;
+    }
+
+    a.btn:hover {
+      border-color: #ff5a00;
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .disabled {
+      color: #777;
       cursor: not-allowed;
     }
 
@@ -204,12 +220,7 @@
 
   <header>
     <div class="hero">
-      <!--
-        Simpan gambar logo kamu dengan nama:
-        angry-logo.png
 
-        Lalu taruh di folder yang sama dengan index.html
-      -->
       <img src="angry-logo.png" alt="ANGRY logo" class="logo" />
 
       <h1>ANGRY 😡</h1>
@@ -225,13 +236,17 @@
       </p>
 
       <span class="scroll">↓ Scroll down</span>
+
     </div>
   </header>
 
 
   <section>
     <div class="container">
-      <h2>WHAT MAKES <span class="orange">ANGRY</span> ANGRY?</h2>
+
+      <h2>
+        WHAT MAKES <span class="orange">ANGRY</span> ANGRY?
+      </h2>
 
       <div class="angry-list">
         <div class="angry-item">😡 Scams</div>
@@ -243,15 +258,20 @@
         <div class="angry-item">😡 Lies</div>
         <div class="angry-item">😡 Wrongdoing in any form</div>
       </div>
+
     </div>
   </section>
 
 
   <section>
     <div class="container">
-      <h2>ABOUT <span class="orange">ANGRY</span></h2>
+
+      <h2>
+        ABOUT <span class="orange">ANGRY</span>
+      </h2>
 
       <div class="text-block">
+
         <p>
           ANGRY was born from one simple expression: anger toward scams,
           manipulation, and all forms of dishonesty.
@@ -275,16 +295,22 @@
           A meme that represents frustration with scams, rug pulls,
           manipulation, lies, and people who profit by deceiving others.
         </p>
+
       </div>
+
     </div>
   </section>
 
 
   <section class="warning">
     <div class="container">
-      <h2>⚠️ BEFORE BUYING <span class="orange">ANGRY</span></h2>
+
+      <h2>
+        ⚠️ BEFORE BUYING <span class="orange">ANGRY</span>
+      </h2>
 
       <div class="warning-box">
+
         <p>
           If you find ANGRY and decide to buy it, please be careful.
         </p>
@@ -313,24 +339,52 @@
           ANGRY does not promise wealth.<br />
           ANGRY is just an angry meme. 😡
         </div>
+
       </div>
+
     </div>
   </section>
 
 
   <section>
     <div class="container">
-      <h2 style="text-align:center;">ANGRY IS <span class="orange">COMING</span></h2>
+
+      <h2 style="text-align: center;">
+        ANGRY IS <span class="orange">COMING</span>
+      </h2>
 
       <div class="coming-soon">
-        Token contract, X and Telegram will be added here after launch.
+
+        Contract address will be added here after launch.
 
         <div class="links">
-          <div class="btn">Contract — Coming Soon</div>
-          <div class="btn">X — Coming Soon</div>
-          <div class="btn">Telegram — Coming Soon</div>
+
+          <div class="btn disabled">
+            Contract — Coming Soon
+          </div>
+
+          <a
+            class="btn"
+            href="https://x.com/ANGRY1c"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            X — Follow ANGRY
+          </a>
+
+          <a
+            class="btn"
+            href="https://t.me/ANGRYOfficialCommunity"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Telegram — Join Community
+          </a>
+
         </div>
+
       </div>
+
     </div>
   </section>
 
@@ -340,4 +394,4 @@
   </footer>
 
 </body>
-</html>
+                                         </html>
