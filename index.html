@@ -7029,329 +7029,177 @@ async function analyzeWalletRelationships() {
       };
     }
 
-    relationshipStage = "result rendering";
-    const funderCards = funders.length > 0
-      ? funders.slice(0, 8).map((item, index) => {
-          const sol = item.lamports / 1_000_000_000;
-          const time = item.firstTimestamp
-            ? new Date(item.firstTimestamp * 1000).toLocaleString()
-            : "Time unavailable";
-          const signature = item.signatures[0] || "";
-          const classification = classifications.get(item.address) || {
-            type: "unknown",
-            label: "Unknown / unclassified"
-          };
-          const isService = classification.type === "service";
-          const isWallet = classification.type === "wallet";
-          const reviewText = isService
-            ? `Known exchange/service funding is informational and is not counted
-               as evidence that this wallet controls the creator candidate. The
-               wallet and funding transaction remain available for independent review.`
-            : isWallet
-              ? `This looks like a live System Program wallet, but that alone does
-                 not identify its owner. It may still belong to an exchange, service,
-                 bridge or unrelated third party. Review the wallet and transaction
-                 before treating the funding source as developer evidence.`
-              : `This funding source is not confidently classified. It may be an
-                 exchange, service, bridge or unrelated third party. Manual review
-                 is recommended and this address should not be treated as identity proof.`;
+    // V15: Render-safe Wallet Relationship output.
+    // Keep the analysis results from V14, but render only primitive values and
+    // direct explorer URLs. This avoids helper/object coercion recursion on
+    // mobile browsers and gives a precise render sub-stage if anything fails.
+    const relationRenderEscape = value => {
+      if (value === null || value === undefined) return "";
+      const type = typeof value;
+      if (type !== "string" && type !== "number" && type !== "boolean") return "";
+      return ("" + value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    };
 
-          return `
-            <div style="
-              padding:12px;
-              margin-top:9px;
-              background:#101010;
-              border-radius:11px;
-            ">
-              <div><strong>Funder #${index + 1}</strong></div>
-              <div style="margin-top:5px;word-break:break-all;color:#aaa;font-size:12px;">
-                ${relationEscape(item.address)}
+    const relationRenderNumber = (value, digits = 2) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "0";
+      return n.toLocaleString("en-US", { maximumFractionDigits: digits });
+    };
+
+    const relationRenderTime = value => {
+      const n = Number(value || 0);
+      if (!Number.isFinite(n) || n <= 0) return "Time unavailable";
+      try {
+        return new Date(n * 1000).toLocaleString();
+      } catch (_) {
+        return "Time unavailable";
+      }
+    };
+
+    const relationRenderAccountLink = (address, label) => {
+      const text = typeof address === "string" ? address : "";
+      if (!text) return "";
+      return `<a href="https://solscan.io/account/${encodeURIComponent(text)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:7px 7px 0 0;color:#ff6a3d;text-decoration:none;font-size:12px;">${relationRenderEscape(label)} ↗</a>`;
+    };
+
+    const relationRenderTxLink = (signature, label) => {
+      const text = typeof signature === "string" ? signature : "";
+      if (!text) return "";
+      return `<a href="https://solscan.io/tx/${encodeURIComponent(text)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin:7px 7px 0 0;color:#ff6a3d;text-decoration:none;font-size:12px;">${relationRenderEscape(label)} ↗</a>`;
+    };
+
+    relationshipStage = "result rendering: funders";
+    const funderHtmlParts = [];
+    const shownFunders = Array.isArray(funders) ? funders.slice(0, 8) : [];
+
+    if (shownFunders.length === 0) {
+      funderHtmlParts.push(`<div style="margin-top:9px;color:#888;font-size:13px;">No explicit significant incoming SOL funder was found in the scanned pre-launch history.</div>`);
+    } else {
+      for (let index = 0; index < shownFunders.length; index++) {
+        const item = shownFunders[index] || {};
+        const address = typeof item.address === "string" ? item.address : "";
+        const classification = classifications.get(address) || { type: "unknown", label: "Unknown / unclassified" };
+        const signature = Array.isArray(item.signatures) && typeof item.signatures[0] === "string" ? item.signatures[0] : "";
+        const sol = Number(item.lamports || 0) / 1_000_000_000;
+        const classLabel = typeof classification.label === "string" ? classification.label : "Unknown / unclassified";
+        const classIcon = classification.type === "service" ? "🏦" : classification.type === "wallet" ? "👤" : "❓";
+
+        funderHtmlParts.push(`
+          <div style="padding:12px;margin-top:9px;background:#101010;border-radius:11px;">
+            <div><strong>Funder #${index + 1}</strong></div>
+            <div style="margin-top:5px;word-break:break-all;color:#aaa;font-size:12px;">${relationRenderEscape(address)}</div>
+            <div style="margin-top:5px;color:#aaa;font-size:12px;">${classIcon} ${relationRenderEscape(classLabel)}</div>
+            <div style="margin-top:6px;">Observed incoming SOL: <strong>${relationRenderNumber(sol, 6)} SOL</strong></div>
+            <div style="margin-top:4px;color:#888;font-size:12px;">${relationRenderNumber(item.txCount, 0)} transfer(s) · first observed ${relationRenderEscape(relationRenderTime(item.firstTimestamp))}</div>
+            <div style="margin-top:4px;">${relationRenderAccountLink(address, "View Funder Wallet")}${relationRenderTxLink(signature, "View Funding Transaction")}</div>
+          </div>
+        `);
+      }
+    }
+    const funderCards = funderHtmlParts.join("");
+
+    relationshipStage = "result rendering: recipients";
+    const recipientHtmlParts = [];
+    const shownRecipients = Array.isArray(topRecipients) ? topRecipients : [];
+
+    if (shownRecipients.length === 0) {
+      recipientHtmlParts.push(`<div style="margin-top:10px;color:#888;font-size:13px;">No direct outbound transfer of this token from the creator candidate was found in the scanned history.</div>`);
+    } else {
+      for (let index = 0; index < shownRecipients.length; index++) {
+        const item = shownRecipients[index] || {};
+        const address = typeof item.address === "string" ? item.address : "";
+        const classification = classifications.get(address) || { type: "unknown", label: "Unknown" };
+        const behavior = deepResults.get(address);
+        const signature = Array.isArray(item.signatures) && typeof item.signatures[0] === "string" ? item.signatures[0] : "";
+        const amount = Number(item.amount || 0);
+        const percent = supply > 0 ? (amount / supply) * 100 : null;
+        const overlap = qualifiedFunderSet.has(address);
+
+        let classificationLabel = "⚪ Unclassified address";
+        if (item.streamflow) classificationLabel = "🔒 Streamflow / vesting-contract route";
+        else if (classification.type === "service") classificationLabel = "🏦 " + (typeof classification.label === "string" ? classification.label : "Known exchange/service wallet");
+        else if (classification.type === "wallet") classificationLabel = "👤 System wallet";
+        else if (classification.type === "program") classificationLabel = "⚙️ Executable program";
+        else if (classification.type === "program-controlled") classificationLabel = "⚙️ Program-controlled account";
+
+        let behaviorHtml = "";
+        if (item.streamflow) {
+          behaviorHtml = `<div style="margin-top:8px;color:#f0c341;font-size:13px;">Contract/vesting route; not treated as an ordinary linked wallet.</div>`;
+        } else if (behavior && typeof behavior.error === "string") {
+          behaviorHtml = `<div style="margin-top:8px;color:#f0c341;font-size:13px;">Deeper trace unavailable: ${relationRenderEscape(behavior.error)}</div>`;
+        } else if (behavior) {
+          const sold = Number(behavior.sold || 0);
+          const forwarded = Number(behavior.forwarded || 0);
+          const signal = sold > 0 ? "🔴 Wallet-level token selling detected" : forwarded > 0 ? "🟠 Tokens forwarded to other address(es)" : "🟢 No sell/forward detected in scanned history";
+          const onward = Array.isArray(behavior.onward) ? behavior.onward.slice(0, 3) : [];
+          const onwardRows = onward.map(next => {
+            const nextAddress = next && typeof next.address === "string" ? next.address : "";
+            return `${relationRenderEscape(relationShort(nextAddress))} — ${relationRenderNumber(next?.amount, 2)} tokens`;
+          }).join("<br>");
+
+          behaviorHtml = `
+            <div style="margin-top:9px;padding:10px;background:#151515;border-radius:10px;">
+              <div>${signal}</div>
+              <div style="margin-top:6px;font-size:13px;">
+                Current token balance: ${behavior.balance === null ? "N/A" : relationRenderNumber(behavior.balance, 2)}<br>
+                Detected wallet-level sold: ${relationRenderNumber(sold, 2)}<br>
+                Forwarded out: ${relationRenderNumber(forwarded, 2)}<br>
+                Linked-wallet transactions scanned: ${relationRenderNumber(behavior.txScanned, 0)} ${behavior.historyComplete ? "· complete" : "· partial"}
               </div>
-              <div style="margin-top:5px;color:${isService ? "#8ab4f8" : (isWallet ? "#f0c341" : "#aaa")};font-size:12px;">
-                ${isService ? "🏦 " : (isWallet ? "🟡 " : "❓ ")}${relationEscape(classification.label || "Unclassified address")}
-              </div>
-              <div style="margin-top:6px;">
-                Observed incoming SOL before/current creation time:
-                <strong>${sol.toLocaleString("en-US", { maximumFractionDigits: 6 })} SOL</strong>
-              </div>
-              <div style="margin-top:6px;color:${isService ? "#8ab4f8" : "#888"};font-size:12px;line-height:1.45;">
-                ${reviewText}
-              </div>
-              <div style="margin-top:4px;color:#888;font-size:12px;">
-                ${item.txCount} transfer${item.txCount === 1 ? "" : "s"} · first observed ${time}
-              </div>
-              ${relationFundingReviewLinks(item)}
+              ${onwardRows ? `<div style="margin-top:8px;color:#aaa;font-size:12px;">Top onward destinations:<br>${onwardRows}</div>` : ""}
             </div>
           `;
-        }).join("")
-      : `
-        <div style="margin-top:9px;color:#888;font-size:13px;">
-          No explicit incoming SOL transfer to the creator candidate was found
-          before/current token creation time in the scanned enhanced history.
-        </div>
-      `;
+        }
 
-    const recipientCards = topRecipients.length > 0
-      ? topRecipients.map((item, index) => {
-          const classification = classifications.get(item.address) || {
-            type: "unknown",
-            label: "Unknown"
-          };
-
-          const behavior = deepResults.get(item.address);
-          const percent = supply > 0
-            ? (Number(item.amount || 0) / supply) * 100
-            : null;
-
-          const classificationLabel = item.streamflow
-            ? "🔒 Streamflow / vesting-contract route"
-            : classification.type === "service"
-              ? `🏦 ${classification.label || "Known exchange/service wallet"}`
-              : classification.type === "wallet"
-                ? "👤 System wallet"
-                : classification.type === "program"
-                  ? "⚙️ Executable program"
-                  : classification.type === "program-controlled"
-                    ? "⚙️ Program-controlled account"
-                    : "⚪ Unclassified address";
-
-          let behaviorHtml = "";
-
-          if (item.streamflow) {
-            behaviorHtml = `
-              <div style="margin-top:8px;color:#f0c341;font-size:13px;">
-                Not treated as an ordinary linked wallet because this transfer
-                was detected through Streamflow-related activity.
-              </div>
-            `;
-          } else if (behavior?.error) {
-            behaviorHtml = `
-              <div style="margin-top:8px;color:#f0c341;font-size:13px;">
-                Deeper trace unavailable: ${relationEscape(behavior.error)}
-              </div>
-            `;
-          } else if (behavior) {
-            let behaviorSignal = "🟢 No sell/forward detected in scanned history";
-            let behaviorColor = "#7ac943";
-
-            if (Number(behavior.sold || 0) > 0) {
-              behaviorSignal = "🔴 Wallet-level token selling detected after direct creator transfer";
-              behaviorColor = "#ff4d4d";
-            } else if (Number(behavior.forwarded || 0) > 0) {
-              behaviorSignal = "🟠 Tokens forwarded to other address(es)";
-              behaviorColor = "#ff9800";
-            }
-
-            const onward = (behavior.onward || []).slice(0, 3);
-
-            behaviorHtml = `
-              <div style="margin-top:9px;padding:10px;background:#151515;border-radius:10px;">
-                <div style="color:${behaviorColor};">
-                  ${behaviorSignal}
-                </div>
-                <div style="margin-top:6px;font-size:13px;">
-                  Current token balance:
-                  ${behavior.balance === null
-                    ? "N/A"
-                    : Number(behavior.balance || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}
-                  <br>
-                  Detected wallet-level sold:
-                  ${Number(behavior.sold || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}
-                  <br>
-                  <span style="color:#777;font-size:11px;">
-                    The sold total is activity of this wallet and is not assumed to come
-                    entirely from the ${Number(item.amount || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}
-                    tokens received directly from the creator candidate.
-                  </span>
-                  <br>
-                  Forwarded out:
-                  ${Number(behavior.forwarded || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}
-                  <br>
-                  Linked-wallet transactions scanned:
-                  ${Number(behavior.txScanned || 0).toLocaleString("en-US")}
-                  ${behavior.historyComplete ? " · complete" : " · partial"}
-                </div>
-                ${onward.length > 0 ? `
-                  <div style="margin-top:8px;color:#aaa;font-size:12px;">
-                    Top onward destination${onward.length === 1 ? "" : "s"}:<br>
-                    ${onward.map(next =>
-                      `${relationEscape(relationShort(next.address))} — ${Number(next.amount || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} tokens`
-                    ).join("<br>")}
-                  </div>
-                ` : ""}
-              </div>
-            `;
-          } else {
-            behaviorHtml = `
-              <div style="margin-top:8px;color:#888;font-size:12px;">
-                Deeper wallet behavior is limited to the top
-                ${deepCandidates.length} ordinary direct recipient${deepCandidates.length === 1 ? "" : "s"}.
-              </div>
-            `;
-          }
-
-          const firstTime = item.firstTimestamp
-            ? new Date(item.firstTimestamp * 1000).toLocaleString()
-            : "Time unavailable";
-
-          const firstSignature = item.signatures[0] || "";
-          const overlap = qualifiedFunderSet.has(item.address);
-
-          return `
-            <div style="
-              padding:14px;
-              margin-top:10px;
-              background:#101010;
-              border-radius:12px;
-            ">
-              <div style="display:flex;justify-content:space-between;gap:8px;">
-                <strong>#${index + 1} ${relationEscape(relationShort(item.address))}</strong>
-                ${overlap
-                  ? '<span style="color:#ff9800;font-size:11px;white-space:nowrap;">FUNDER OVERLAP</span>'
-                  : ""}
-              </div>
-
-              <div style="margin-top:5px;color:#888;font-size:12px;word-break:break-all;">
-                ${relationEscape(item.address)}
-              </div>
-
-              <div style="margin-top:7px;color:#aaa;font-size:13px;">
-                ${classificationLabel}
-              </div>
-
-              <div style="margin-top:7px;">
-                Received directly from creator:
-                <strong>${Number(item.amount || 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} tokens</strong>
-                ${percent !== null ? ` (${percent.toFixed(4)}% of current supply)` : ""}
-              </div>
-
-              <div style="margin-top:5px;color:#888;font-size:12px;">
-                ${item.txCount} creator transfer${item.txCount === 1 ? "" : "s"} · first ${firstTime}
-              </div>
-
-              ${behaviorHtml}
-
-              ${firstSignature ? `
-                <a href="https://solscan.io/tx/${encodeURIComponent(firstSignature)}"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   style="display:inline-block;margin-top:8px;color:#ff4d1a;text-decoration:none;font-size:13px;">
-                  View Creator Transfer ↗
-                </a>
-              ` : ""}
+        recipientHtmlParts.push(`
+          <div style="padding:14px;margin-top:10px;background:#101010;border-radius:12px;">
+            <div style="display:flex;justify-content:space-between;gap:8px;">
+              <strong>#${index + 1} ${relationRenderEscape(relationShort(address))}</strong>
+              ${overlap ? '<span style="color:#ff9800;font-size:11px;white-space:nowrap;">FUNDER OVERLAP</span>' : ""}
             </div>
-          `;
-        }).join("")
-      : `
-        <div style="margin-top:10px;color:#888;font-size:13px;">
-          No direct outbound transfer of this token from the creator candidate
-          was found in the scanned enhanced history.
-        </div>
-      `;
+            <div style="margin-top:5px;color:#888;font-size:12px;word-break:break-all;">${relationRenderEscape(address)}</div>
+            <div style="margin-top:7px;color:#aaa;font-size:13px;">${relationRenderEscape(classificationLabel)}</div>
+            <div style="margin-top:7px;">Received directly from creator: <strong>${relationRenderNumber(amount, 2)} tokens</strong>${percent !== null ? ` (${relationRenderNumber(percent, 4)}% of current supply)` : ""}</div>
+            <div style="margin-top:5px;color:#888;font-size:12px;">${relationRenderNumber(item.txCount, 0)} creator transfer(s) · first ${relationRenderEscape(relationRenderTime(item.firstTimestamp))}</div>
+            ${behaviorHtml}
+            <div style="margin-top:4px;">${relationRenderAccountLink(address, "View Recipient Wallet")}${relationRenderTxLink(signature, "View Creator Transfer")}</div>
+          </div>
+        `);
+      }
+    }
+    const recipientCards = recipientHtmlParts.join("");
 
-    const creationText = creationTimestamp
-      ? new Date(creationTimestamp * 1000).toLocaleString()
-      : "Unknown";
+    relationshipStage = "result rendering: summary";
+    const creationText = creationTimestamp ? relationRenderTime(creationTimestamp) : "Unknown";
+    const creatorText = typeof creator === "string" ? creator : "";
 
     output.innerHTML = `
       <div style="padding:16px;background:#151515;border-radius:14px;">
-        <div style="font-size:22px;font-weight:bold;margin-bottom:14px;">
-          🔗 Creator Wallet Relationship / Funding Trace
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>Creator / Deployer Candidate:</strong>
-        </div>
-        <div style="color:#aaa;font-size:12px;word-break:break-all;margin-bottom:12px;">
-          ${relationEscape(creator)}
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>Token Creation Time:</strong> ${creationText}
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>Creator Transactions Scanned:</strong>
-          ${creatorHistory.transactions.length.toLocaleString("en-US")}
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>History Coverage:</strong>
-          ${creatorHistory.historyComplete
-            ? '<span style="color:#7ac943;">✅ Complete for this enhanced-history query</span>'
-            : '<span style="color:#f0c341;">⚠️ Partial</span>'}
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>Significant Pre-Launch SOL Funders:</strong>
-          ${funders.length}
-          ${hiddenDustFunderCount > 0
-            ? `<span style="color:#777;font-size:12px;"> · ${hiddenDustFunderCount} dust entr${hiddenDustFunderCount === 1 ? "y" : "ies"} hidden</span>`
-            : ""}
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>Direct Token Recipient Addresses:</strong>
-          ${recipients.length}
-        </div>
-
-        <div style="margin-bottom:7px;">
-          <strong>Total Directly Distributed by Creator:</strong>
-          ${totalDirect.toLocaleString("en-US", { maximumFractionDigits: 2 })} tokens
-          ${directPercent !== null ? ` (${directPercent.toFixed(4)}% of current supply)` : ""}
-        </div>
-
-        <div style="margin-bottom:14px;">
-          <strong>Funder ↔ Token-Recipient Overlap:</strong>
-          ${funderOverlap.length}
-        </div>
-
+        <div style="font-size:22px;font-weight:bold;margin-bottom:14px;">🔗 Creator Wallet Relationship / Funding Trace</div>
+        <div style="margin-bottom:7px;"><strong>Creator / Deployer Candidate:</strong></div>
+        <div style="color:#aaa;font-size:12px;word-break:break-all;margin-bottom:12px;">${relationRenderEscape(creatorText)}</div>
+        <div style="margin-bottom:7px;"><strong>Token Creation Time:</strong> ${relationRenderEscape(creationText)}</div>
+        <div style="margin-bottom:7px;"><strong>Creator Transactions Scanned:</strong> ${relationRenderNumber(creatorHistory.transactions.length, 0)}</div>
+        <div style="margin-bottom:7px;"><strong>History Coverage:</strong> ${creatorHistory.historyComplete ? '<span style="color:#7ac943;">✅ Complete</span>' : '<span style="color:#f0c341;">⚠️ Partial</span>'}</div>
+        <div style="margin-bottom:7px;"><strong>Significant Pre-Launch SOL Funders:</strong> ${relationRenderNumber(funders.length, 0)}${hiddenDustFunderCount > 0 ? ` <span style="color:#777;font-size:12px;">· ${relationRenderNumber(hiddenDustFunderCount, 0)} dust entries hidden</span>` : ""}</div>
+        <div style="margin-bottom:7px;"><strong>Direct Token Recipient Addresses:</strong> ${relationRenderNumber(recipients.length, 0)}</div>
+        <div style="margin-bottom:7px;"><strong>Total Directly Distributed by Creator:</strong> ${relationRenderNumber(totalDirect, 2)} tokens${directPercent !== null ? ` (${relationRenderNumber(directPercent, 4)}% of current supply)` : ""}</div>
+        <div style="margin-bottom:14px;"><strong>Funder ↔ Token-Recipient Overlap:</strong> ${relationRenderNumber(funderOverlap.length, 0)}</div>
         <div style="padding:13px;background:#101010;border-radius:12px;">
-          <div style="font-weight:bold;margin-bottom:7px;">
-            Relationship Signal
-          </div>
-          <div style="color:${relationshipSignal.color};">
-            ${relationshipSignal.icon} ${relationEscape(relationshipSignal.text)}
-          </div>
-          <div style="color:#777;font-size:12px;margin-top:6px;line-height:1.45;">
-            This signal describes observable on-chain relationships only.
-            Funding, receiving tokens, forwarding tokens, or selling does not
-            by itself prove that two wallets share the same owner or that a
-            project is malicious.
-          </div>
+          <div style="font-weight:bold;margin-bottom:7px;">Relationship Signal</div>
+          <div style="color:${relationRenderEscape(relationshipSignal.color)};">${relationRenderEscape(relationshipSignal.icon)} ${relationRenderEscape(relationshipSignal.text)}</div>
+          <div style="color:#777;font-size:12px;margin-top:6px;line-height:1.45;">This signal describes observable on-chain relationships only. Funding, receiving, forwarding, or selling does not by itself prove common ownership or malicious behavior.</div>
         </div>
-
-        <div style="margin-top:18px;font-size:18px;font-weight:bold;">
-          💰 Observed Creator Funding
-        </div>
-        <div style="color:#777;font-size:12px;margin-top:5px;line-height:1.45;">
-          Incoming native-SOL transfers observed at or before the detected token
-          creation time. Transfers below ${RELATION_MIN_SIGNIFICANT_SOL} SOL are hidden
-          from the main relationship signal as dust. Known exchanges/services are labeled
-          when available. Other sources still require manual review because a normal-looking
-          System Program wallet can belong to an exchange, service, bridge or unrelated party.
-          Funding-source candidates are not identity proof.
-        </div>
+        <div style="margin-top:18px;font-size:18px;font-weight:bold;">💰 Observed Creator Funding</div>
         ${funderCards}
-
-        <div style="margin-top:20px;font-size:18px;font-weight:bold;">
-          🧩 Direct Token Distribution
-        </div>
-        <div style="color:#777;font-size:12px;margin-top:5px;line-height:1.45;">
-          Showing up to 8 largest direct recipient addresses. Up to 5 ordinary
-          recipient wallets receive a deeper follow-up scan for later sells or
-          onward transfers. Contract/vesting routes are shown separately and are
-          not automatically treated as insider wallets.
-        </div>
+        <div style="margin-top:20px;font-size:18px;font-weight:bold;">🧩 Direct Token Distribution</div>
         ${recipientCards}
-
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #2a2a2a;color:#777;font-size:12px;line-height:1.55;">
-          Stage 1 relationship tracing uses the detected creator candidate and
-          Helius parsed transfer history. A "detected sale" requires an outbound
-          transfer of the checked token in a parsed SWAP where the same wallet
-          receives SOL or another payment token. Results can be partial when the
-          parser/history endpoint does not expose every relationship.
-        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #2a2a2a;color:#777;font-size:12px;line-height:1.55;">V15 render-safe mode. Analysis remains based on the detected creator candidate and Helius parsed transfer history.</div>
       </div>
     `;
   } catch (error) {
@@ -7360,7 +7208,8 @@ async function analyzeWalletRelationships() {
     output.innerHTML = `
       ⚠️ Unable to analyze wallet relationships.<br><br>
       <span style="color:#888;font-size:12px;">Stage: ${relationEscape(relationshipStage)}</span><br><br>
-      ${relationEscape(error?.message || "Relationship data could not be retrieved.")}
+      ${relationEscape(error?.message || "Relationship data could not be retrieved.")}<br><br>
+      <span style="color:#666;font-size:10px;white-space:pre-wrap;word-break:break-word;">${relationEscape(String(error?.stack || "").split("\n").slice(0, 5).join("\n"))}</span>
     `;
   }
 }
