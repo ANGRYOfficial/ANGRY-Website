@@ -913,7 +913,7 @@ footer{
         <div class="tools-status">
           <span class="status-pill primary">● Solana V1</span>
           <span class="status-pill">9 analysis modules</span>
-          <span class="status-pill">Explainable evidence</span><span class="status-pill">Smart cache</span>
+          <span class="status-pill">Explainable evidence</span><span class="status-pill">Smart cache V13</span>
         </div>
       </div>
 
@@ -1808,12 +1808,12 @@ const formatPercent = (value) => {
 
 
   // ============================================================
-  // ANGRY SMART CLIENT CACHE — V12
+  // ANGRY SMART CLIENT CACHE — V13
   // Reduces repeated Worker/API calls on the same browser while
   // keeping fast-changing on-chain data on short TTLs.
   // ============================================================
   const ANGRY_NATIVE_FETCH = window.fetch.bind(window);
-  const ANGRY_CACHE_PREFIX = "angry:v12:";
+  const ANGRY_CACHE_PREFIX = "angry:v13:";
   const ANGRY_MEMORY_CACHE = new Map();
   const ANGRY_INFLIGHT = new Map();
   const ANGRY_MAX_PERSIST_BODY = 160000;
@@ -1867,11 +1867,10 @@ const formatPercent = (value) => {
         try {
           const parsedUrl = new URL(url);
           if (parsedUrl.searchParams.get("mode") === "address-transactions") {
-            // The newest page changes quickly. Older cursor pages change much less.
-            return {
-              ttl: parsedUrl.searchParams.get("before") ? 120000 : 30000,
-              persist: false
-            };
+            // Enhanced transaction-history pages can be very large and deeply nested.
+            // Do NOT duplicate them in the browser cache on mobile. The Cloudflare
+            // Worker still edge-caches these requests, so Helius calls remain reduced.
+            return { ttl: 0, persist: false };
           }
         } catch (_) {}
 
@@ -6198,26 +6197,46 @@ function relationFilterSignificantFunders(
   });
 }
 
-function relationTxUsesProgram(txItem, programId) {
-  // Never recurse through instruction trees here. Some enhanced-history payloads
-  // can be deeply nested, which previously caused "Maximum call stack size exceeded"
-  // in Wallet Relationship / Funding Trace on mobile browsers.
-  const queue = [];
-  const seen = new WeakSet();
+function relationProgramIdString(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
 
-  const enqueue = instructions => {
-    if (!Array.isArray(instructions)) return;
-    for (const instruction of instructions) {
-      if (instruction && typeof instruction === "object") {
-        queue.push(instruction);
+  if (typeof value === "object") {
+    const candidates = [
+      value.programId,
+      value.program,
+      value.pubkey,
+      value.address,
+      value.key
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate === "string") return candidate;
+      if (candidate && typeof candidate === "object") {
+        const nested =
+          candidate.pubkey ??
+          candidate.address ??
+          candidate.key;
+        if (typeof nested === "string") return nested;
       }
     }
-  };
+  }
 
-  enqueue(txItem?.instructions);
-  enqueue(txItem?.transaction?.instructions);
-  enqueue(txItem?.transaction?.message?.instructions);
-  enqueue(txItem?.message?.instructions);
+  return "";
+}
+
+function relationTxUsesProgram(txItem, programId) {
+  // Mobile-safe bounded inspection. Never recursively walk arbitrary instruction
+  // objects: some enhanced transaction payloads are extremely nested/large.
+  const target = String(programId || "");
+  if (!target) return false;
+
+  const arrays = [
+    txItem?.instructions,
+    txItem?.transaction?.instructions,
+    txItem?.transaction?.message?.instructions,
+    txItem?.message?.instructions
+  ];
 
   const innerGroups =
     txItem?.meta?.innerInstructions ||
@@ -6225,26 +6244,42 @@ function relationTxUsesProgram(txItem, programId) {
     [];
 
   if (Array.isArray(innerGroups)) {
-    for (const group of innerGroups) {
-      enqueue(group?.instructions);
+    for (const group of innerGroups.slice(0, 256)) {
+      arrays.push(group?.instructions);
     }
   }
 
-  let cursor = 0;
-  while (cursor < queue.length) {
-    const instruction = queue[cursor++];
-    if (!instruction || typeof instruction !== "object") continue;
-    if (seen.has(instruction)) continue;
-    seen.add(instruction);
+  let inspected = 0;
+  const MAX_INSTRUCTIONS = 5000;
 
-    const currentProgram = historyPubkeyToString(
-      instruction?.programId || instruction?.program
-    );
+  for (const instructions of arrays) {
+    if (!Array.isArray(instructions)) continue;
 
-    if (currentProgram === programId) return true;
+    for (const instruction of instructions) {
+      if (++inspected > MAX_INSTRUCTIONS) return false;
+      if (!instruction || typeof instruction !== "object") continue;
 
-    enqueue(instruction?.innerInstructions);
-    enqueue(instruction?.instructions);
+      const currentProgram = relationProgramIdString(
+        instruction.programId || instruction.program
+      );
+
+      if (currentProgram === target) return true;
+
+      // One explicit child level only. No recursive descent.
+      const children = Array.isArray(instruction.instructions)
+        ? instruction.instructions
+        : Array.isArray(instruction.innerInstructions)
+          ? instruction.innerInstructions
+          : [];
+
+      for (const child of children.slice(0, 256)) {
+        if (++inspected > MAX_INSTRUCTIONS) return false;
+        const childProgram = relationProgramIdString(
+          child?.programId || child?.program
+        );
+        if (childProgram === target) return true;
+      }
+    }
   }
 
   return false;
@@ -6811,7 +6846,10 @@ async function analyzeWalletRelationships() {
   output.innerHTML =
     "🔎 Identifying creator/deployer candidate...";
 
+  let relationshipStage = "creator detection";
+
   try {
+    relationshipStage = "creator detection";
     const creatorDetection =
       await historyDetectCreatorCandidate(contract);
 
@@ -6830,6 +6868,7 @@ async function analyzeWalletRelationships() {
       ⏳ Loading creator transfer history...
     `;
 
+    relationshipStage = "creator transaction history";
     const creatorHistory = await relationFetchEnhancedHistory(
       creator,
       10,
@@ -6842,6 +6881,7 @@ async function analyzeWalletRelationships() {
       }
     );
 
+    relationshipStage = "funding aggregation";
     const rawFunders = relationAggregatePreLaunchFunders(
       creatorHistory.transactions,
       creator,
@@ -6851,6 +6891,7 @@ async function analyzeWalletRelationships() {
     const funders = relationFilterSignificantFunders(rawFunders);
     const hiddenDustFunderCount = Math.max(0, rawFunders.length - funders.length);
 
+    relationshipStage = "direct token distribution scan";
     const recipients = relationAggregateDirectRecipients(
       creatorHistory.transactions,
       creator,
@@ -6864,6 +6905,7 @@ async function analyzeWalletRelationships() {
       direct recipient${topRecipients.length === 1 ? "" : "s"}...
     `;
 
+    relationshipStage = "recipient/funder classification";
     const classifications = await relationClassifyAddresses(
       Array.from(new Set([
         ...topRecipients.map(item => item.address),
@@ -6894,6 +6936,7 @@ async function analyzeWalletRelationships() {
     const deepCandidates = walletRecipients.slice(0, 5);
     const deepResults = new Map();
 
+    relationshipStage = "linked-wallet follow-up";
     for (let index = 0; index < deepCandidates.length; index++) {
       const recipient = deepCandidates[index];
 
@@ -6932,6 +6975,7 @@ async function analyzeWalletRelationships() {
       }
     }
 
+    relationshipStage = "token supply lookup";
     const supply = await relationGetSupply(contract);
     const totalDirect = recipients.reduce(
       (sum, item) => sum + Number(item.amount || 0),
@@ -6985,6 +7029,7 @@ async function analyzeWalletRelationships() {
       };
     }
 
+    relationshipStage = "result rendering";
     const funderCards = funders.length > 0
       ? funders.slice(0, 8).map((item, index) => {
           const sol = item.lamports / 1_000_000_000;
@@ -7150,7 +7195,7 @@ async function analyzeWalletRelationships() {
             : "Time unavailable";
 
           const firstSignature = item.signatures[0] || "";
-          const overlap = funderSet.has(item.address);
+          const overlap = qualifiedFunderSet.has(item.address);
 
           return `
             <div style="
@@ -7314,6 +7359,7 @@ async function analyzeWalletRelationships() {
 
     output.innerHTML = `
       ⚠️ Unable to analyze wallet relationships.<br><br>
+      <span style="color:#888;font-size:12px;">Stage: ${relationEscape(relationshipStage)}</span><br><br>
       ${relationEscape(error?.message || "Relationship data could not be retrieved.")}
     `;
   }
