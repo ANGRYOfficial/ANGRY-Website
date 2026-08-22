@@ -8114,10 +8114,10 @@ const ANGRY_NETWORKS = {
     nativeSymbol: "SOL",
     explorer: {
       account(address) {
-        return angryExplorerAccount(address);
+        return "https://solscan.io/account/" + encodeURIComponent(address);
       },
       transaction(signature) {
-        return angryExplorerTransaction(signature);
+        return "https://solscan.io/tx/" + encodeURIComponent(signature);
       },
       token(address) {
         return "https://solscan.io/token/" + encodeURIComponent(address);
