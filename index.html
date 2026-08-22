@@ -913,7 +913,7 @@ footer{
         <div class="tools-status">
           <span class="status-pill primary">● Solana V1</span>
           <span class="status-pill">9 analysis modules</span>
-          <span class="status-pill">Explainable evidence</span>
+          <span class="status-pill">Explainable evidence</span><span class="status-pill">Smart cache</span>
         </div>
       </div>
 
@@ -1805,6 +1805,358 @@ const formatPercent = (value) => {
     window.location.hostname === "angry-tools.web.app"
       ? "/api/kol-intel"
       : "https://angry-tools.web.app/api/kol-intel";
+
+
+  // ============================================================
+  // ANGRY SMART CLIENT CACHE — V12
+  // Reduces repeated Worker/API calls on the same browser while
+  // keeping fast-changing on-chain data on short TTLs.
+  // ============================================================
+  const ANGRY_NATIVE_FETCH = window.fetch.bind(window);
+  const ANGRY_CACHE_PREFIX = "angry:v12:";
+  const ANGRY_MEMORY_CACHE = new Map();
+  const ANGRY_INFLIGHT = new Map();
+  const ANGRY_MAX_PERSIST_BODY = 160000;
+  const ANGRY_MAX_PERSIST_ENTRIES = 30;
+
+  function angryHashString(value) {
+    let hash = 2166136261;
+    const text = String(value || "");
+    for (let i = 0; i < text.length; i++) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(16);
+  }
+
+  function angryFetchRequestParts(input, init = {}) {
+    const url = typeof input === "string"
+      ? input
+      : String(input?.url || input || "");
+
+    const method = String(
+      init?.method ||
+      (typeof input !== "string" && input?.method) ||
+      "GET"
+    ).toUpperCase();
+
+    const body = typeof init?.body === "string" ? init.body : "";
+    return { url, method, body };
+  }
+
+  function angryRpcMethod(body) {
+    if (!body) return { method: "", params: null };
+
+    try {
+      const parsed = JSON.parse(body);
+      return {
+        method: String(parsed?.method || ""),
+        params: parsed?.params
+      };
+    } catch (_) {
+      return { method: "", params: null };
+    }
+  }
+
+  function angryCachePolicy(input, init = {}) {
+    const { url, method, body } = angryFetchRequestParts(input, init);
+
+    // Helius through ANGRY Worker.
+    if (url.startsWith(HELIUS_PROXY_URL)) {
+      if (method === "GET") {
+        try {
+          const parsedUrl = new URL(url);
+          if (parsedUrl.searchParams.get("mode") === "address-transactions") {
+            // The newest page changes quickly. Older cursor pages change much less.
+            return {
+              ttl: parsedUrl.searchParams.get("before") ? 120000 : 30000,
+              persist: false
+            };
+          }
+        } catch (_) {}
+
+        return { ttl: 30000, persist: false };
+      }
+
+      if (method === "POST") {
+        const rpc = angryRpcMethod(body);
+        const params = rpc.params;
+
+        if (rpc.method === "getBalance") {
+          return { ttl: 15000, persist: false };
+        }
+
+        if (rpc.method === "getTokenSupply") {
+          return { ttl: 30000, persist: true };
+        }
+
+        if (rpc.method === "getTokenLargestAccounts") {
+          return { ttl: 45000, persist: true };
+        }
+
+        if (rpc.method === "getTokenAccountsByOwner") {
+          return { ttl: 30000, persist: false };
+        }
+
+        if (rpc.method === "getMultipleAccounts") {
+          return { ttl: 60000, persist: true };
+        }
+
+        if (rpc.method === "getAccountInfo") {
+          return { ttl: 60000, persist: true };
+        }
+
+        if (rpc.method === "getSignaturesForAddress") {
+          return { ttl: 30000, persist: false };
+        }
+
+        if (rpc.method === "getTransaction") {
+          // Confirmed transaction content is effectively historical.
+          return { ttl: 21600000, persist: true };
+        }
+
+        if (rpc.method === "getAssetBatch") {
+          // Token metadata changes far less often than balances/holders.
+          return { ttl: 3600000, persist: true };
+        }
+
+        if (rpc.method === "getTransactionsForAddress") {
+          const config = Array.isArray(params) ? (params[1] || {}) : {};
+          const isCreatorDetection =
+            Number(config?.limit || 0) === 1 &&
+            String(config?.sortOrder || "").toLowerCase() === "asc";
+
+          // Earliest token transaction is essentially stable; full history remains fresh.
+          return isCreatorDetection
+            ? { ttl: 21600000, persist: true }
+            : { ttl: 60000, persist: false };
+        }
+
+        return { ttl: 30000, persist: false };
+      }
+    }
+
+    // Market data changes quickly; 30 seconds is enough to reduce duplicate calls
+    // without making the displayed market state feel stale.
+    if (
+      method === "GET" &&
+      url.startsWith("https://api.dexscreener.com/")
+    ) {
+      return { ttl: 30000, persist: true };
+    }
+
+    return { ttl: 0, persist: false };
+  }
+
+  function angryResponseFromPack(pack, cacheState = "") {
+    const headers = new Headers();
+    if (pack?.contentType) {
+      headers.set("Content-Type", pack.contentType);
+    }
+    if (cacheState) {
+      headers.set("X-ANGRY-Client-Cache", cacheState);
+    }
+
+    return new Response(pack?.body ?? "", {
+      status: Number(pack?.status || 200),
+      statusText: String(pack?.statusText || ""),
+      headers
+    });
+  }
+
+  function angryPersistentKey(cacheKey) {
+    return ANGRY_CACHE_PREFIX + angryHashString(cacheKey);
+  }
+
+  function angryReadPersistent(cacheKey) {
+    try {
+      const raw = localStorage.getItem(angryPersistentKey(cacheKey));
+      if (!raw) return null;
+
+      const item = JSON.parse(raw);
+
+      if (
+        !item ||
+        item.key !== cacheKey ||
+        Number(item.expiresAt || 0) <= Date.now()
+      ) {
+        localStorage.removeItem(angryPersistentKey(cacheKey));
+        return null;
+      }
+
+      return item.pack || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function angryPrunePersistentCache() {
+    try {
+      const entries = [];
+
+      for (let index = 0; index < localStorage.length; index++) {
+        const key = localStorage.key(index);
+        if (!key || !key.startsWith(ANGRY_CACHE_PREFIX)) continue;
+
+        try {
+          const item = JSON.parse(localStorage.getItem(key) || "null");
+
+          if (!item || Number(item.expiresAt || 0) <= Date.now()) {
+            localStorage.removeItem(key);
+            index--;
+            continue;
+          }
+
+          entries.push({
+            key,
+            savedAt: Number(item.savedAt || 0)
+          });
+        } catch (_) {
+          localStorage.removeItem(key);
+          index--;
+        }
+      }
+
+      entries
+        .sort((a, b) => b.savedAt - a.savedAt)
+        .slice(ANGRY_MAX_PERSIST_ENTRIES)
+        .forEach(item => localStorage.removeItem(item.key));
+    } catch (_) {}
+  }
+
+  function angryWritePersistent(cacheKey, pack, ttl) {
+    if (!pack || String(pack.body || "").length > ANGRY_MAX_PERSIST_BODY) {
+      return;
+    }
+
+    try {
+      angryPrunePersistentCache();
+
+      localStorage.setItem(
+        angryPersistentKey(cacheKey),
+        JSON.stringify({
+          key: cacheKey,
+          savedAt: Date.now(),
+          expiresAt: Date.now() + ttl,
+          pack
+        })
+      );
+    } catch (_) {
+      // Browser storage is only an optimization. If full/unavailable,
+      // ANGRY continues using memory + backend cache normally.
+    }
+  }
+
+  function angryReadMemory(cacheKey) {
+    const item = ANGRY_MEMORY_CACHE.get(cacheKey);
+    if (!item) return null;
+
+    if (item.expiresAt <= Date.now()) {
+      ANGRY_MEMORY_CACHE.delete(cacheKey);
+      return null;
+    }
+
+    return item.pack;
+  }
+
+  function angryWriteMemory(cacheKey, pack, ttl) {
+    ANGRY_MEMORY_CACHE.set(cacheKey, {
+      expiresAt: Date.now() + ttl,
+      pack
+    });
+  }
+
+  async function angrySmartFetch(input, init = {}) {
+    const policy = angryCachePolicy(input, init);
+
+    if (!policy.ttl) {
+      return ANGRY_NATIVE_FETCH(input, init);
+    }
+
+    const parts = angryFetchRequestParts(input, init);
+    const cacheKey = [
+      parts.method,
+      parts.url,
+      parts.body
+    ].join("\n");
+
+    const memoryHit = angryReadMemory(cacheKey);
+    if (memoryHit) {
+      return angryResponseFromPack(memoryHit, "MEMORY-HIT");
+    }
+
+    if (policy.persist) {
+      const persistentHit = angryReadPersistent(cacheKey);
+
+      if (persistentHit) {
+        angryWriteMemory(cacheKey, persistentHit, policy.ttl);
+        return angryResponseFromPack(persistentHit, "PERSISTENT-HIT");
+      }
+    }
+
+    // If the same request is already running, reuse one network call.
+    if (ANGRY_INFLIGHT.has(cacheKey)) {
+      const sharedPack = await ANGRY_INFLIGHT.get(cacheKey);
+      return angryResponseFromPack(sharedPack, "INFLIGHT-HIT");
+    }
+
+    const networkPromise = (async () => {
+      const response = await ANGRY_NATIVE_FETCH(input, init);
+      const text = await response.text();
+
+      const pack = {
+        status: response.status,
+        statusText: response.statusText,
+        contentType:
+          response.headers.get("Content-Type") ||
+          "application/json; charset=utf-8",
+        body: text
+      };
+
+      // Never cache failed API responses.
+      if (response.ok) {
+        angryWriteMemory(cacheKey, pack, policy.ttl);
+
+        if (policy.persist) {
+          angryWritePersistent(cacheKey, pack, policy.ttl);
+        }
+      }
+
+      return pack;
+    })();
+
+    ANGRY_INFLIGHT.set(cacheKey, networkPromise);
+
+    try {
+      const pack = await networkPromise;
+      return angryResponseFromPack(pack, "MISS");
+    } finally {
+      ANGRY_INFLIGHT.delete(cacheKey);
+    }
+  }
+
+  // Existing analysis functions can keep using fetch(); they automatically
+  // receive smart caching without changing their analysis logic.
+  window.fetch = angrySmartFetch;
+
+  // Prepared for a future visible "Refresh Live Data" button.
+  // Calling this clears client cache; the next analysis requests fresh data.
+  window.ANGRY_CLEAR_SMART_CACHE = function () {
+    ANGRY_MEMORY_CACHE.clear();
+
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(ANGRY_CACHE_PREFIX)) keys.push(key);
+      }
+      keys.forEach(key => localStorage.removeItem(key));
+    } catch (_) {}
+
+    return true;
+  };
+
+  angryPrunePersistentCache();
 
 async function analyzeBurns(maxPages = 20) {
   const contract = document.getElementById("contract").value.trim();
@@ -5259,24 +5611,25 @@ function historyShortAddress(address, start = 7, end = 6) {
 }
 
 function historyCollectParsedInstructions(txItem) {
+  // Iterative traversal avoids browser call-stack overflows if a provider returns
+  // unusually deep/nested instruction structures. WeakSet also prevents revisiting
+  // the same object if a non-standard response contains repeated references.
   const collected = [];
+  const queue = [];
+  const seen = new WeakSet();
 
-  const pushInstructions = instructions => {
+  const enqueue = instructions => {
     if (!Array.isArray(instructions)) return;
-
-    instructions.forEach(instruction => {
-      if (!instruction || typeof instruction !== "object") return;
-      collected.push(instruction);
-
-      // Some providers can nest instruction arrays on an instruction.
-      pushInstructions(instruction.innerInstructions);
-      pushInstructions(instruction.instructions);
-    });
+    for (const instruction of instructions) {
+      if (instruction && typeof instruction === "object") {
+        queue.push(instruction);
+      }
+    }
   };
 
-  pushInstructions(txItem?.transaction?.message?.instructions);
-  pushInstructions(txItem?.message?.instructions);
-  pushInstructions(txItem?.instructions);
+  enqueue(txItem?.transaction?.message?.instructions);
+  enqueue(txItem?.message?.instructions);
+  enqueue(txItem?.instructions);
 
   const innerGroups =
     txItem?.meta?.innerInstructions ||
@@ -5284,9 +5637,21 @@ function historyCollectParsedInstructions(txItem) {
     [];
 
   if (Array.isArray(innerGroups)) {
-    innerGroups.forEach(group => {
-      pushInstructions(group?.instructions);
-    });
+    for (const group of innerGroups) {
+      enqueue(group?.instructions);
+    }
+  }
+
+  let cursor = 0;
+  while (cursor < queue.length) {
+    const instruction = queue[cursor++];
+    if (!instruction || typeof instruction !== "object") continue;
+    if (seen.has(instruction)) continue;
+    seen.add(instruction);
+
+    collected.push(instruction);
+    enqueue(instruction?.innerInstructions);
+    enqueue(instruction?.instructions);
   }
 
   return collected;
@@ -5573,6 +5938,74 @@ function historyExtractMintRecords(transactions, creator) {
   });
 }
 
+async function historyFetchAssetBatchMetadata(mints) {
+  const uniqueMints = Array.from(new Set(
+    (Array.isArray(mints) ? mints : []).filter(Boolean)
+  ));
+
+  const metadataByMint = new Map();
+  if (uniqueMints.length === 0) return metadataByMint;
+
+  // Helius DAS getAssetBatch supports large batches. We still chunk defensively
+  // so a future provider/proxy limit does not break the entire Creator History.
+  const chunkSize = 250;
+
+  for (let start = 0; start < uniqueMints.length; start += chunkSize) {
+    const ids = uniqueMints.slice(start, start + chunkSize);
+
+    try {
+      const response = await fetch(HELIUS_PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: `creator-asset-batch-${start}`,
+          method: "getAssetBatch",
+          params: {
+            ids,
+            options: {
+              showFungible: true
+            }
+          }
+        })
+      });
+
+      if (!response.ok) continue;
+
+      const body = await response.json();
+      if (body?.error) continue;
+
+      const assets = Array.isArray(body?.result) ? body.result : [];
+
+      for (const asset of assets) {
+        const mint = String(asset?.id || "");
+        if (!mint) continue;
+
+        const name = String(asset?.content?.metadata?.name || "").trim();
+        const symbol = String(
+          asset?.content?.metadata?.symbol ||
+          asset?.token_info?.symbol ||
+          ""
+        ).trim();
+
+        metadataByMint.set(mint, {
+          name,
+          symbol,
+          interface: String(asset?.interface || ""),
+          decimals: Number.isFinite(Number(asset?.token_info?.decimals))
+            ? Number(asset.token_info.decimals)
+            : null
+        });
+      }
+    } catch (_) {
+      // Metadata enrichment is optional. Creator-history detection itself remains
+      // usable even if DAS metadata is temporarily unavailable.
+    }
+  }
+
+  return metadataByMint;
+}
+
 async function historyFetchDexSnapshot(mint) {
   try {
     const response = await fetch(
@@ -5766,26 +6199,55 @@ function relationFilterSignificantFunders(
 }
 
 function relationTxUsesProgram(txItem, programId) {
-  const visit = instructions => {
-    if (!Array.isArray(instructions)) return false;
+  // Never recurse through instruction trees here. Some enhanced-history payloads
+  // can be deeply nested, which previously caused "Maximum call stack size exceeded"
+  // in Wallet Relationship / Funding Trace on mobile browsers.
+  const queue = [];
+  const seen = new WeakSet();
 
-    return instructions.some(instruction => {
-      if (!instruction || typeof instruction !== "object") return false;
-
-      const currentProgram = historyPubkeyToString(
-        instruction?.programId || instruction?.program
-      );
-
-      if (currentProgram === programId) return true;
-
-      return visit(instruction?.innerInstructions);
-    });
+  const enqueue = instructions => {
+    if (!Array.isArray(instructions)) return;
+    for (const instruction of instructions) {
+      if (instruction && typeof instruction === "object") {
+        queue.push(instruction);
+      }
+    }
   };
 
-  return (
-    visit(txItem?.instructions) ||
-    visit(txItem?.transaction?.instructions)
-  );
+  enqueue(txItem?.instructions);
+  enqueue(txItem?.transaction?.instructions);
+  enqueue(txItem?.transaction?.message?.instructions);
+  enqueue(txItem?.message?.instructions);
+
+  const innerGroups =
+    txItem?.meta?.innerInstructions ||
+    txItem?.transaction?.meta?.innerInstructions ||
+    [];
+
+  if (Array.isArray(innerGroups)) {
+    for (const group of innerGroups) {
+      enqueue(group?.instructions);
+    }
+  }
+
+  let cursor = 0;
+  while (cursor < queue.length) {
+    const instruction = queue[cursor++];
+    if (!instruction || typeof instruction !== "object") continue;
+    if (seen.has(instruction)) continue;
+    seen.add(instruction);
+
+    const currentProgram = historyPubkeyToString(
+      instruction?.programId || instruction?.program
+    );
+
+    if (currentProgram === programId) return true;
+
+    enqueue(instruction?.innerInstructions);
+    enqueue(instruction?.instructions);
+  }
+
+  return false;
 }
 
 async function relationFetchEnhancedHistory(
@@ -5794,6 +6256,8 @@ async function relationFetchEnhancedHistory(
   onProgress = null
 ) {
   const all = [];
+  const seenSignatures = new Set();
+  const seenCursors = new Set();
   let before = null;
   let pages = 0;
   let complete = false;
@@ -5810,7 +6274,7 @@ async function relationFetchEnhancedHistory(
       url += `&before=${encodeURIComponent(before)}`;
     }
 
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "no-store" });
 
     if (!response.ok) {
       throw new Error(`Wallet history HTTP ${response.status}`);
@@ -5823,16 +6287,39 @@ async function relationFetchEnhancedHistory(
       break;
     }
 
-    all.push(...pageTransactions);
+    for (const txItem of pageTransactions) {
+      const signature =
+        txItem?.signature ||
+        txItem?.transaction?.signatures?.[0] ||
+        "";
+
+      // Keep unsigned/unusual records, but deduplicate normal signed records.
+      if (signature) {
+        if (seenSignatures.has(signature)) continue;
+        seenSignatures.add(signature);
+      }
+
+      all.push(txItem);
+    }
+
     pages += 1;
 
     const last = pageTransactions[pageTransactions.length - 1];
-    before = last?.signature || null;
+    const nextBefore = last?.signature || null;
 
-    if (!before || pageTransactions.length < 100) {
+    if (!nextBefore || pageTransactions.length < 100) {
       complete = true;
       break;
     }
+
+    // Defensive stop: a repeated cursor would otherwise reload the same page.
+    if (seenCursors.has(nextBefore) || nextBefore === before) {
+      complete = false;
+      break;
+    }
+
+    seenCursors.add(nextBefore);
+    before = nextBefore;
   }
 
   return {
@@ -9534,13 +10021,19 @@ async function analyzeCreatorHistory() {
       item => item.mint !== contract
     );
 
-    const displayRecords = mintRecords.slice(0, 12);
+    const displayRecords = mintRecords.slice(0, 30);
 
     creatorHistoryResult.innerHTML = `
       ⏳ Creator mint history detected.<br><br>
-      Checking current DEX market signals for up to
-      ${displayRecords.length} detected token${displayRecords.length === 1 ? "" : "s"}...
+      Resolving names for ${mintRecords.length.toLocaleString("en-US")} detected mint${mintRecords.length === 1 ? "" : "s"}
+      and checking DEX signals for up to ${displayRecords.length}...
     `;
+
+    // Resolve token names/symbols even when a token has no current DexScreener market.
+    // This uses Helius DAS metadata as a neutral metadata source.
+    const assetMetadataByMint = await historyFetchAssetBatchMetadata(
+      mintRecords.map(record => record.mint)
+    );
 
     const dexSnapshots = await Promise.all(
       displayRecords.map(record =>
@@ -9614,18 +10107,56 @@ async function analyzeCreatorHistory() {
       ? "#7ac943"
       : "#f0a33a";
 
+    const detectedCoinNameRows = mintRecords.length > 0
+      ? mintRecords.map((record, index) => {
+          const meta = assetMetadataByMint.get(record.mint) || {};
+          const fallbackSnapshot = dexByMint.get(record.mint);
+          const name =
+            fallbackSnapshot?.name ||
+            meta?.name ||
+            "Name unavailable";
+          const symbol =
+            fallbackSnapshot?.symbol ||
+            meta?.symbol ||
+            "";
+          const currentLabel = record.mint === contract
+            ? ' <span style="color:#ff7b54;font-size:11px;">CURRENT</span>'
+            : "";
+
+          return `
+            <div style="padding:8px 0;border-bottom:1px solid #222;">
+              <div style="font-weight:600;">
+                ${index + 1}. ${relationEscape(name)}${symbol ? ` (${relationEscape(symbol)})` : ""}${currentLabel}
+              </div>
+              <div style="margin-top:3px;color:#777;font-size:11px;word-break:break-all;">
+                ${relationEscape(record.mint)}
+              </div>
+            </div>
+          `;
+        }).join("")
+      : '<div style="color:#888;">No mint creations detected in the scanned history.</div>';
+
     const tokenCards = displayRecords.length > 0
       ? displayRecords.map((record, index) => {
           const snapshot = dexByMint.get(record.mint);
           const signal = historyMarketSignal(snapshot);
 
+          const assetMeta = assetMetadataByMint.get(record.mint) || {};
+
           const tokenName =
             snapshot?.name ||
+            assetMeta?.name ||
             snapshot?.symbol ||
+            assetMeta?.symbol ||
             "Detected SPL Mint";
 
-          const tokenSymbol = snapshot?.symbol
-            ? ` (${snapshot.symbol})`
+          const resolvedSymbol =
+            snapshot?.symbol ||
+            assetMeta?.symbol ||
+            "";
+
+          const tokenSymbol = resolvedSymbol
+            ? ` (${resolvedSymbol})`
             : "";
 
           const createdText = record.timestamp
@@ -9770,6 +10301,11 @@ async function analyzeCreatorHistory() {
         </div>
 
         <div style="margin-bottom:8px;">
+          <strong>Coins Created by This Creator (detected in scan):</strong>
+          ${mintRecords.length}
+        </div>
+
+        <div style="margin-bottom:8px;">
           <strong>Current Token Creation Found in Scan:</strong>
           ${currentTokenDetected ? "✅ Yes" : "⚠️ No"}
         </div>
@@ -9817,12 +10353,21 @@ async function analyzeCreatorHistory() {
           </div>
         </div>
 
+        <details style="margin-top:16px;padding:13px;background:#101010;border-radius:12px;">
+          <summary style="cursor:pointer;font-weight:bold;">
+            🧾 Names / CAs of all detected creator mints (${mintRecords.length})
+          </summary>
+          <div style="margin-top:10px;">
+            ${detectedCoinNameRows}
+          </div>
+        </details>
+
         <div style="
           margin-top:18px;
           font-size:18px;
           font-weight:bold;
         ">
-          🪙 Detected Token Launches
+          🪙 Detailed Token Launches
         </div>
 
         ${tokenCards}
@@ -9830,8 +10375,9 @@ async function analyzeCreatorHistory() {
         ${mintRecords.length > displayRecords.length
           ? `
             <div style="margin-top:12px;color:#888;font-size:12px;">
-              Showing the latest ${displayRecords.length} of
-              ${mintRecords.length} detected mint creations.
+              Detailed market cards show the latest ${displayRecords.length} of
+              ${mintRecords.length} detected mint creations. The collapsed list above
+              includes every detected mint name/CA from this scan.
             </div>
           `
           : ""}
