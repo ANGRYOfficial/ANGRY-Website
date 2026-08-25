@@ -64,6 +64,11 @@ contract ANGRYOneOfOne {
         return _tokenUri;
     }
 
+    /// @notice Fixed supply helper for explorers and indexers.
+    function totalSupply() external pure returns (uint256) {
+        return 1;
+    }
+
     function approve(address to, uint256 tokenId) external {
         address owner_ = ownerOf(tokenId);
         require(msg.sender == owner_ || _operatorApprovals[owner_][msg.sender], "NOT_AUTHORIZED");

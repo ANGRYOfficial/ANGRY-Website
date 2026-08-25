@@ -309,7 +309,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
   <header class="topbar">
     <div class="brand">
       <div class="mark">😡</div>
-      <div class="brand-name">ANGRY <span style="color:#ff7f54">NFT Creator</span><span class="beta">Beta v0.7.0</span></div>
+      <div class="brand-name">ANGRY <span style="color:#ff7f54">NFT Creator</span><span class="beta">Beta v0.7.1</span></div>
     </div>
     <button class="wallet" id="walletBtn">Connect wallet</button>
   </header>
@@ -1018,7 +1018,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
   </div>
 
   <footer class="footer">
-    <span>ANGRY NFT Creator Beta v0.7.0 · No-code NFT tooling</span>
+    <span>ANGRY NFT Creator Beta v0.7.1 · No-code NFT tooling</span>
     <span>Testnet planning · Separate page, same ANGRY ecosystem</span>
   </footer>
 </div>
@@ -1468,7 +1468,7 @@ function addCollectionFiles(files){
   );
 }
 
-function metadata(){
+function metadata(imageOverride=""){
   const extra={};
   if(state.purpose==="collection")Object.assign(extra,{
     artwork_mode:$("collectionArtworkMode").value,
@@ -1531,7 +1531,7 @@ function metadata(){
   return {
     name:$("nftName").value.trim(),
     description:$("description").value.trim(),
-    image:state.purpose==="collection" ? "ipfs://<collection-artwork-folder>/<tokenId>" : (state.imageFile ? "ipfs://<uploaded-artwork-cid>" : "ipfs://<artwork-cid>"),
+    image:imageOverride || (state.purpose==="collection" ? "ipfs://<collection-artwork-folder>/<tokenId>" : (state.imageFile ? "ipfs://<uploaded-artwork-cid>" : "ipfs://<artwork-cid>")),
     collection:$("collectionName").value.trim(),
     symbol:$("symbol").value.trim(),
     purpose:state.purpose,
@@ -1780,7 +1780,7 @@ function updateLiveLab(){
 }
 
 function buildLiveMetadata(imageUri){
-  const base=metadata();
+  const base=metadata(imageUri);
   return {
     name:$("nftName").value.trim()||"Untitled NFT",
     description:$("description").value.trim(),
@@ -1927,7 +1927,8 @@ async function deployOneOfOneSepolia(){
       royaltyBps
     );
     const tx=contract.deploymentTransaction();
-    $("deployProgress").textContent="Transaction sent"+(tx?.hash?" · "+tx.hash:"")+" · waiting for Sepolia confirmation…";
+    const txHash=tx?.hash||"";
+    $("deployProgress").textContent="Transaction sent"+(txHash?" · "+txHash:"")+" · waiting for Sepolia confirmation…";
     await contract.waitForDeployment();
     const address=await contract.getAddress();
 
@@ -1935,7 +1936,7 @@ async function deployOneOfOneSepolia(){
     state.liveMetadataUri=metadataUri;
     const explorer="https://sepolia.etherscan.io/address/"+address;
     $("deployResult").classList.remove("live-hidden");
-    $("deployResult").innerHTML="<b>1 of 1 test NFT deployed ✅</b><br>Contract: "+address+"<br>Token ID: #1<br>Owner: "+recipient+"<br><a target=\"_blank\" rel=\"noopener\" href=\""+explorer+"\">Open contract on Sepolia explorer</a>";
+    $("deployResult").innerHTML="<b>1 of 1 test NFT deployed ✅</b><br>Contract: "+address+"<br>Token ID: #1<br>Owner: "+recipient+(txHash?"<br>Transaction: "+txHash:"")+"<br>Metadata: "+metadataUri+"<br><a target=\"_blank\" rel=\"noopener\" href=\""+explorer+"\">Open contract on Sepolia explorer</a><br><small>Wallets and explorers may need time to index NFT artwork after deployment.</small>";
     $("deployProgress").textContent="Confirmed on Ethereum Sepolia.";
     setStatus("1 of 1 NFT deployed successfully on Ethereum Sepolia. Token ID #1 was minted to the recipient wallet.","good");
   }catch(e){
