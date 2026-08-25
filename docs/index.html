@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>ANGRY Docs | Product Documentation</title>
+<link rel="stylesheet" href="../assets/ecosystem.css">
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#050607;color:#eef1f3;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}.page{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:44px 0 70px}
+.hero{padding:26px 0 34px;border-bottom:1px solid #1c2125}.kicker{color:#ff8055;font-size:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}.hero h1{font-size:clamp(36px,6vw,60px);letter-spacing:-.05em;line-height:1;margin:9px 0 12px}.hero p{max-width:760px;color:#8e969d;font-size:14px;line-height:1.6;margin:0}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;padding-top:30px}.sidebar{position:sticky;top:16px;align-self:start;border:1px solid #22282d;background:#0a0d0f;border-radius:15px;padding:10px}.sidebar a{display:block;padding:9px 10px;border-radius:9px;color:#8f979e;font-size:10.5px;font-weight:800}.sidebar a:hover{color:#fff;background:#12161a}
+.content{min-width:0}.doc-section{scroll-margin-top:20px;padding:6px 0 36px;margin-bottom:28px;border-bottom:1px solid #1b2024}.doc-section:last-child{border-bottom:0}.doc-section h2{font-size:25px;letter-spacing:-.035em;margin:0 0 9px}.doc-section h3{font-size:14px;margin:20px 0 7px}.doc-section p,.doc-section li{color:#9aa2a8;font-size:12px;line-height:1.65}.doc-section ul{padding-left:19px}.lead{font-size:13px!important;color:#cbd0d4!important}.callout{border:1px solid #292f35;background:#0a0d0f;border-radius:13px;padding:13px 14px;margin:14px 0;color:#9ba3a9;font-size:11px;line-height:1.55}.callout.orange{border-color:rgba(255,84,28,.30);background:rgba(255,84,28,.045);color:#c8a193}.callout.green{border-color:rgba(75,211,116,.22);background:rgba(75,211,116,.035);color:#a5cfb1}
+.table-wrap{overflow-x:auto;border:1px solid #242a2f;border-radius:14px;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:650px;background:#090c0e}th,td{padding:11px 12px;border-bottom:1px solid #20262b;text-align:left;font-size:10.5px;vertical-align:top}th{color:#dce0e3;background:#0e1114}td{color:#919aa1}tr:last-child td{border-bottom:0}.badge{display:inline-flex;border:1px solid #30363c;border-radius:999px;padding:4px 7px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.ready{color:#7dde99;border-color:rgba(75,211,116,.25);background:rgba(75,211,116,.05)}.beta{color:#e7bc72;border-color:rgba(242,184,75,.25);background:rgba(242,184,75,.04)}.soon{color:#999}
+.code{display:block;border:1px solid #252b31;background:#080a0c;border-radius:10px;padding:10px;color:#d4d8db;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto}
+.footer{padding-top:20px;color:#626a70;font-size:9.5px}
+@media(max-width:800px){.page{padding-top:28px}.layout{grid-template-columns:1fr}.sidebar{position:static;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}.sidebar::-webkit-scrollbar{display:none}.sidebar a{flex:0 0 auto}.doc-section h2{font-size:22px}.hero p{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+  <a class="angry-globalbrand" href="../index.html"><span class="angry-globalbrand-mark">😡</span><span>ANGRY <small>ECOSYSTEM</small></span></a>
+  <nav class="angry-globalnav">
+    <a href="../index.html">Home</a><a href="../tracker/index.html">Tracker</a><a href="../token-creator/index.html">Token Creator</a><a href="../nft-creator/index.html">NFT Creator</a><a class="active" href="index.html">Docs</a>
+  </nav>
+</div>
+
+<div class="page">
+  <header class="hero">
+    <div class="kicker">Official product guide</div>
+    <h1>ANGRY Documentation</h1>
+    <p>Understand what each ANGRY tool does, what is currently enabled, what is still beta, and where different blockchain architectures require different implementation.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="#overview">Overview</a>
+      <a href="#status">Product Status</a>
+      <a href="#tracker">Tracker</a>
+      <a href="#token">Token Creator</a>
+      <a href="#nft">NFT Creator</a>
+      <a href="#networks">Networks</a>
+      <a href="#fees">Fees & Gas</a>
+      <a href="#security">Security</a>
+      <a href="#responsibility">Creator Responsibility</a>
+      <a href="#roadmap">Roadmap</a>
+    </aside>
+
+    <main class="content">
+      <section class="doc-section" id="overview">
+        <h2>Overview</h2>
+        <p class="lead"><strong>ANGRY is one website with separate product modules.</strong> Users can move between Tracker, Token Creator, NFT Creator and Docs without feeling like they are visiting unrelated projects.</p>
+        <p>The code remains separated by product. This is intentional: a change to the NFT Creator should not require rewriting the Tracker, and a Tracker update should not risk breaking token deployment.</p>
+        <div class="callout orange"><strong>$ANGRY and the tools are not the same thing.</strong> The token can remain a meme token while ANGRY products are developed as separate research and creator tools. Holding a token should not be presented as ownership of product revenue unless that is explicitly and legally implemented.</div>
+      </section>
+
+      <section class="doc-section" id="status">
+        <h2>Current Product Status</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Product</th><th>Status</th><th>Current scope</th></tr></thead>
+          <tbody>
+            <tr><td>ANGRY Tracker</td><td><span class="badge beta">Beta</span></td><td>Multi-chain research interface with market and explainable on-chain analysis modules.</td></tr>
+            <tr><td>Token Creator</td><td><span class="badge ready">Test deploy</span></td><td>Standard Token deployment on selected EVM testnets. Liquidity and Reward modes remain planner-only.</td></tr>
+            <tr><td>NFT Creator</td><td><span class="badge beta">Configurator</span></td><td>1 of 1, NFT Collection and Multiple Editions configuration. Live NFT deployment is not enabled yet.</td></tr>
+            <tr><td>Event Tickets / Membership / Certificate / Game Item / Advanced NFT</td><td><span class="badge soon">Coming soon</span></td><td>Visible roadmap only; not part of the initial NFT Creator launch scope.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section class="doc-section" id="tracker">
+        <h2>ANGRY Tracker</h2>
+        <p>The Tracker is built to reduce the number of separate pages a user must open when researching a token. It combines market information with modular checks that explain the evidence they found.</p>
+        <h3>Current analysis modules</h3>
+        <ul>
+          <li>Token overview / checker</li>
+          <li>Token burn tracking</li>
+          <li>Liquidity analysis</li>
+          <li>Holder concentration</li>
+          <li>Creator / deployer review</li>
+          <li>Creator history</li>
+          <li>Wallet relationship and funding trace</li>
+          <li>Risk timeline</li>
+          <li>KOL / promotion activity</li>
+          <li>Cross-token / developer relationship comparison</li>
+        </ul>
+        <div class="callout"><strong>Important:</strong> a signal is not proof of fraud. KOL activity, wallet overlap, concentration or other observations need context and should be presented as evidence for the user to review.</div>
+      </section>
+
+      <section class="doc-section" id="token">
+        <h2>Token Creator</h2>
+        <p>The Token Creator guides a user through network selection, contract type, token name, symbol, supply and deployment review.</p>
+        <h3>Standard Token</h3>
+        <p>The current Standard Token beta has no token tax, no extra mint function and no admin controls in the precompiled deployment path. The full initial supply is minted once to the deployer wallet.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Network</th><th>Standard test deployment</th></tr></thead>
+          <tbody>
+            <tr><td>Ethereum Sepolia</td><td><span class="badge ready">Enabled</span></td></tr>
+            <tr><td>Base Sepolia</td><td><span class="badge ready">Enabled</span></td></tr>
+            <tr><td>Robinhood Chain Testnet</td><td><span class="badge ready">Enabled</span></td></tr>
+            <tr><td>BSC Testnet</td><td><span class="badge soon">Visible / not enabled</span></td></tr>
+            <tr><td>Arbitrum Sepolia</td><td><span class="badge soon">Visible / not enabled</span></td></tr>
+            <tr><td>Polygon Amoy</td><td><span class="badge soon">Visible / not enabled</span></td></tr>
+            <tr><td>Solana Devnet</td><td><span class="badge soon">Coming soon</span></td></tr>
+          </tbody>
+        </table></div>
+        <h3>Liquidity and Reward modes</h3>
+        <p>These modes are planning interfaces in the current beta. They should not be described as live deployment-ready until their contracts, token-path validation, liquidity behavior and testnet deployment have been verified end to end.</p>
+      </section>
+
+      <section class="doc-section" id="nft">
+        <h2>NFT Creator</h2>
+        <p>The initial NFT Creator is deliberately narrow. It helps a creator prepare an NFT correctly before live deployment is introduced.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Purpose</th><th>Launch status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>1 of 1 NFT</td><td><span class="badge ready">Initial scope</span></td><td>One unique NFT with supply 1.</td></tr>
+            <tr><td>NFT Collection</td><td><span class="badge ready">Initial scope</span></td><td>Many unique NFTs in one collection. Current beta limit: 100 unique artworks.</td></tr>
+            <tr><td>Multiple Editions</td><td><span class="badge ready">Initial scope</span></td><td>Multiple copies of the same item. Current beta limit: 10,000 copies.</td></tr>
+            <tr><td>Event Tickets</td><td><span class="badge soon">Coming soon</span></td><td>Preserved internally but not selectable in the initial launch.</td></tr>
+            <tr><td>Membership / Certificate / Game Item / Advanced</td><td><span class="badge soon">Coming soon</span></td><td>Future creator modules.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout orange"><strong>Live deployment is not enabled yet.</strong> The current NFT beta builds configuration and metadata. Permanent decentralized storage and verified NFT smart-contract deployment still need to be connected and tested.</div>
+        <h3>Game / Digital Item boundary</h3>
+        <p>When this feature is eventually enabled, ANGRY can create and launch the NFT asset. Animation, game logic, 2D/3D models, inventory behavior and in-game integration remain the game developer's responsibility.</p>
+      </section>
+
+      <section class="doc-section" id="networks">
+        <h2>Network Architecture</h2>
+        <h3>EVM networks</h3>
+        <p>Ethereum, Base, Robinhood Chain, BSC, Arbitrum and Polygon use EVM-compatible smart-contract and wallet patterns. Individual ANGRY tools can still have different readiness on each network.</p>
+        <h3>Solana</h3>
+        <p>Solana is not an ERC network. Token creation uses Solana token programs and Solana wallet instructions. NFT deployment also requires a Solana-specific NFT path. ANGRY should keep this implementation separate instead of pretending ERC-20 / ERC-721 / ERC-1155 logic works on Solana.</p>
+      </section>
+
+      <section class="doc-section" id="fees">
+        <h2>Fees & Gas</h2>
+        <p>Blockchain network gas is separate from any ANGRY platform fee. Gas is paid to the network through the user's wallet.</p>
+        <p><strong>Current beta:</strong> platform-fee rules are not finalized across the products. Do not publish a permanent fee schedule until the exact on-chain calculation, treasury destination and disclosure are implemented and verified.</p>
+      </section>
+
+      <section class="doc-section" id="security">
+        <h2>Security & Testnet Rules</h2>
+        <ul>
+          <li>Test deployment before enabling mainnet.</li>
+          <li>Never put private keys or wallet recovery phrases into the website.</li>
+          <li>Do not expose secret provider API keys in static GitHub Pages JavaScript.</li>
+          <li>Show the selected network and contract settings before wallet approval.</li>
+          <li>Keep planner-only features visually different from deployment-ready features.</li>
+          <li>For NFT artwork and metadata, use permanent storage before live minting.</li>
+        </ul>
+        <div class="callout green">The safest release pattern is: configure → review → testnet deploy → verify contract behavior → only then consider mainnet.</div>
+      </section>
+
+      <section class="doc-section" id="responsibility">
+        <h2>Creator Responsibility</h2>
+        <p>Creator tools should make responsibilities clear rather than promising that ANGRY verifies ownership of every asset or business claim.</p>
+        <ul>
+          <li>NFT creators should confirm they own or have permission to use uploaded artwork.</li>
+          <li>Token creators are responsible for the project information and settings they choose.</li>
+          <li>Future ticket issuers should confirm they are authorized to issue tickets for the event.</li>
+          <li>Game developers are responsible for connecting NFT ownership to actual game functionality.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section" id="roadmap">
+        <h2>Roadmap Principle</h2>
+        <p>ANGRY should add features step by step rather than marking unfinished mechanics as live. Stable product pages can be frozen while new functions are developed in separate versions.</p>
+        <p>A practical order from the current build is:</p>
+        <span class="code">1. Stabilize unified navigation and Tracker
+2. Verify Standard Token deployment on each enabled testnet
+3. Add permanent NFT storage
+4. Add real ERC-721 / ERC-1155 NFT testnet deployment
+5. Build a proper Solana token/NFT path
+6. Revisit Event Tickets and other Coming soon NFT modules
+7. Add API documentation when API access is actually available</span>
+      </section>
+
+      <div class="footer">ANGRY Documentation · Unified Website v1.0 · Beta features may change as testing continues.</div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>ANGRY Token Creator | Testnet Beta</title>
+<style>
+:root{
+  --bg:#050607;--surface:#0b0d0f;--surface2:#101316;--surface3:#15181c;
+  --line:#252a2f;--line2:#30363d;--text:#f5f7f8;--muted:#8e969d;--muted2:#697179;
+  --orange:#ff541c;--orange2:#ff6a27;--green:#4bd374;--amber:#f2b84b;--red:#ff7168;
+  --radius:18px;--shadow:0 24px 70px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 8% -12%,rgba(255,84,28,.11),transparent 28rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{display:none!important}
+.app{max-width:1220px;margin:0 auto;padding:0 22px 42px}
+.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}.brand-logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#ff692a,#f04712);font-size:21px;box-shadow:0 12px 30px rgba(255,84,28,.19)}
+.brand-name{font-size:18px;font-weight:850;letter-spacing:-.025em;white-space:nowrap}.beta{border:1px solid rgba(255,84,28,.42);background:rgba(255,84,28,.07);color:#ff8c61;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:850;letter-spacing:.08em}
+.top-right{display:flex;align-items:center;gap:10px}.testnet-pill{display:flex;align-items:center;gap:7px;color:#adb3b8;border:1px solid var(--line);border-radius:999px;padding:9px 11px;background:#0a0c0e;font-size:11px;font-weight:700}.testnet-pill i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(75,211,116,.07)}
+.wallet{border:1px solid rgba(255,84,28,.58);background:#0d0f11;color:#ff8d62;border-radius:11px;padding:10px 14px;min-height:42px;font-size:12px;font-weight:820;transition:.15s}.wallet:hover{background:rgba(255,84,28,.06)}
+.hero{padding:34px 1px 22px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#ff875d;font-weight:850;margin-bottom:10px}.hero h1{margin:0;font-size:clamp(30px,4.2vw,47px);line-height:1.06;letter-spacing:-.045em;font-weight:880}.hero p{margin:12px 0 0;color:#969da3;line-height:1.55;font-size:14px;max-width:720px}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.72fr);gap:16px;align-items:start}.left{display:grid;gap:12px}.card{background:linear-gradient(180deg,rgba(16,19,22,.98),rgba(9,11,13,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.section{padding:17px}.section-head{display:grid;grid-template-columns:33px 175px 1fr;gap:12px;align-items:start;margin-bottom:14px}.step{width:33px;height:33px;border-radius:9px;display:grid;place-items:center;background:#181c20;border:1px solid #2a3036;font-size:11px;font-weight:900;color:#d8dcdf}.section-title{font-size:14px;font-weight:820;letter-spacing:-.015em;margin-top:1px}.section-sub{font-size:10.5px;color:#7e878e;line-height:1.42;margin-top:4px}
+.network-grid{grid-column:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.network-card{min-height:67px;display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid #30363d;background:#0b0d0f;color:#d9dde0;transition:.16s}.network-card:hover{border-color:#454c54}.network-card.active{border-color:var(--orange);background:linear-gradient(135deg,rgba(255,84,28,.12),rgba(255,84,28,.035));box-shadow:inset 0 0 0 1px rgba(255,84,28,.10),0 0 24px rgba(255,84,28,.06)}.network-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto}.network-icon svg{width:30px;height:30px;display:block}.network-card b{font-size:12px;display:block}.network-card span{display:block;color:#8e969d;font-size:10px;margin-top:2px}
+.network-strip{grid-column:3;margin-top:1px;border:1px solid #252b31;border-radius:11px;background:#090b0d;min-height:42px;padding:9px 11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#858e95;font-size:10.5px}.network-strip b{color:#c9ced2}.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+.switch-btn{grid-column:3;margin-top:0;width:100%;border:1px solid #292f35;background:#111417;color:#cbd0d4;border-radius:11px;min-height:43px;font-size:11.5px;font-weight:800}.switch-btn:hover{background:#15191d}
+.type-grid{grid-column:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.type{min-height:118px;border:1px solid #2d3339;background:#0a0c0e;color:var(--text);border-radius:13px;padding:12px;position:relative;transition:.16s}.type:hover{border-color:#414850}.type.active{border-color:var(--orange);background:linear-gradient(150deg,rgba(255,84,28,.11),rgba(255,84,28,.025));box-shadow:inset 0 0 0 1px rgba(255,84,28,.09)}.type-top{display:flex;align-items:center;gap:9px}.type-icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#171a1e;color:#dadddf;font-weight:900;font-size:13px}.type.active .type-icon{background:linear-gradient(145deg,#ff6a27,#ff4d12);color:#fff}.type.active b{color:#fff}.type b{font-size:12.5px;color:#f5f7f8;font-weight:850}.type p{margin:9px 0 0;color:#8f979e;font-size:10.5px;line-height:1.48}.status-badge{display:inline-flex;margin-top:9px;border-radius:999px;padding:4px 7px;border:1px solid #30363c;background:#15181c;color:#9ba2a8;font-size:8.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.type.active .ready{border-color:rgba(75,211,116,.25);background:rgba(75,211,116,.06);color:#75dc90}
+.form-grid{grid-column:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}.field label{display:block;margin:0 0 6px;color:#afb5ba;font-size:10.5px;font-weight:720}.field input,.field select{width:100%;height:45px;border:1px solid #30363d;border-radius:11px;background:#090b0d;color:#f2f4f5;padding:10px 11px;outline:none;font-size:12px}.field input:focus,.field select:focus{border-color:rgba(255,84,28,.75);box-shadow:0 0 0 3px rgba(255,84,28,.07)}.field-help{grid-column:1/-1;color:#747d84;font-size:10px;line-height:1.45;margin-top:-2px}
+.fee-grid{grid-column:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mini-help{margin-top:5px;color:#707981;font-size:8.8px;line-height:1.4}
+.reward-builder{grid-column:1/-1;margin-top:2px;padding:12px;border:1px solid #2b3137;background:#090b0d;border-radius:12px}
+.reward-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.reward-title{font-size:11px;font-weight:820;color:#e7eaec}
+.reward-sub{font-size:9px;color:#757e85;margin-top:3px}
+.planner-chip{border:1px solid #30363c;background:#15181c;color:#969ea5;border-radius:999px;padding:4px 7px;font-size:7.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.reward-assets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.reward-asset{display:flex;align-items:center;gap:8px;min-height:58px;padding:9px;border:1px solid #2e343a;background:#0d1012;color:#e8eaec;border-radius:11px;text-align:left;transition:.15s}
+.reward-asset:hover{border-color:#444b52}
+.reward-asset.active{border-color:var(--orange);background:linear-gradient(145deg,rgba(255,84,28,.12),rgba(255,84,28,.025));box-shadow:inset 0 0 0 1px rgba(255,84,28,.08)}
+.reward-asset>span:last-child{min-width:0}
+.reward-asset b{display:block;font-size:10.5px;color:#eef0f1;white-space:nowrap}
+.reward-asset small{display:block;margin-top:2px;color:#7e878e;font-size:7.8px;line-height:1.2;white-space:nowrap}
+.asset-dot{width:29px;height:29px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;font-weight:900;font-size:12px;border:1px solid #30363c;background:#171a1e}
+.usdt-dot{color:#62d4b5}.usdc-dot{color:#62a7ff}.wrapped-dot{color:#c8ccd0}.custom-dot{color:#ff8b60}
+.reward-asset.active .asset-dot{border-color:rgba(255,84,28,.35);background:rgba(255,84,28,.10)}
+.reward-explain{margin-top:9px;padding:9px 10px;border:1px solid #252b31;border-radius:9px;background:#0b0d0f;color:#8f979e;font-size:9px;line-height:1.45}
+.reward-builder>.field{margin-top:10px}
+.token-check-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.token-check-btn{min-height:42px;padding:0 13px;border-radius:9px;border:1px solid #343b42;background:#171b1f;color:#e9ebed;font-size:9px;font-weight:850;white-space:nowrap;transition:.15s}
+.token-check-btn:hover{border-color:#4a525a;background:#1c2126}
+.token-check-btn:disabled{opacity:.48;cursor:not-allowed}
+.token-validation{display:flex;align-items:flex-start;gap:9px;margin-top:9px;padding:10px 11px;border-radius:10px;border:1px solid #293037;background:#0b0e10}
+.token-validation .validation-icon{width:20px;height:20px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;border:1px solid #343b42;color:#8a939a}
+.token-validation b{display:block;color:#c9ced2;font-size:9.5px}
+.token-validation small{display:block;margin-top:3px;color:#747d84;font-size:8.3px;line-height:1.4}
+.token-validation.checking{border-color:rgba(255,185,70,.24);background:rgba(255,185,70,.035)}
+.token-validation.checking .validation-icon{border-color:rgba(255,185,70,.42);color:#ffbf47}
+.token-validation.good{border-color:rgba(74,207,111,.25);background:rgba(74,207,111,.04)}
+.token-validation.good .validation-icon{border-color:rgba(74,207,111,.4);background:rgba(74,207,111,.08);color:#61d881}
+.token-validation.bad{border-color:rgba(255,103,95,.28);background:rgba(255,103,95,.04)}
+.token-validation.bad .validation-icon{border-color:rgba(255,103,95,.45);background:rgba(255,103,95,.07);color:#ff8179}
+.verified-token{margin-top:9px;padding:11px;border:1px solid rgba(74,207,111,.18);background:#0a0d0b;border-radius:10px}
+.verified-token-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;color:#737d77;font-size:7.8px}
+.verified-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:rgba(74,207,111,.08);border:1px solid rgba(74,207,111,.20);color:#82d895;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.verified-token-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.verified-token-grid>div{border:1px solid #242b27;background:#0d100e;border-radius:8px;padding:7px 8px;min-width:0}
+.verified-token-grid span{display:block;color:#68716c;font-size:7.4px;margin-bottom:3px}
+.verified-token-grid b{display:block;color:#e4e9e5;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.verified-note{margin-top:8px;color:#747e77;font-size:7.8px;line-height:1.42}
+
+.feeBox{grid-column:3;border:1px solid #2b3137;background:#090b0d;border-radius:11px;padding:11px;margin-top:10px}.feeLine{display:flex;align-items:center;justify-content:space-between;gap:12px}.total{font-size:18px;font-weight:850}.total.good{color:var(--green)}.total.warn{color:var(--amber)}.total.bad{color:var(--red)}.hint{color:#8d959c;font-size:10px}.wallet-hidden{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
+.preview-card{position:sticky;top:14px;overflow:hidden}.preview-head{padding:17px;border-bottom:1px solid #22282e}.preview-title{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:840}.code-icon{color:var(--orange);font-size:20px}.preview-sub{font-size:10.5px;color:#828a91;margin-top:4px}.preview-body{padding:14px 17px 17px}.preview-list{border:1px solid #252b31;border-radius:12px;background:#090b0d;overflow:hidden}.preview-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #20252a;font-size:10.5px}.preview-row:last-child{border-bottom:0}.preview-row>span{color:#858e95}.preview-row strong{color:#e4e7e9;font-size:10.5px;font-weight:760;text-align:right;max-width:62%;word-break:break-word}.preview-network{display:inline-flex;align-items:center;gap:6px}.mini-chain-dot{width:8px;height:8px;border-radius:50%;background:#89919a}.mini-chain-dot.sepolia{background:#9da6b0}.mini-chain-dot.bscTestnet{background:#f1c40f}.mini-chain-dot.baseSepolia{background:#3685ff}.mini-chain-dot.arbSepolia{background:#45a7ff}.mini-chain-dot.polygonAmoy{background:#9a5cff}.contract-value{color:#ff966e}
+.deploy-note{margin-top:12px;border:1px solid rgba(255,84,28,.36);background:linear-gradient(110deg,rgba(255,84,28,.12),rgba(255,84,28,.035));border-radius:11px;padding:10px 11px;color:#e7b09c;font-size:10.5px;line-height:1.45}.deploy-note b{color:#ff986f}.btn{width:100%;border-radius:11px;min-height:46px;padding:10px 13px;font-weight:830;font-size:12px;transition:.15s}.primary{margin-top:11px;border:0;background:linear-gradient(180deg,#ff6425,#ff4d12);color:#fff;box-shadow:0 12px 28px rgba(255,84,28,.16)}.primary:hover{filter:brightness(1.04)}.secondary{margin-top:8px;border:1px solid #2b3137;background:#121519;color:#c4c9cd}.secondary:hover{background:#171b1f}.btn:disabled{opacity:.48;cursor:not-allowed}.status{margin-top:10px;border:1px solid #252b31;border-radius:10px;background:#090b0d;padding:10px;color:#808990;font-size:10px;line-height:1.48;word-break:break-word}.status.good{border-color:rgba(75,211,116,.25);color:#9ad9aa;background:rgba(75,211,116,.035)}.status.warn{border-color:rgba(242,184,75,.24);color:#d6bc85;background:rgba(242,184,75,.035)}.status.bad{border-color:rgba(255,113,104,.24);color:#efa19b;background:rgba(255,113,104,.035)}.link{color:#ff8d62;text-decoration:none;font-weight:800}.micro-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bottom-strip{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #22282e;background:#0a0c0e;border-radius:14px;overflow:hidden}.bottom-item{padding:13px 15px;display:flex;gap:9px;align-items:center;border-right:1px solid #22282e}.bottom-item:last-child{border-right:0}.bottom-item i{font-style:normal;color:#ff8458}.bottom-item b{display:block;font-size:10.5px}.bottom-item span{display:block;color:#727b82;font-size:9.5px;margin-top:2px}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 2px 0;color:#60686f;font-size:9.5px}
+#chain,#nativeCoinInput{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.preview-card{position:static}.section-head{grid-template-columns:33px 150px 1fr}.network-grid{grid-template-columns:repeat(3,1fr)}.bottom-strip{grid-template-columns:1fr}}
+@media(max-width:640px){.app{padding:0 12px 28px}.topbar{height:64px}.brand-logo{width:37px;height:37px;font-size:19px}.brand-name{font-size:16px}.beta{font-size:8.5px;padding:4px 6px}.testnet-pill{display:none}.wallet{padding:8px 10px;font-size:10.5px;max-width:142px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hero{padding:26px 4px 18px}.eyebrow{font-size:9.5px}.hero h1{font-size:31px;max-width:520px}.hero p{font-size:12px;line-height:1.5}.section{padding:12px}.section-head{grid-template-columns:31px 1fr;gap:9px;margin-bottom:10px}.step{width:31px;height:31px}.section-title{font-size:13px}.section-sub{font-size:9.5px}.network-grid,.type-grid,.form-grid,.fee-grid,.network-strip,.switch-btn,.feeBox{grid-column:1/-1}.network-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.network-card{min-height:59px;padding:8px;gap:7px}.network-icon{width:27px;height:27px}.network-icon svg{width:25px;height:25px}.network-card b{font-size:10.5px}.network-card span{font-size:8.5px}.network-strip{font-size:9.5px;min-height:38px}.switch-btn{min-height:40px;font-size:10.5px}.type-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.type{min-height:96px;padding:9px}.type-top{gap:6px}.type-icon{width:29px;height:29px;font-size:11px}.type b{font-size:11px}.type p{font-size:8.8px;line-height:1.38;margin-top:7px}.status-badge{font-size:7.2px;padding:3px 5px;margin-top:7px}.form-grid{grid-template-columns:1fr 1fr;gap:8px}.field label{font-size:9.5px}.field input,.field select{height:42px;font-size:11px;padding:9px}.field-help{font-size:9px}.fee-grid{grid-template-columns:1fr 1fr}.fee-grid>.field:nth-child(3){grid-column:1/-1}.reward-assets{grid-template-columns:1fr 1fr}.reward-asset{min-height:54px}.reward-asset b{font-size:9.5px}.reward-asset small{font-size:7.2px}.mini-help{font-size:8px}.preview-head{padding:13px}.preview-body{padding:11px 13px 13px}.preview-row{padding:9px 10px;font-size:9.5px}.preview-row strong{font-size:9.5px}.deploy-note{font-size:9.5px}.btn{min-height:44px;font-size:11px}.bottom-strip{display:none}.footer{font-size:8.7px}}
+@media(max-width:390px){.token-check-row{grid-template-columns:1fr}.token-check-btn{width:100%}.verified-token-grid{grid-template-columns:1fr 1fr}.reward-assets{grid-template-columns:1fr 1fr}.network-grid{grid-template-columns:repeat(2,1fr)}.type-grid{grid-template-columns:1fr 1fr}.type:last-child{grid-column:1/-1}.hero h1{font-size:28px}}
+
+.letter-network{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:950;font-size:13px;color:#fff}
+.robinhood-letter{background:#ccff00;color:#000;font-size:15px}
+.solana-letter{background:linear-gradient(145deg,#8a4dff,#20d69a)}
+.network-card.planned-network{position:relative;opacity:.68;border-style:dashed}
+.network-card.planned-network:hover{border-color:#30363d}
+.network-badge{position:absolute;top:5px;right:5px;border:1px solid rgba(242,184,75,.28);background:rgba(242,184,75,.06);color:#d7b873;border-radius:999px;padding:2px 5px;font-size:6px!important;font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:.03em}
+.mini-chain-dot.robinhoodTestnet{background:#2a8d62}.mini-chain-dot.solanaDevnet{background:#8a4dff}
+
+</style>
+<link rel="stylesheet" href="../assets/ecosystem.css">
+</head>
+<body>
+
+<div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+  <a class="angry-globalbrand" href="../index.html">
+    <span class="angry-globalbrand-mark">😡</span>
+    <span>ANGRY <small>ECOSYSTEM</small></span>
+  </a>
+  <nav class="angry-globalnav">
+    <a href="../index.html">Home</a><a href="../tracker/index.html">Tracker</a><a class="active" href="../token-creator/index.html">Token Creator</a><a href="../nft-creator/index.html">NFT Creator</a><a href="../docs/index.html">Docs</a>
+  </nav>
+</div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-logo">😡</div><div class="brand-name">ANGRY Token Creator</div><span class="beta">BETA v0.6.3</span></div>
+    <div class="top-right"><div class="testnet-pill"><i></i> Testnet</div><button class="wallet" id="walletBtn">Connect wallet</button></div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">No-code token creation</div>
+    <h1>Create a token with rules people can verify.</h1>
+    <p>Choose a network, set the contract type and token details, then review everything before approving the deployment in your wallet.</p>
+  </section>
+
+  <main class="layout">
+    <div class="left">
+      <section class="card section">
+        <div class="section-head">
+          <div class="step">01</div>
+          <div><div class="section-title">Choose network</div><div class="section-sub">Select the test network.</div></div>
+          <div class="network-grid">
+            <button class="network-card active" type="button" data-chain="sepolia"><div class="network-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#e8edf2" d="M16 2 8.1 16.1 16 20.8l7.9-4.7L16 2Z"/><path fill="#aeb7c2" d="M16 22.2 8.1 17.6 16 30l7.9-12.4L16 22.2Z"/><path fill="#88939f" d="m16 20.8 7.9-4.7L16 12.5v8.3Z"/></svg></div><div><b>Ethereum</b><span>Sepolia</span></div></button>
+            <button class="network-card" type="button" data-chain="bscTestnet"><div class="network-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><g fill="#f3ba2f"><path d="M16 3 21 8l-3 3-2-2-2 2-3-3 5-5Zm-8 8 3 3-2 2 2 2-3 3-5-5 5-5Zm16 0 5 5-5 5-3-3 2-2-2-2 3-3ZM16 21l2-2 3 3-5 5-5-5 3-3 2 2Z"/><path d="m16 12 4 4-4 4-4-4 4-4Z"/></g></svg></div><div><b>BSC</b><span>Testnet</span></div></button>
+            <button class="network-card" type="button" data-chain="baseSepolia"><div class="network-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#2b7fff"/><rect x="7" y="14" width="18" height="4" rx="2" fill="white"/></svg></div><div><b>Base</b><span>Sepolia</span></div></button>
+            <button class="network-card" type="button" data-chain="robinhoodTestnet">
+              <div class="network-icon"><div class="letter-network robinhood-letter" aria-hidden="true">🪶</div></div>
+              <div><b>Robinhood Chain</b><span>Testnet</span></div>
+            </button>
+            <button class="network-card" type="button" data-chain="arbSepolia"><div class="network-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14l-12 7L4 23V9L16 2Z" fill="#213147" stroke="#6dd0ff" stroke-width="1.5"/><path d="m11 23 7-15h4l-7 15h-4Z" fill="#fff"/><path d="m17 23 5-11 2 4-3 7h-4Z" fill="#28a0f0"/><path d="m8 20 5-11h4l-7 15-2-4Z" fill="#96bedc"/></svg></div><div><b>Arbitrum</b><span>Sepolia</span></div></button>
+            <button class="network-card" type="button" data-chain="polygonAmoy"><div class="network-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11.5 10.5 16 8l4.5 2.5v5L16 18l-4.5-2.5v-5Zm-6 4L10 12v5l6 3.5 6-3.5v-5l4.5 2.5v5L16 25 5.5 19.5v-5Z" fill="none" stroke="#a86bff" stroke-width="3" stroke-linejoin="round"/></svg></div><div><b>Polygon</b><span>Amoy</span></div></button>
+          
+            <button class="network-card planned-network" type="button" data-chain="solanaDevnet" aria-disabled="true">
+              <span class="network-badge">Coming soon</span>
+              <div class="network-icon"><div class="letter-network solana-letter">S</div></div>
+              <div><b>Solana</b><span>Devnet</span></div>
+            </button></div>
+          <div class="network-strip" id="networkHint"></div>
+          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected testnet</button>
+        </div>
+        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Sepolia</option><option value="bscTestnet">BSC Testnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
+        <input id="nativeCoinInput" value="SepoliaETH" readonly aria-hidden="true">
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div class="step">02</div>
+          <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
+          <div class="type-grid">
+            <button class="type active" type="button" data-type="standard"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="status-badge ready">Deploy ready</span></button>
+            <button class="type" type="button" data-type="liquidity"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, automatic liquidity and creator fee rules.</p><span class="status-badge">Planner</span></button>
+            <button class="type" type="button" data-type="reward"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Reward holders in USDT, USDC, wrapped native coin or a custom token.</p><span class="status-badge">Planner</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div class="step">03</div>
+          <div><div class="section-title">Token details</div><div class="section-sub">Set the basic token information.</div></div>
+          <div class="form-grid">
+            <div class="field"><label for="name">Token name</label><input id="name" value="ANGRY Test" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="ANGT" maxlength="10" autocomplete="off"></div>
+            <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="1000000" min="1" step="1"></div>
+            <div class="field"><label>Decimals</label><input value="18" readonly></div>
+            <div class="field-help">The Standard beta mints the full supply once to the deployer wallet.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section hidden" id="feeFields">
+        <div class="section-head">
+          <div class="step">04</div>
+          <div>
+            <div class="section-title" id="feeSectionTitle">Fee rules</div>
+            <div class="section-sub" id="feeSectionSub">Planner only in this beta.</div>
+          </div>
+
+          <div class="fee-grid">
+            <div class="field">
+              <label for="holderFee" id="holderFeeLabel">Holder Reflection (%)</label>
+              <input id="holderFee" type="number" value="0.3" min="0" max="5" step="0.1">
+              <div class="mini-help" id="holderFeeHelp">Distributed to eligible holders in the token itself.</div>
+            </div>
+
+            <div class="field">
+              <label for="lpFee">Auto Liquidity (%)</label>
+              <input id="lpFee" type="number" value="0.4" min="0" max="5" step="0.1">
+              <div class="mini-help">Reserved for automatic liquidity mechanics.</div>
+            </div>
+
+            <div class="field">
+              <label for="projectFee">Project / Creator (%)</label>
+              <input id="projectFee" type="number" value="0.3" min="0" max="5" step="0.1">
+              <div class="mini-help">Allocated to the creator/project fee wallet.</div>
+            </div>
+
+            <div id="rewardFields" class="reward-builder hidden">
+              <div class="reward-head">
+                <div>
+                  <div class="reward-title">Reward asset</div>
+                  <div class="reward-sub">Choose what eligible holders receive.</div>
+                </div>
+                <span class="planner-chip">Planner</span>
+              </div>
+
+              <div class="reward-assets" id="rewardAssets">
+                <button class="reward-asset active" type="button" data-reward="usdt">
+                  <span class="asset-dot usdt-dot">₮</span>
+                  <span><b>USDT</b><small>Stablecoin reward</small></span>
+                </button>
+                <button class="reward-asset" type="button" data-reward="usdc">
+                  <span class="asset-dot usdc-dot">$</span>
+                  <span><b>USDC</b><small>Stablecoin reward</small></span>
+                </button>
+                <button class="reward-asset" type="button" data-reward="wrapped">
+                  <span class="asset-dot wrapped-dot">W</span>
+                  <span><b id="wrappedAssetName">WETH</b><small>Wrapped network coin</small></span>
+                </button>
+                <button class="reward-asset" type="button" data-reward="custom">
+                  <span class="asset-dot custom-dot">+</span>
+                  <span><b>Custom</b><small>Use another ERC-20</small></span>
+                </button>
+              </div>
+
+              <div class="reward-explain" id="rewardExplain">
+                Holders receive rewards in USDT generated from the configured reward fee.
+              </div>
+
+              <div class="field hidden" id="customRewardField">
+                <label for="rewardToken">Custom reward token contract</label>
+                <div class="token-check-row">
+                  <input id="rewardToken" placeholder="0x..." autocomplete="off" inputmode="text" spellcheck="false">
+                  <button class="token-check-btn" id="validateRewardBtn" type="button">Check token</button>
+                </div>
+                <div class="mini-help">The address is checked on the network selected above. A token from another network will not be accepted.</div>
+
+                <div class="token-validation idle" id="rewardValidation">
+                  <span class="validation-icon">○</span>
+                  <div>
+                    <b>Not checked yet</b>
+                    <small>Enter a custom ERC-20 contract address, then tap Check token.</small>
+                  </div>
+                </div>
+
+                <div class="verified-token hidden" id="verifiedRewardToken">
+                  <div class="verified-token-head">
+                    <span class="verified-badge">Verified on selected network</span>
+                    <span id="verifiedRewardNetwork">—</span>
+                  </div>
+                  <div class="verified-token-grid">
+                    <div><span>Name</span><b id="verifiedRewardName">—</b></div>
+                    <div><span>Symbol</span><b id="verifiedRewardSymbol">—</b></div>
+                    <div><span>Decimals</span><b id="verifiedRewardDecimals">—</b></div>
+                    <div><span>Contract</span><b id="verifiedRewardAddress">—</b></div>
+                  </div>
+                  <div class="verified-note">Basic ERC-20 compatibility is confirmed. DEX liquidity/path checking will be required before Reward deployment is enabled.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feeBox">
+            <div class="feeLine">
+              <span class="hint">Total planned token tax</span>
+              <span id="totalFee" class="total good">1%</span>
+            </div>
+            <div class="hint" id="feeMessage"></div>
+          </div>
+        </div>
+      </section>
+      <input id="projectWallet" class="wallet-hidden" readonly aria-hidden="true">
+    </div>
+
+    <aside class="card preview-card">
+      <div class="preview-head"><div class="preview-title"><span class="code-icon">&lt;/&gt;</span> Deployment Preview</div><div class="preview-sub">Review your settings before deployment.</div></div>
+      <div class="preview-body">
+        <div id="preview" class="preview-list"></div>
+        <div class="deploy-note"><b>Testnet deployment.</b> Standard Token is enabled on Ethereum Sepolia, Base Sepolia and Robinhood Chain Testnet. Solana is listed as Coming soon because it requires a separate SPL Token + Solana-wallet deployment path.</div>
+        <button class="btn primary" id="deployBtn" type="button">Deploy Standard Test Token</button>
+        <div class="micro-actions"><button class="btn secondary" id="downloadBtn" type="button">Download config</button><button class="btn secondary" id="copyBtn" type="button">Copy summary</button></div>
+        <div id="status" class="status">Ready. Connect an EVM wallet, select Ethereum Sepolia, Base Sepolia or Robinhood Chain Testnet, then deploy a Standard test token.</div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="bottom-strip">
+    <div class="bottom-item"><i>✓</i><div><b>Clear configuration</b><span>Review important token settings before approval.</span></div></div>
+    <div class="bottom-item"><i>⌁</i><div><b>Wallet controlled</b><span>The deployer wallet receives the Standard test supply.</span></div></div>
+    <div class="bottom-item"><i>⚙</i><div><b>Built in stages</b><span>More networks and token mechanics can be added later.</span></div></div>
+  </div>
+  <footer class="footer"><span>ANGRY Launch Beta v0.6.3 · Token creation prototype</span><span>Testnet only · Never send mainnet funds to this beta</span></footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const CHAINS = {
+  sepolia:{name:"Ethereum Sepolia",family:"evm",chainId:"0xaa36a7",chainIdDec:11155111,native:"SepoliaETH",nativeSymbol:"ETH",rpc:"https://rpc.sepolia.org",explorer:"https://sepolia.etherscan.io",deploy:true},
+  bscTestnet:{name:"BSC Testnet",family:"evm",chainId:"0x61",chainIdDec:97,native:"tBNB",nativeSymbol:"tBNB",rpc:"https://bsc-testnet-dataseed.bnbchain.org",explorer:"https://testnet.bscscan.com",deploy:false},
+  baseSepolia:{name:"Base Sepolia",family:"evm",chainId:"0x14a34",chainIdDec:84532,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia.base.org",explorer:"https://sepolia.basescan.org",deploy:true},
+  robinhoodTestnet:{name:"Robinhood Chain Testnet",family:"evm",chainId:"0xb626",chainIdDec:46630,native:"ETH",nativeSymbol:"ETH",rpc:"https://rpc.testnet.chain.robinhood.com",explorer:"https://explorer.testnet.chain.robinhood.com",deploy:true},
+  arbSepolia:{name:"Arbitrum Sepolia",family:"evm",chainId:"0x66eee",chainIdDec:421614,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia-rollup.arbitrum.io/rpc",explorer:"https://sepolia.arbiscan.io",deploy:false},
+  polygonAmoy:{name:"Polygon Amoy",family:"evm",chainId:"0x13882",chainIdDec:80002,native:"POL",nativeSymbol:"POL",rpc:"https://rpc-amoy.polygon.technology",explorer:"https://amoy.polygonscan.com",deploy:false},
+  solanaDevnet:{name:"Solana Devnet",family:"solana",chainId:null,chainIdDec:null,native:"SOL",nativeSymbol:"SOL",rpc:"https://api.devnet.solana.com",explorer:"https://explorer.solana.com/?cluster=devnet",deploy:false}
+};
+const state={type:"standard",rewardAsset:"usdt",customReward:{status:"idle",address:"",chainKey:"",meta:null,message:""},account:null,lastContract:null};
+
+function setStatus(text,kind=""){
+  const s=$("status"); s.className="status"+(kind?" "+kind:""); s.innerHTML=text;
+}
+function n(id){const v=parseFloat($(id)?.value||"0");return Number.isFinite(v)?v:0}
+function calcFees(){if(state.type==="standard")return 0;return n("holderFee")+n("lpFee")+n("projectFee")}
+function feeStatus(){const t=calcFees();$("totalFee").textContent=(Math.round(t*100)/100)+"%";$("totalFee").className="total "+(t<=1?"good":t<=2?"warn":"bad");$("feeMessage").textContent=t<=1?"Low-fee target.":t<=2?"Moderate fee.":"High fee — review before future deployment."}
+function selectedChain(){return CHAINS[$("chain").value]}
+function isEvmAddress(value){
+  return /^0x[a-fA-F0-9]{40}$/.test(String(value||"").trim());
+}
+function shortAddress(value){
+  const v=String(value||"");
+  return v.length>14?v.slice(0,8)+"…"+v.slice(-6):v;
+}
+function resetCustomRewardValidation(message="Enter a custom ERC-20 contract address, then tap Check token."){
+  state.customReward={status:"idle",address:"",chainKey:"",meta:null,message};
+  renderRewardValidation();
+}
+function renderRewardValidation(){
+  const box=$("rewardValidation");
+  const verified=$("verifiedRewardToken");
+  if(!box||!verified)return;
+
+  const v=state.customReward;
+  box.className="token-validation "+(v.status||"idle");
+  const icon=box.querySelector(".validation-icon");
+  const title=box.querySelector("b");
+  const small=box.querySelector("small");
+
+  if(v.status==="checking"){
+    icon.textContent="…";
+    title.textContent="Checking selected network";
+    small.textContent=v.message||"Reading contract code and ERC-20 metadata.";
+    verified.classList.add("hidden");
+  }else if(v.status==="good"){
+    icon.textContent="✓";
+    title.textContent="Compatible reward token";
+    small.textContent=v.message||"Token contract verified on the selected network.";
+    verified.classList.remove("hidden");
+
+    $("verifiedRewardNetwork").textContent=selectedChain().name;
+    $("verifiedRewardName").textContent=v.meta?.name||"Metadata unavailable";
+    $("verifiedRewardSymbol").textContent=v.meta?.symbol||"—";
+    $("verifiedRewardDecimals").textContent=String(v.meta?.decimals ?? "—");
+    $("verifiedRewardAddress").textContent=shortAddress(v.address);
+    $("verifiedRewardAddress").title=v.address;
+  }else if(v.status==="bad"){
+    icon.textContent="!";
+    title.textContent="Reward token rejected";
+    small.textContent=v.message||"This address cannot be used on the selected network.";
+    verified.classList.add("hidden");
+  }else{
+    icon.textContent="○";
+    title.textContent="Not checked yet";
+    small.textContent=v.message||"Enter a custom ERC-20 contract address, then tap Check token.";
+    verified.classList.add("hidden");
+  }
+}
+async function rpcRequest(chain,method,params=[]){
+  const body={jsonrpc:"2.0",id:Date.now(),method,params};
+  const response=await fetch(chain.rpc,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  });
+  if(!response.ok)throw new Error("RPC returned HTTP "+response.status);
+  const data=await response.json();
+  if(data.error)throw new Error(data.error.message||"RPC error");
+  return data.result;
+}
+function hexToUtf8(hex){
+  const clean=String(hex||"").replace(/^0x/,"");
+  if(!clean)return "";
+  const bytes=new Uint8Array(clean.match(/.{1,2}/g).map(x=>parseInt(x,16)));
+  return new TextDecoder().decode(bytes).replace(/\u0000+$/g,"").trim();
+}
+function decodeAbiString(data){
+  if(!data||data==="0x")return "";
+  const hex=data.replace(/^0x/,"");
+  try{
+    if(hex.length>=128){
+      const offset=Number(BigInt("0x"+hex.slice(0,64)));
+      const lenPos=offset*2;
+      if(Number.isFinite(offset)&&hex.length>=lenPos+64){
+        const len=Number(BigInt("0x"+hex.slice(lenPos,lenPos+64)));
+        const start=lenPos+64;
+        if(Number.isFinite(len)&&len>=0&&hex.length>=start+(len*2)){
+          return hexToUtf8(hex.slice(start,start+(len*2)));
+        }
+      }
+    }
+    if(hex.length===64)return hexToUtf8(hex);
+  }catch(_){}
+  return "";
+}
+async function ethCall(chain,address,data){
+  return rpcRequest(chain,"eth_call",[{to:address,data},"latest"]);
+}
+async function detectAddressOnOtherNetworks(address,currentKey){
+  const checks=Object.entries(CHAINS)
+    .filter(([key,chain])=>key!==currentKey && chain.family==="evm")
+    .map(async([key,chain])=>{
+      try{
+        const code=await rpcRequest(chain,"eth_getCode",[address,"latest"]);
+        return code&&code!=="0x"&&code!=="0x0"?{key,chain}:null;
+      }catch(_){return null}
+    });
+  const found=(await Promise.all(checks)).filter(Boolean);
+  return found;
+}
+async function validateCustomRewardToken(){
+  const address=$("rewardToken").value.trim();
+  const chainKey=$("chain").value;
+  const chain=selectedChain();
+  const btn=$("validateRewardBtn");
+
+  resetCustomRewardValidation();
+
+  if(!isEvmAddress(address)){
+    state.customReward={status:"bad",address,chainKey,meta:null,message:"Enter a complete EVM contract address beginning with 0x followed by 40 hexadecimal characters."};
+    renderRewardValidation();renderPreview();return false;
+  }
+
+  state.customReward={status:"checking",address,chainKey,meta:null,message:`Checking ${chain.name}…`};
+  renderRewardValidation();
+  if(btn){btn.disabled=true;btn.textContent="Checking…";}
+
+  try{
+    const code=await rpcRequest(chain,"eth_getCode",[address,"latest"]);
+    if(!code||code==="0x"||code==="0x0"){
+      const elsewhere=await detectAddressOnOtherNetworks(address,chainKey);
+      const otherNames=elsewhere.map(x=>x.chain.name);
+      const suffix=otherNames.length
+        ? ` Contract code was found on ${otherNames.join(", ")}, not on ${chain.name}.`
+        : ` No contract exists at this address on ${chain.name}. It may be from another network.`;
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"Wrong network or invalid contract."+suffix};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    let totalSupplyRaw, balanceRaw, decimalsRaw, symbolRaw="", nameRaw="";
+    try{
+      [totalSupplyRaw,balanceRaw,decimalsRaw,symbolRaw,nameRaw]=await Promise.all([
+        ethCall(chain,address,"0x18160ddd"),
+        ethCall(chain,address,"0x70a082310000000000000000000000000000000000000000000000000000000000000000"),
+        ethCall(chain,address,"0x313ce567"),
+        ethCall(chain,address,"0x95d89b41").catch(()=> "0x"),
+        ethCall(chain,address,"0x06fdde03").catch(()=> "0x")
+      ]);
+    }catch(e){
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"A contract exists here, but it did not respond like a compatible ERC-20 token."};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    if(!totalSupplyRaw||totalSupplyRaw==="0x"||!balanceRaw||balanceRaw==="0x"||!decimalsRaw||decimalsRaw==="0x"){
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"Contract found, but required ERC-20 functions could not be verified."};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    let decimals;
+    try{decimals=Number(BigInt(decimalsRaw));}catch(_){decimals=NaN}
+    if(!Number.isFinite(decimals)||decimals<0||decimals>255){
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"Contract found, but token decimals returned an invalid value."};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    const symbol=decodeAbiString(symbolRaw);
+    const name=decodeAbiString(nameRaw);
+    state.customReward={
+      status:"good",
+      address,
+      chainKey,
+      meta:{name,symbol,decimals},
+      message:`Verified on ${chain.name}. This address passed the basic ERC-20 compatibility checks.`
+    };
+    renderRewardValidation();renderPreview();return true;
+  }catch(e){
+    state.customReward={status:"bad",address,chainKey,meta:null,message:"Could not verify this token on "+chain.name+": "+(e.message||e)};
+    renderRewardValidation();renderPreview();return false;
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="Check token";}
+  }
+}
+function wrappedRewardName(){
+  const key=$("chain").value;
+  if(key==="bscTestnet")return "WBNB";
+  if(key==="polygonAmoy")return "WPOL";
+  return "WETH";
+}
+function rewardAssetLabel(){
+  if(state.rewardAsset==="usdt")return "USDT";
+  if(state.rewardAsset==="usdc")return "USDC";
+  if(state.rewardAsset==="wrapped")return wrappedRewardName();
+  return "Custom Token";
+}
+function updateRewardUI(){
+  const wrapped=wrappedRewardName();
+  const wrappedName=$("wrappedAssetName");
+  if(wrappedName)wrappedName.textContent=wrapped;
+
+  document.querySelectorAll(".reward-asset").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.reward===state.rewardAsset);
+  });
+
+  const custom=$("customRewardField");
+  if(custom)custom.classList.toggle("hidden",state.rewardAsset!=="custom");
+  if(state.rewardAsset!=="custom" && state.customReward.status!=="idle"){
+    state.customReward={status:"idle",address:"",chainKey:"",meta:null,message:""};
+  }
+  renderRewardValidation();
+
+  const explain=$("rewardExplain");
+  if(explain){
+    const messages={
+      usdt:"Holders receive rewards in USDT generated from the configured reward fee.",
+      usdc:"Holders receive rewards in USDC generated from the configured reward fee.",
+      wrapped:`Holders receive rewards in ${wrapped}, the wrapped native asset for the selected network.`,
+      custom:"Holders receive rewards in the custom ERC-20 token contract supplied below."
+    };
+    explain.textContent=messages[state.rewardAsset];
+  }
+}
+function updateFeeModeUI(){
+  const label=$("holderFeeLabel");
+  const help=$("holderFeeHelp");
+  const title=$("feeSectionTitle");
+  const sub=$("feeSectionSub");
+  if(state.type==="liquidity"){
+    if(label)label.textContent="Holder Reflection (%)";
+    if(help)help.textContent="Distributed to eligible holders in the token itself.";
+    if(title)title.textContent="Liquidity fee rules";
+    if(sub)sub.textContent="Plan reflection, automatic liquidity and creator allocation.";
+  }else if(state.type==="reward"){
+    if(label)label.textContent="Reward Distribution (%)";
+    if(help)help.textContent="Used to generate the selected reward asset for eligible holders.";
+    if(title)title.textContent="Reward fee rules";
+    if(sub)sub.textContent="Choose the reward asset and how transaction fees are allocated.";
+  }
+  updateRewardUI();
+}
+function updateChain(){
+  const c=selectedChain();
+  if(state.rewardAsset==="custom" && state.customReward.status!=="idle"){
+    state.customReward={status:"idle",address:"",chainKey:"",meta:null,message:"Network changed. Check the custom reward token again on "+c.name+"."};
+  }
+  $("nativeCoinInput").value=c.native;
+  const idText=c.family==="evm"?`Chain ID ${c.chainIdDec}`:"SPL Token architecture";
+  const availability=c.deploy?"Standard deploy enabled":(c.family==="solana"?"Coming soon":"Coming next");
+  $("networkHint").innerHTML=`<span class="live-dot"></span><b>${c.name}</b><span>•</span><span>${idText}</span><span>•</span><span>${availability}</span>`;
+  document.querySelectorAll(".network-card").forEach(x=>x.classList.toggle("active",x.dataset.chain===$("chain").value));
+  updateRewardUI();
+  renderPreview();
+}
+function setType(type){
+  state.type=type;
+  document.querySelectorAll(".type").forEach(x=>x.classList.toggle("active",x.dataset.type===type));
+  $("feeFields").classList.toggle("hidden",type==="standard");
+  $("rewardFields").classList.toggle("hidden",type!=="reward");
+  updateFeeModeUI();
+  const labels={standard:"Deploy Standard Test Token",liquidity:"Liquidity mode — planner only",reward:"Reward mode — planner only"};
+  $("deployBtn").textContent=labels[type];
+  renderPreview();
+}
+function validateBasic(){const issues=[];const name=$("name").value.trim(),symbol=$("symbol").value.trim(),supply=$("supply").value.trim();if(!name)issues.push("Token name is empty.");if(!symbol)issues.push("Symbol is empty.");if(!/^[A-Za-z0-9_$.-]{1,10}$/.test(symbol))issues.push("Symbol: use 1-10 simple characters.");if(!/^\d+$/.test(supply)||BigInt(supply)<1n)issues.push("Supply must be a whole number above 0.");if(/^\d+$/.test(supply)&&BigInt(supply)>1000000000000000000n)issues.push("Supply is too large for this beta.");return issues}
+function renderPreview(){
+  feeStatus();
+  const c=selectedChain();
+  const typeNames={standard:"Standard Token",liquidity:"Liquidity Generator",reward:"Reward Token"};
+  const name=$("name").value||"—", symbol=$("symbol").value||"—", supply=$("supply").value||"—";
+  const shortOwner=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Not connected";
+  let rows=[
+    ["Network",`<span class="preview-network"><span class="mini-chain-dot ${$("chain").value}"></span>${c.name}</span>`],
+    [c.family==="evm"?"Chain ID":"Token program",c.family==="evm"?c.chainIdDec:"SPL Token (Coming soon)"],
+    ["Contract type",typeNames[state.type]],
+    ["Token name",name],
+    ["Symbol",symbol.toUpperCase()],
+    ["Total supply",supply],
+    ["Decimals","18"],
+    ["Owner",shortOwner]
+  ];
+  if(state.type==="standard"){
+    rows.push(["Mintable","No"],["Token tax","0%"],["Admin controls","No"]);
+  }else{
+    if(state.type==="liquidity"){
+      rows.push(["Holder Reflection",n("holderFee")+"%"],["Auto liquidity",n("lpFee")+"%"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
+    }else{
+      rows.push(["Reward Distribution",n("holderFee")+"%"],["Reward asset",rewardAssetLabel()],["Auto liquidity",n("lpFee")+"%"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
+      if(state.rewardAsset==="custom"){
+        const customAddress=$("rewardToken").value.trim();
+        rows.push(["Custom reward contract",customAddress||"Not entered"]);
+        const validationLabel=state.customReward.status==="good"
+          ?"✓ Verified on "+c.name
+          :state.customReward.status==="checking"
+          ?"Checking…"
+          :state.customReward.status==="bad"
+          ?"✕ Rejected"
+          :"Not verified";
+        rows.push(["Reward validation",validationLabel]);
+      }
+    }
+  }
+  if(state.lastContract) rows.push(["Last contract",`<span class="contract-value">${state.lastContract.slice(0,8)}…${state.lastContract.slice(-6)}</span>`]);
+  $("preview").innerHTML=rows.map(([k,v])=>`<div class="preview-row"><span>${k}</span><strong>${v}</strong></div>`).join("");
+} 
+
+async function connectWallet(){
+  const c=selectedChain();
+  if(c.family!=="evm"){setStatus("Solana wallet support is Coming soon. The current Token Creator uses an EVM wallet for Ethereum, Base and Robinhood Chain test deployments.","warn");return}
+  if(!window.ethereum){setStatus("EVM wallet provider not detected. Open the hosted ANGRY Launch page inside MetaMask or another compatible EVM wallet browser.","warn");return}
+  try{const accounts=await ethereum.request({method:"eth_requestAccounts"});state.account=accounts[0];$("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("projectWallet").value=state.account;renderPreview();setStatus("EVM wallet connected. Switch to "+c.name+" before deployment.","good")}catch(e){setStatus("Wallet connection cancelled: "+(e.message||e),"bad")}
+}
+
+async function ensureNetwork(){
+  const c=selectedChain();
+  if(c.family!=="evm")throw new Error("Solana needs a separate Solana wallet + SPL Token deployment path.");
+  if(!window.ethereum)throw new Error("EVM wallet provider not detected.");
+  try{await ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:c.chainId}]});return true}
+  catch(e){
+    if(e.code===4902 || String(e.message||"").toLowerCase().includes("unrecognized")){
+      await ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:c.chainId,chainName:c.name,nativeCurrency:{name:c.nativeSymbol||c.native,symbol:c.nativeSymbol||c.native,decimals:18},rpcUrls:[c.rpc],blockExplorerUrls:[c.explorer]}]});return true
+    }
+    throw e;
+  }
+}
+
+// Precompiled Consensys-style EIP20 reference creation bytecode (Solidity 0.4.21).
+// Constructor: (uint256 initialAmount, string tokenName, uint8 decimals, string tokenSymbol)
+// This beta intentionally has no owner/admin function and no mint function.
+const EIP20_CREATION_BYTECODE = "0x6060604052341561000f57600080fd5b604051610dd1380380610dd18339810160405280805190602001909190805182019190602001805190602001909190805182019190505083600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508360008190555082600390805190602001906100a79291906100e3565b5081600460006101000a81548160ff021916908360ff16021790555080600590805190602001906100d99291906100e3565b5050505050610188565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061012457805160ff1916838001178555610152565b82800160010185558215610152579182015b82811115610151578251825591602001919060010190610136565b5b50905061015f9190610163565b5090565b61018591905b80821115610181576000816000905550600101610169565b5090565b90565b610c3a806101976000396000f3006060604052600436106100af576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806306fdde03146100b4578063095ea7b31461014257806318160ddd1461019c57806323b872dd146101c557806327e235e31461023e578063313ce5671461028b5780635c658165146102ba57806370a082311461032657806395d89b4114610373578063a9059cbb14610401578063dd62ed3e1461045b575b600080fd5b34156100bf57600080fd5b6100c76104c7565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156101075780820151818401526020810190506100ec565b50505050905090810190601f1680156101345780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561014d57600080fd5b610182600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610565565b604051808215151515815260200191505060405180910390f35b34156101a757600080fd5b6101af610657565b6040518082815260200191505060405180910390f35b34156101d057600080fd5b610224600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803590602001909190505061065d565b604051808215151515815260200191505060405180910390f35b341561024957600080fd5b610275600480803573ffffffffffffffffffffffffffffffffffffffff169060200190919050506108f7565b6040518082815260200191505060405180910390f35b341561029657600080fd5b61029e61090f565b604051808260ff1660ff16815260200191505060405180910390f35b34156102c557600080fd5b610310600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610922565b6040518082815260200191505060405180910390f35b341561033157600080fd5b61035d600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610947565b6040518082815260200191505060405180910390f35b341561037e57600080fd5b610386610990565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156103c65780820151818401526020810190506103ab565b50505050905090810190601f1680156103f35780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561040c57600080fd5b610441600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610a2e565b604051808215151515815260200191505060405180910390f35b341561046657600080fd5b6104b1600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610b87565b6040518082815260200191505060405180910390f35b60038054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020018280546001816001161561010002031660029004801561055d5780601f106105325761010080835404028352916020019161055d565b820191906000526020600020905b81548152906001019060200180831161054057829003601f168201915b505050505081565b600081600260003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925846040518082815260200191505060405180910390a36001905092915050565b60005481565b600080600260008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905082600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020541015801561072e5750828110155b151561073957600080fd5b82600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254019250508190555082600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8110156108865782600260008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055505b8373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef856040518082815260200191505060405180910390a360019150509392505050565b60016020528060005260406000206000915090505481565b600460009054906101000a900460ff1681565b6002602052816000526040600020602052806000526040600020600091509150505481565b6000600160008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050919050565b60058054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610a265780601f106109fb57610100808354040283529160200191610a26565b820191906000526020600020905b815481529060010190602001808311610a0957829003601f168201915b505050505081565b600081600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205410151515610a7e57600080fd5b81600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254039250508190555081600160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef846040518082815260200191505060405180910390a36001905092915050565b6000600260008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050929150505600a165627a7a72305820bc008488cf4a9a65094e07ebf8bdcbd666557ad5f822dc59f9ed5328fc2cb1cc0029";
+
+function wordHex(value){
+  let h=BigInt(value).toString(16);
+  if(h.length>64)throw new Error("Value is too large for uint256.");
+  return h.padStart(64,"0");
+}
+function utf8Hex(value){
+  return Array.from(new TextEncoder().encode(String(value)),b=>b.toString(16).padStart(2,"0")).join("");
+}
+function encodeDynamicString(value){
+  const h=utf8Hex(value), byteLen=h.length/2;
+  const padded=h.padEnd(Math.ceil(h.length/64)*64,"0");
+  return wordHex(byteLen)+padded;
+}
+function encodeEIP20Constructor(initialAmount,name,decimals,symbol){
+  const nameTail=encodeDynamicString(name);
+  const symbolTail=encodeDynamicString(symbol);
+  const headBytes=32*4;
+  const symbolOffset=headBytes+(nameTail.length/2);
+  return wordHex(initialAmount)+wordHex(headBytes)+wordHex(decimals)+wordHex(symbolOffset)+nameTail+symbolTail;
+}
+function buildDeploymentData(){
+  const humanSupply=BigInt($("supply").value.trim());
+  const initialAmount=humanSupply*(10n**18n);
+  const args=encodeEIP20Constructor(initialAmount,$("name").value.trim(),18,$("symbol").value.trim().toUpperCase());
+  return EIP20_CREATION_BYTECODE+args;
+}
+
+async function waitReceipt(hash){
+  for(let i=0;i<90;i++){
+    const r=await ethereum.request({method:"eth_getTransactionReceipt",params:[hash]});
+    if(r)return r;
+    await new Promise(res=>setTimeout(res,2500));
+  }
+  throw new Error("Transaction was sent but the receipt is taking too long. Check the selected network explorer with the transaction hash.");
+}
+
+async function deployToken(){
+  const issues=validateBasic();if(issues.length){setStatus(issues.join("<br>"),"bad");return}
+  if(state.type!=="standard"){setStatus("Real deployment in v0.6.3 is enabled only for Standard Token. Liquidity/Reward are still planner modes.","warn");return}
+
+  const c=selectedChain();
+  if(c.family!=="evm"){
+    setStatus("Solana Standard Token deployment is Coming soon. Solana uses SPL Token rather than the EVM ERC-20 bytecode used by this build.","warn");
+    return;
+  }
+  if(!c.deploy){
+    setStatus(c.name+" is visible for interface testing but Standard deployment is not enabled there yet.","warn");
+    return;
+  }
+
+  if(!state.account){await connectWallet();if(!state.account)return}
+  const btn=$("deployBtn");btn.disabled=true;
+  try{
+    await ensureNetwork();
+    const chainId=await ethereum.request({method:"eth_chainId"});
+    if(chainId.toLowerCase()!==c.chainId.toLowerCase())throw new Error("Wallet is not on "+c.name+".");
+    const data=buildDeploymentData();
+    setStatus("Preparing Standard token deployment and estimating gas on "+c.name+"…","warn");
+    let gas;
+    try{gas=await ethereum.request({method:"eth_estimateGas",params:[{from:state.account,data}]})}catch(e){throw new Error("Gas estimate failed before approval: "+(e.message||e))}
+    const gasDec=parseInt(gas,16);
+    const paddedGas="0x"+Math.ceil(gasDec*1.20).toString(16);
+    setStatus(`Ready to deploy. Estimated gas: ${gasDec.toLocaleString()} units. Your wallet will now ask you to approve a ${c.name} TESTNET transaction.`,"warn");
+    const txHash=await ethereum.request({method:"eth_sendTransaction",params:[{from:state.account,data,gas:paddedGas}]});
+    setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
+    const receipt=await waitReceipt(txHash);
+    if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
+    state.lastContract=receipt.contractAddress;renderPreview();
+    setStatus(`✅ Test token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
+  }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
+  finally{btn.disabled=false}
+}
+
+function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
+function downloadConfig(){const blob=new Blob([JSON.stringify(makeConfig(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${$("symbol").value||"token"}-angry-launch-testnet.json`;a.click();URL.revokeObjectURL(a.href)}
+function copyPlan(){navigator.clipboard?.writeText($("preview").textContent).then(()=>setStatus("Deployment summary copied.","good"))}
+
+document.querySelectorAll(".network-card").forEach(card=>card.addEventListener("click",()=>{
+  const key=card.dataset.chain;
+  const next=CHAINS[key];
+  if(next?.family==="solana"){
+    setStatus("Solana Devnet has been added to the ANGRY Launch network roadmap, but it is not active yet. A professional Solana token creator needs SPL Token instructions and a Solana wallet connector, so it is not routed through the current ERC-20/MetaMask deployment code.","warn");
+    return;
+  }
+  $("chain").value=key;
+  updateChain();
+}));
+document.querySelectorAll(".reward-asset").forEach(btn=>btn.addEventListener("click",()=>{
+  state.rewardAsset=btn.dataset.reward;
+  if(state.rewardAsset==="custom"){
+    state.customReward={status:"idle",address:"",chainKey:"",meta:null,message:"Enter a custom ERC-20 contract address, then tap Check token."};
+  }
+  updateRewardUI();
+  renderPreview();
+}));
+$("validateRewardBtn")?.addEventListener("click",validateCustomRewardToken);
+$("rewardToken")?.addEventListener("blur",()=>{
+  if(state.rewardAsset==="custom" && isEvmAddress($("rewardToken").value.trim())) validateCustomRewardToken();
+});
+$("walletBtn").addEventListener("click",connectWallet);$("switchBtn").addEventListener("click",async()=>{try{await ensureNetwork();setStatus("Wallet switched to "+selectedChain().name+".","good")}catch(e){setStatus("Network switch failed: "+(e.message||e),"bad")}});$("deployBtn").addEventListener("click",deployToken);$("downloadBtn").addEventListener("click",downloadConfig);$("copyBtn").addEventListener("click",copyPlan);$("chain").addEventListener("change",updateChain);document.querySelectorAll(".type").forEach(x=>x.addEventListener("click",()=>setType(x.dataset.type)));document.addEventListener("input",renderPreview);
+if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect Wallet";$("projectWallet").value=state.account||"";renderPreview()});ethereum.on?.("chainChanged",()=>setStatus("Wallet network changed.","warn"))}
+updateChain();setType("standard");renderPreview();
+</script>
+</body>
+</html>
