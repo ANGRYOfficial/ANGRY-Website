@@ -266,6 +266,30 @@ input[readonly]{opacity:.72;cursor:not-allowed}
   text-transform:uppercase;
 }
 
+
+.live-lab{margin-top:14px;border:1px solid rgba(255,84,28,.34);border-radius:14px;background:linear-gradient(180deg,rgba(255,84,28,.055),rgba(8,10,12,.96));overflow:hidden}
+.live-lab-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.075)}
+.live-lab-head b{display:block;font-size:11px;color:#f4f6f7}.live-lab-head small{display:block;margin-top:4px;color:#8f979e;font-size:8.5px;line-height:1.45}
+.live-pill{flex:0 0 auto;border:1px solid rgba(75,211,116,.26);background:rgba(75,211,116,.055);color:#86dfa0;border-radius:999px;padding:5px 7px;font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.live-lab-body{padding:13px 14px}
+.live-stage{border:1px solid #252b30;border-radius:11px;background:#090b0d;padding:11px;margin-top:9px}
+.live-stage:first-child{margin-top:0}
+.live-stage-title{display:flex;align-items:center;gap:8px;margin-bottom:8px}.live-stage-num{width:23px;height:23px;display:grid;place-items:center;border-radius:7px;border:1px solid #30363c;background:#12161a;color:#ff8458;font-size:8px;font-weight:900}
+.live-stage-title b{font-size:9.5px}.live-stage p{margin:0 0 8px;color:#818a91;font-size:8.5px;line-height:1.5}
+.live-input{width:100%;min-height:40px;border:1px solid #2b3137;border-radius:9px;background:#080a0c;color:#eef1f3;padding:0 10px;font:inherit;font-size:9px;outline:none}
+.live-input:focus{border-color:rgba(255,84,28,.55)}
+.live-input[readonly]{color:#9ca4aa;background:#07090a}
+.live-row{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}
+.live-action{min-height:40px;border-radius:9px;border:1px solid #333a40;background:#111519;color:#e9edef;padding:0 12px;font-size:8.5px;font-weight:900;cursor:pointer}
+.live-action.primary{border-color:#ff541c;background:linear-gradient(180deg,#ff6425,#ff4d12);color:white}
+.live-action:disabled{opacity:.45;cursor:not-allowed}
+.live-note{margin-top:8px;border-left:2px solid #ff6a31;padding-left:8px;color:#817f7d;font-size:7.8px;line-height:1.5}
+.live-result{margin-top:9px;border:1px solid rgba(75,211,116,.23);background:rgba(75,211,116,.035);border-radius:10px;padding:10px;color:#a9cdb3;font-size:8.5px;line-height:1.55}
+.live-result a{color:#8edda5;text-decoration:underline;font-weight:800}
+.live-hidden{display:none!important}
+.live-progress{margin-top:8px;color:#c29b72;font-size:8px;line-height:1.5}
+@media(max-width:620px){.live-row{grid-template-columns:1fr}.live-action{width:100%}}
+
 </style>
 <link rel="stylesheet" href="../assets/ecosystem.css">
 </head>
@@ -285,7 +309,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
   <header class="topbar">
     <div class="brand">
       <div class="mark">😡</div>
-      <div class="brand-name">ANGRY <span style="color:#ff7f54">NFT Creator</span><span class="beta">Beta v0.6.4</span></div>
+      <div class="brand-name">ANGRY <span style="color:#ff7f54">NFT Creator</span><span class="beta">Beta v0.7.0</span></div>
     </div>
     <button class="wallet" id="walletBtn">Connect wallet</button>
   </header>
@@ -294,7 +318,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
     <div>
       <div class="eyebrow">No-code NFT creation</div>
       <h1>Create NFTs without writing a smart contract.</h1>
-      <p>Choose a network, upload artwork, configure collection rules and prepare deployment from one interface. This guided beta helps beginners choose the right NFT setup before live deployment is enabled.</p>
+      <p>Choose a network, upload artwork and configure the NFT from one interface. The 1 of 1 path now includes a real Ethereum Sepolia test-deployment lab; Collection and Multiple Editions remain configuration-only while testing continues.</p>
     </div>
     <div class="env">TESTNET BETA<br>No mainnet assets required</div>
   </section>
@@ -417,7 +441,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
     </div><div class="bulk-feedback hidden" id="bulkFeedback"></div>
         </div>
 
-        <div class="storage-note">The current beta previews artwork locally. Before live minting, artwork and metadata will be uploaded to decentralized storage such as IPFS/Arweave so the NFT does not depend on the ANGRY website staying online.</div>
+        <div class="storage-note">Artwork still previews locally first. For the 1 of 1 Ethereum Sepolia test path, a creator can upload artwork + metadata to IPFS using their own temporary Pinata JWT, or paste an existing metadata URI. Production ANGRY storage will later move behind a secure server-side service.</div>
 
         <div class="grid2" style="margin-top:12px">
           <div class="field">
@@ -933,8 +957,51 @@ input[readonly]{opacity:.72;cursor:not-allowed}
           <div class="meta" id="metadataPreview"></div>
         </details>
         <button class="btn primary" id="prepareBtn">Review & prepare configuration</button>
+
         <button class="btn secondary" id="downloadBtn">Download metadata JSON</button>
-        <div class="status" id="status">Ready. This beta builds the NFT configuration and metadata. Live ERC-721/ERC-1155 deployment comes after decentralized storage is connected.</div>
+
+        <div class="live-lab" id="liveLab">
+          <div class="live-lab-head">
+            <div>
+              <b>Ethereum Sepolia · Testnet Deployment Lab</b>
+              <small>Real 1 of 1 test deployment. This lab is deliberately limited while the contract and storage flow are tested end to end.</small>
+            </div>
+            <span class="live-pill" id="liveLabPill">1 of 1 only</span>
+          </div>
+          <div class="live-lab-body">
+            <div id="liveUnsupported" class="live-stage live-hidden">
+              <div class="live-stage-title"><span class="live-stage-num">!</span><b>Not enabled for this setup</b></div>
+              <p id="liveUnsupportedText">Select 1 of 1 NFT and Ethereum Sepolia to use real test deployment.</p>
+            </div>
+
+            <div id="liveSepoliaFlow">
+              <div class="live-stage">
+                <div class="live-stage-title"><span class="live-stage-num">1</span><b>Permanent metadata</b></div>
+                <p>Recommended for this developer test: upload the selected artwork and generated metadata to IPFS with your own limited Pinata JWT. The JWT is kept only in this browser field and is cleared after a successful upload.</p>
+                <input class="live-input" id="pinataJwt" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your temporary Pinata JWT (developer test only)">
+                <button class="live-action" id="uploadIpfsBtn" type="button" style="margin-top:7px;width:100%">Upload artwork + metadata to IPFS</button>
+                <div class="live-note">Do not put an ANGRY production/shared API key in public GitHub HTML. This field is only for a creator's own temporary test credential. The production path should use a server-side secret.</div>
+              </div>
+
+              <div class="live-stage">
+                <div class="live-stage-title"><span class="live-stage-num">2</span><b>Metadata URI</b></div>
+                <p>After IPFS upload this fills automatically. Advanced testers can instead paste an existing <b>ipfs://</b> or HTTPS metadata JSON URI.</p>
+                <input class="live-input" id="liveMetadataUri" spellcheck="false" placeholder="ipfs://...">
+                <div class="live-progress" id="ipfsProgress">No IPFS metadata uploaded yet.</div>
+              </div>
+
+              <div class="live-stage">
+                <div class="live-stage-title"><span class="live-stage-num">3</span><b>Deploy fixed-supply ERC-721</b></div>
+                <p>Deploys a new ERC-721 contract for this 1 of 1 NFT and mints Token ID #1 directly to the recipient wallet. The contract has no extra mint function after deployment. Royalty information is exposed through ERC-2981.</p>
+                <button class="live-action primary" id="deployOneOfOneBtn" type="button" style="width:100%">Deploy 1 of 1 on Ethereum Sepolia</button>
+                <div class="live-note">Direct deployment does not charge the form's Mint Price. Mint Price is a future public-sale setting. Sepolia ETH is test ETH and has no real monetary value.</div>
+                <div class="live-progress" id="deployProgress">Compiler and wallet transaction have not started.</div>
+                <div class="live-result live-hidden" id="deployResult"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="status" id="status">Ready. 1 of 1 Ethereum Sepolia test deployment is available in the Testnet Deployment Lab below. Collection and Multiple Editions are still configuration-only.</div>
       </div>
     </aside>
   </main>
@@ -951,7 +1018,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
   </div>
 
   <footer class="footer">
-    <span>ANGRY NFT Creator Beta v0.6.4 · No-code NFT tooling</span>
+    <span>ANGRY NFT Creator Beta v0.7.0 · No-code NFT tooling</span>
     <span>Testnet planning · Separate page, same ANGRY ecosystem</span>
   </footer>
 </div>
@@ -995,7 +1062,7 @@ const CHAINS={
     explorer:"https://amoy.polygonscan.com",standard:"ERC-721 / ERC-1155"
   }
 };
-const state={chain:"sepolia",purpose:"artwork",type:"single",account:null,imageFile:null,imageUrl:null,collectionFiles:[],collectionUrls:[]};
+const state={chain:"sepolia",purpose:"artwork",type:"single",account:null,imageFile:null,imageUrl:null,collectionFiles:[],collectionUrls:[],liveImageUri:"",liveMetadataUri:"",lastNftContract:""};
 
 function currentChain(){return CHAINS[state.chain]}
 function setStatus(text,kind=""){const s=$("status");s.className="status"+(kind?" "+kind:"");s.textContent=text}
@@ -1697,6 +1764,186 @@ function updateTicketSaleControls(){
   $("ticketSaleEndAtField").classList.toggle("hidden",$("ticketSaleEnd").value!=="custom");
 }
 
+
+function updateLiveLab(){
+  const enabled=state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single";
+  $("liveSepoliaFlow")?.classList.toggle("live-hidden",!enabled);
+  $("liveUnsupported")?.classList.toggle("live-hidden",enabled);
+  if(!enabled && $("liveUnsupportedText")){
+    $("liveUnsupportedText").textContent=state.purpose!=="artwork"
+      ?"Real deployment is currently limited to 1 of 1 NFT while the first contract path is tested."
+      : state.chain!=="sepolia"
+        ?"Real 1 of 1 deployment is currently enabled only on Ethereum Sepolia."
+        :"This configuration is not enabled for live test deployment yet.";
+  }
+  if($("liveLabPill"))$("liveLabPill").textContent=enabled?"Sepolia real test":"Limited beta";
+}
+
+function buildLiveMetadata(imageUri){
+  const base=metadata();
+  return {
+    name:$("nftName").value.trim()||"Untitled NFT",
+    description:$("description").value.trim(),
+    image:imageUri,
+    attributes:[
+      {trait_type:"Created with",value:"ANGRY NFT Creator"},
+      {trait_type:"NFT type",value:"1 of 1"}
+    ],
+    angry_creator:{
+      network:"Ethereum Sepolia",
+      structure:"ERC-721",
+      supply:1,
+      creator_wallet:$("recipient").value.trim()||state.account||"",
+      royalty_percent:Number($("royalty").value||0)
+    },
+    source_configuration:base
+  };
+}
+
+async function uploadOneOfOneToIpfs(){
+  if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
+    setStatus("IPFS test upload is currently available only for 1 of 1 on Ethereum Sepolia.","warn");return;
+  }
+  if(!state.imageFile){setStatus("Upload the 1 of 1 artwork first.","warn");return}
+  if(!$("rightsCheck").checked){setStatus("Confirm that you own or have permission to use the artwork first.","warn");return}
+  const jwt=$("pinataJwt").value.trim();
+  if(!jwt){setStatus("Paste your own temporary Pinata JWT for this developer test.","warn");return}
+
+  const btn=$("uploadIpfsBtn");
+  btn.disabled=true;
+  try{
+    $("ipfsProgress").textContent="Uploading artwork to IPFS…";
+    const fd=new FormData();
+    fd.append("file",state.imageFile,state.imageFile.name||"nft-artwork");
+    fd.append("pinataMetadata",JSON.stringify({name:(state.imageFile.name||"nft-artwork")}));
+    fd.append("pinataOptions",JSON.stringify({cidVersion:1}));
+
+    const artRes=await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+jwt},
+      body:fd
+    });
+    const artData=await artRes.json().catch(()=>({}));
+    if(!artRes.ok||!artData.IpfsHash)throw new Error(artData.error?.details||artData.error||artData.message||("Artwork upload failed ("+artRes.status+")"));
+    const imageUri="ipfs://"+artData.IpfsHash;
+    state.liveImageUri=imageUri;
+
+    $("ipfsProgress").textContent="Artwork pinned. Uploading metadata JSON…";
+    const metaBody={
+      pinataOptions:{cidVersion:1},
+      pinataMetadata:{name:(($("nftName").value.trim()||"ANGRY-NFT").replace(/[^a-z0-9._-]+/gi,"-"))+"-metadata.json"},
+      pinataContent:buildLiveMetadata(imageUri)
+    };
+    const metaRes=await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+jwt,"Content-Type":"application/json"},
+      body:JSON.stringify(metaBody)
+    });
+    const metaData=await metaRes.json().catch(()=>({}));
+    if(!metaRes.ok||!metaData.IpfsHash)throw new Error(metaData.error?.details||metaData.error||metaData.message||("Metadata upload failed ("+metaRes.status+")"));
+
+    state.liveMetadataUri="ipfs://"+metaData.IpfsHash;
+    $("liveMetadataUri").value=state.liveMetadataUri;
+    $("pinataJwt").value="";
+    $("ipfsProgress").textContent="IPFS ready · artwork "+imageUri+" · metadata "+state.liveMetadataUri;
+    setStatus("Artwork and metadata uploaded to IPFS successfully. The temporary JWT field was cleared.","good");
+  }catch(e){
+    $("ipfsProgress").textContent="IPFS upload stopped: "+(e.message||e);
+    setStatus("IPFS upload failed: "+(e.message||e),"warn");
+  }finally{btn.disabled=false}
+}
+
+let compilerWorker=null;
+let compilerRequest=0;
+const compilerPending=new Map();
+
+function getCompilerWorker(){
+  if(compilerWorker)return compilerWorker;
+  compilerWorker=new Worker("./solc-worker.js",{type:"module"});
+  compilerWorker.onmessage=(event)=>{
+    const data=event.data||{};
+    const pending=compilerPending.get(data.id);
+    if(!pending)return;
+    compilerPending.delete(data.id);
+    data.ok?pending.resolve(data):pending.reject(new Error(data.error||"Solidity compilation failed."));
+  };
+  compilerWorker.onerror=(event)=>{
+    for(const [,pending] of compilerPending)pending.reject(new Error(event.message||"Solidity compiler worker failed."));
+    compilerPending.clear();
+  };
+  return compilerWorker;
+}
+
+function compileOneOfOne(){
+  return new Promise((resolve,reject)=>{
+    const id=++compilerRequest;
+    compilerPending.set(id,{resolve,reject});
+    getCompilerWorker().postMessage({id,action:"compile"});
+  });
+}
+
+async function deployOneOfOneSepolia(){
+  if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
+    setStatus("Real deployment is currently limited to 1 of 1 on Ethereum Sepolia.","warn");return;
+  }
+  const name=$("nftName").value.trim(),collection=$("collectionName").value.trim(),symbol=$("symbol").value.trim();
+  const recipient=$("recipient").value.trim()||state.account||"";
+  const metadataUri=$("liveMetadataUri").value.trim();
+  if(!name||!collection||!symbol){setStatus("NFT name, collection name and symbol are required.","warn");return}
+  if(!/^0x[a-fA-F0-9]{40}$/.test(recipient)){setStatus("Connect a valid EVM wallet before deployment.","warn");return}
+  if(!metadataUri){setStatus("Upload metadata to IPFS or paste an existing metadata URI first.","warn");return}
+  if(!/^(ipfs:\/\/|https:\/\/)/i.test(metadataUri)){setStatus("Metadata URI must start with ipfs:// or https://.","warn");return}
+  if(!$("rightsCheck").checked){setStatus("Confirm artwork ownership/permission before deployment.","warn");return}
+  if(!window.ethereum){setStatus("Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.","warn");return}
+
+  const btn=$("deployOneOfOneBtn");
+  btn.disabled=true;
+  $("deployResult").classList.add("live-hidden");
+  try{
+    if(!state.account){await connectWallet();if(!state.account)throw new Error("Wallet is not connected.");}
+    await switchChain();
+    const actual=String(await ethereum.request({method:"eth_chainId"})).toLowerCase();
+    if(actual!=="0xaa36a7")throw new Error("Wallet is not on Ethereum Sepolia.");
+
+    $("deployProgress").textContent="Loading Solidity compiler and compiling the fixed-supply ERC-721 contract…";
+    const compiled=await compileOneOfOne();
+
+    $("deployProgress").textContent="Contract compiled. Preparing wallet deployment…";
+    const ethers=await import("https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm");
+    const provider=new ethers.BrowserProvider(window.ethereum);
+    const signer=await provider.getSigner();
+
+    const royaltyPct=Math.max(0,Math.min(10,Number($("royalty").value||0)));
+    const royaltyBps=Math.round(royaltyPct*100);
+    const factory=new ethers.ContractFactory(compiled.abi,compiled.bytecode,signer);
+
+    $("deployProgress").textContent="Wallet approval required. Review the Sepolia transaction before confirming.";
+    const contract=await factory.deploy(
+      collection,
+      symbol,
+      recipient,
+      metadataUri,
+      recipient,
+      royaltyBps
+    );
+    const tx=contract.deploymentTransaction();
+    $("deployProgress").textContent="Transaction sent"+(tx?.hash?" · "+tx.hash:"")+" · waiting for Sepolia confirmation…";
+    await contract.waitForDeployment();
+    const address=await contract.getAddress();
+
+    state.lastNftContract=address;
+    state.liveMetadataUri=metadataUri;
+    const explorer="https://sepolia.etherscan.io/address/"+address;
+    $("deployResult").classList.remove("live-hidden");
+    $("deployResult").innerHTML="<b>1 of 1 test NFT deployed ✅</b><br>Contract: "+address+"<br>Token ID: #1<br>Owner: "+recipient+"<br><a target=\"_blank\" rel=\"noopener\" href=\""+explorer+"\">Open contract on Sepolia explorer</a>";
+    $("deployProgress").textContent="Confirmed on Ethereum Sepolia.";
+    setStatus("1 of 1 NFT deployed successfully on Ethereum Sepolia. Token ID #1 was minted to the recipient wallet.","good");
+  }catch(e){
+    $("deployProgress").textContent="Deployment stopped: "+(e.message||e);
+    setStatus("Sepolia deployment failed: "+(e.message||e),"warn");
+  }finally{btn.disabled=false}
+}
+
 function render(){
   updateTicketAllocation();
   $("previewName").textContent=$("nftName").value||"Untitled NFT";
@@ -1766,6 +2013,7 @@ function render(){
       :"Mint price: <b>"+price+" "+currentChain().native+"</b> per NFT. Royalty: <b>"+royalty+"%</b>.")+extra;
 
   $("prepareBtn").disabled=v.errors.length>0 || !$("rightsCheck").checked;
+  updateLiveLab();
 }
 function loadImage(file){
   if(!file||!isSupportedImageFile(file)){setStatus("Please choose a supported image file.","warn");return}
@@ -1774,7 +2022,7 @@ function loadImage(file){
   state.imageUrl=URL.createObjectURL(file);
   updateArtworkMode();
   render();
-  setStatus("Artwork loaded for local preview. Decentralized upload is not enabled yet.","good");
+  setStatus(state.purpose==="artwork"&&state.chain==="sepolia"?"Artwork loaded. You can now use the Sepolia Testnet Deployment Lab to pin it to IPFS.":"Artwork loaded for local preview.","good");
 }
 function downloadMetadata(){
   const blob=new Blob([JSON.stringify(metadata(),null,2)],{type:"application/json"});
@@ -1961,10 +2209,15 @@ $("prepareBtn").addEventListener("click",()=>{
   if(state.purpose==="tickets"){
     setStatus("Event Ticket configuration prepared successfully. Allocation, sale rules and payout flow are ready for the next testnet contract stage. QR check-in and live deployment are not enabled yet.","good");
   }else{
-    setStatus("Configuration prepared successfully. This beta still stops before IPFS upload and blockchain deployment.","good");
+    setStatus(state.purpose==="artwork"&&state.chain==="sepolia"?"Configuration prepared. Continue in the Ethereum Sepolia Testnet Deployment Lab to upload metadata and deploy the 1 of 1 test NFT.":"Configuration prepared successfully. Live deployment for this setup is not enabled yet.","good");
   }
 });
 $("downloadBtn").addEventListener("click",downloadMetadata);
+$("uploadIpfsBtn")?.addEventListener("click",uploadOneOfOneToIpfs);
+$("deployOneOfOneBtn")?.addEventListener("click",deployOneOfOneSepolia);
+$("liveMetadataUri")?.addEventListener("input",()=>{
+  state.liveMetadataUri=$("liveMetadataUri").value.trim();
+});
 if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";render()})}
 setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 </script>
