@@ -964,7 +964,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
           <div class="live-lab-head">
             <div>
               <b>Ethereum Sepolia · Testnet Deployment Lab</b>
-              <small>Real 1 of 1 test deployment. This lab is deliberately limited while the contract and storage flow are tested end to end.</small>
+              <small>Real 1 of 1 and NFT Collection test deployment. This lab remains limited while the contract and storage flow are tested end to end.</small>
             </div>
             <span class="live-pill" id="liveLabPill">1 of 1 only</span>
           </div>
@@ -1001,7 +1001,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
             </div>
           </div>
         </div>
-        <div class="status" id="status">Ready. 1 of 1 Ethereum Sepolia test deployment is available in the Testnet Deployment Lab below. Collection and Multiple Editions are still configuration-only.</div>
+        <div class="status" id="status">Ready. 1 of 1 and NFT Collection Ethereum Sepolia test deployment is available in the Testnet Deployment Lab. Multiple Editions remains configuration-only.</div>
       </div>
     </aside>
   </main>
@@ -1766,17 +1766,59 @@ function updateTicketSaleControls(){
 
 
 function updateLiveLab(){
-  const enabled=state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single";
+  const isOne=
+    state.chain==="sepolia" &&
+    state.purpose==="artwork" &&
+    state.type==="single";
+
+  const isCollection=
+    state.chain==="sepolia" &&
+    state.purpose==="collection" &&
+    state.type==="collection";
+
+  const enabled=isOne||isCollection;
+
   $("liveSepoliaFlow")?.classList.toggle("live-hidden",!enabled);
   $("liveUnsupported")?.classList.toggle("live-hidden",enabled);
+
   if(!enabled && $("liveUnsupportedText")){
-    $("liveUnsupportedText").textContent=state.purpose!=="artwork"
-      ?"Real deployment is currently limited to 1 of 1 NFT while the first contract path is tested."
-      : state.chain!=="sepolia"
-        ?"Real 1 of 1 deployment is currently enabled only on Ethereum Sepolia."
+    $("liveUnsupportedText").textContent=
+      state.chain!=="sepolia"
+        ?"Real NFT test deployment is currently enabled only on Ethereum Sepolia."
         :"This configuration is not enabled for live test deployment yet.";
   }
-  if($("liveLabPill"))$("liveLabPill").textContent=enabled?"Sepolia real test":"Limited beta";
+
+  if($("liveLabPill")){
+    $("liveLabPill").textContent=
+      isCollection
+        ?"Collection beta"
+        : isOne
+          ?"1 of 1 beta"
+          :"Limited beta";
+  }
+
+  if($("uploadIpfsBtn")){
+    const count=state.collectionFiles?.length||0;
+    $("uploadIpfsBtn").textContent=
+      isCollection
+        ?"Upload "+count+" artwork + metadata to IPFS"
+        :"Upload artwork + metadata to IPFS";
+  }
+
+  if($("deployOneOfOneBtn")){
+    const supply=Number($("supply")?.value||0);
+    $("deployOneOfOneBtn").textContent=
+      isCollection
+        ?"Deploy "+supply+" NFT Collection on Ethereum Sepolia"
+        :"Deploy 1 of 1 on Ethereum Sepolia";
+  }
+
+  if($("liveMetadataUri")){
+    $("liveMetadataUri").placeholder=
+      isCollection
+        ?"Collection metadata will be prepared automatically"
+        :"ipfs://...";
+  }
 }
 
 function buildLiveMetadata(imageUri){
@@ -1800,7 +1842,227 @@ function buildLiveMetadata(imageUri){
   };
 }
 
+
+function buildLiveCollectionMetadata(imageUri,index){
+  const base=metadata();
+  const entered=$("nftName").value.trim()||"Untitled NFT";
+  const cleanBase=entered.replace(/\s*#\d+\s*$/,"").trim()||entered;
+  const supply=Number($("supply").value||0);
+
+  return {
+    name:cleanBase+" #"+index,
+    description:$("description").value.trim(),
+    image:imageUri,
+    attributes:[
+      {trait_type:"Created with",value:"ANGRY NFT Creator"},
+      {trait_type:"NFT type",value:"NFT Collection"},
+      {trait_type:"Token ID",value:index}
+    ],
+    angry_creator:{
+      network:"Ethereum Sepolia",
+      structure:"ERC-721 collection",
+      token_id:index,
+      supply:supply,
+      creator_wallet:$("recipient").value.trim()||state.account||"",
+      royalty_percent:Number($("royalty").value||0)
+    },
+    source_configuration:base
+  };
+}
+
+async function uploadCollectionToIpfs(){
+  if(!(
+    state.chain==="sepolia" &&
+    state.purpose==="collection" &&
+    state.type==="collection"
+  )){
+    setStatus(
+      "Collection IPFS upload is available only for NFT Collection on Ethereum Sepolia.",
+      "warn"
+    );
+    return;
+  }
+
+  const supply=Number($("supply").value||0);
+
+  if(!Number.isInteger(supply)||supply<2){
+    setStatus("Collection supply must be at least 2.","warn");
+    return;
+  }
+
+  if(supply>10){
+    setStatus(
+      "Live Collection beta is currently limited to 10 NFTs. Use Supply 10 for this test.",
+      "warn"
+    );
+    return;
+  }
+
+  if(state.collectionFiles.length!==supply){
+    setStatus(
+      "Upload exactly "+supply+" artwork files before continuing.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!$("rightsCheck").checked){
+    setStatus(
+      "Confirm that you own or have permission to use all collection artwork first.",
+      "warn"
+    );
+    return;
+  }
+
+  const jwt=$("pinataJwt").value.trim();
+
+  if(!jwt){
+    setStatus(
+      "Paste your own temporary Pinata JWT for this developer test.",
+      "warn"
+    );
+    return;
+  }
+
+  const btn=$("uploadIpfsBtn");
+  btn.disabled=true;
+
+  state.liveCollectionImageUris=[];
+  state.liveCollectionMetadataUris=[];
+
+  try{
+    const baseName=(
+      $("collectionName").value.trim()||
+      $("nftName").value.trim()||
+      "ANGRY-Collection"
+    ).replace(/[^a-z0-9._-]+/gi,"-");
+
+    for(let i=0;i<supply;i++){
+      const file=state.collectionFiles[i];
+
+      $("ipfsProgress").textContent=
+        "Uploading artwork "+(i+1)+" of "+supply+" to IPFS…";
+
+      const fd=new FormData();
+      fd.append("file",file,file.name||("collection-"+(i+1)));
+      fd.append(
+        "pinataMetadata",
+        JSON.stringify({
+          name:baseName+"-"+(i+1)+"-artwork"
+        })
+      );
+      fd.append(
+        "pinataOptions",
+        JSON.stringify({cidVersion:1})
+      );
+
+      const artRes=await fetch(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        {
+          method:"POST",
+          headers:{Authorization:"Bearer "+jwt},
+          body:fd
+        }
+      );
+
+      const artData=await artRes.json().catch(()=>({}));
+
+      if(!artRes.ok||!artData.IpfsHash){
+        throw new Error(
+          artData.error?.details||
+          artData.error||
+          artData.message||
+          ("Artwork "+(i+1)+" upload failed ("+artRes.status+")")
+        );
+      }
+
+      const imageUri="ipfs://"+artData.IpfsHash;
+      state.liveCollectionImageUris.push(imageUri);
+
+      $("ipfsProgress").textContent=
+        "Artwork "+(i+1)+" pinned. Uploading metadata "+(i+1)+" of "+supply+"…";
+
+      const metaBody={
+        pinataOptions:{cidVersion:1},
+        pinataMetadata:{
+          name:baseName+"-"+(i+1)+"-metadata.json"
+        },
+        pinataContent:buildLiveCollectionMetadata(
+          imageUri,
+          i+1
+        )
+      };
+
+      const metaRes=await fetch(
+        "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        {
+          method:"POST",
+          headers:{
+            Authorization:"Bearer "+jwt,
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify(metaBody)
+        }
+      );
+
+      const metaData=await metaRes.json().catch(()=>({}));
+
+      if(!metaRes.ok||!metaData.IpfsHash){
+        throw new Error(
+          metaData.error?.details||
+          metaData.error||
+          metaData.message||
+          ("Metadata "+(i+1)+" upload failed ("+metaRes.status+")")
+        );
+      }
+
+      state.liveCollectionMetadataUris.push(
+        "ipfs://"+metaData.IpfsHash
+      );
+    }
+
+    $("pinataJwt").value="";
+
+    if($("liveMetadataUri")){
+      $("liveMetadataUri").value=
+        state.liveCollectionMetadataUris[0]||"";
+    }
+
+    $("ipfsProgress").textContent=
+      "Collection IPFS ready · "+
+      state.liveCollectionMetadataUris.length+
+      " artwork + metadata pairs prepared.";
+
+    setStatus(
+      supply+" collection artwork and metadata files uploaded to IPFS successfully.",
+      "good"
+    );
+
+  }catch(e){
+    state.liveCollectionImageUris=[];
+    state.liveCollectionMetadataUris=[];
+
+    $("ipfsProgress").textContent=
+      "Collection IPFS upload stopped: "+(e.message||e);
+
+    setStatus(
+      "Collection IPFS upload failed: "+(e.message||e),
+      "warn"
+    );
+  }finally{
+    btn.disabled=false;
+  }
+}
+
 async function uploadOneOfOneToIpfs(){
+  if(
+    state.chain==="sepolia" &&
+    state.purpose==="collection" &&
+    state.type==="collection"
+  ){
+    return uploadCollectionToIpfs();
+  }
+
   if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
     setStatus("IPFS test upload is currently available only for 1 of 1 on Ethereum Sepolia.","warn");return;
   }
@@ -1882,7 +2144,222 @@ function compileOneOfOne(){
   });
 }
 
+
+function compileCollection(){
+  return new Promise((resolve,reject)=>{
+    const id=++compilerRequest;
+    compilerPending.set(id,{resolve,reject});
+    getCompilerWorker().postMessage({
+      id,
+      action:"compileCollection"
+    });
+  });
+}
+
+async function deployCollectionSepolia(){
+  if(!(
+    state.chain==="sepolia" &&
+    state.purpose==="collection" &&
+    state.type==="collection"
+  )){
+    setStatus(
+      "Collection deployment is available only on Ethereum Sepolia in this beta.",
+      "warn"
+    );
+    return;
+  }
+
+  const supply=Number($("supply").value||0);
+  const collection=$("collectionName").value.trim();
+  const symbol=$("symbol").value.trim();
+  const recipient=$("recipient").value.trim()||state.account||"";
+
+  if(!collection||!symbol){
+    setStatus(
+      "Collection name and symbol are required.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!/^0x[a-fA-F0-9]{40}$/.test(recipient)){
+    setStatus(
+      "Connect a valid EVM wallet before deployment.",
+      "warn"
+    );
+    return;
+  }
+
+  if(supply<2||supply>10){
+    setStatus(
+      "Live Collection beta currently supports 2 to 10 NFTs.",
+      "warn"
+    );
+    return;
+  }
+
+  if(
+    !Array.isArray(state.liveCollectionMetadataUris) ||
+    state.liveCollectionMetadataUris.length!==supply
+  ){
+    setStatus(
+      "Upload all "+supply+" collection artwork + metadata to IPFS first.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!$("rightsCheck").checked){
+    setStatus(
+      "Confirm artwork ownership/permission before deployment.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!window.ethereum){
+    setStatus(
+      "Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.",
+      "warn"
+    );
+    return;
+  }
+
+  const btn=$("deployOneOfOneBtn");
+  btn.disabled=true;
+  $("deployResult").classList.add("live-hidden");
+
+  try{
+    if(!state.account){
+      await connectWallet();
+
+      if(!state.account){
+        throw new Error("Wallet is not connected.");
+      }
+    }
+
+    await switchChain();
+
+    const actual=String(
+      await ethereum.request({method:"eth_chainId"})
+    ).toLowerCase();
+
+    if(actual!=="0xaa36a7"){
+      throw new Error(
+        "Wallet is not on Ethereum Sepolia."
+      );
+    }
+
+    $("deployProgress").textContent=
+      "Loading Solidity compiler and compiling the fixed-supply ERC-721 Collection contract…";
+
+    const compiled=await compileCollection();
+
+    $("deployProgress").textContent=
+      "Collection contract compiled. Preparing wallet deployment…";
+
+    const ethers=await import(
+      "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm"
+    );
+
+    const provider=
+      new ethers.BrowserProvider(window.ethereum);
+
+    const signer=await provider.getSigner();
+
+    const royaltyPct=Math.max(
+      0,
+      Math.min(
+        10,
+        Number($("royalty").value||0)
+      )
+    );
+
+    const royaltyBps=Math.round(
+      royaltyPct*100
+    );
+
+    const factory=
+      new ethers.ContractFactory(
+        compiled.abi,
+        compiled.bytecode,
+        signer
+      );
+
+    $("deployProgress").textContent=
+      "Wallet approval required. Review the Sepolia Collection deployment before confirming.";
+
+    const contract=await factory.deploy(
+      collection,
+      symbol,
+      recipient,
+      state.liveCollectionMetadataUris,
+      recipient,
+      royaltyBps
+    );
+
+    const tx=contract.deploymentTransaction();
+
+    $("deployProgress").textContent=
+      "Transaction sent"+
+      (tx?.hash?" · "+tx.hash:"")+
+      " · waiting for Sepolia confirmation…";
+
+    await contract.waitForDeployment();
+
+    const address=await contract.getAddress();
+
+    state.lastNftContract=address;
+
+    const explorer=
+      "https://sepolia.etherscan.io/address/"+address;
+
+    $("deployResult").classList.remove(
+      "live-hidden"
+    );
+
+    $("deployResult").innerHTML=
+      "<b>"+supply+" NFT Collection deployed ✅</b>"+
+      "<br>Contract: "+address+
+      "<br>Token IDs: #1–#"+supply+
+      "<br>Owner: "+recipient+
+      "<br><a target=\"_blank\" rel=\"noopener\" href=\""+
+      explorer+
+      "\">Open contract on Sepolia explorer</a>";
+
+    $("deployProgress").textContent=
+      "Collection confirmed on Ethereum Sepolia.";
+
+    setStatus(
+      supply+
+      " NFT Collection deployed successfully on Ethereum Sepolia. Token IDs #1–#"+
+      supply+
+      " were minted to the recipient wallet.",
+      "good"
+    );
+
+  }catch(e){
+    $("deployProgress").textContent=
+      "Collection deployment stopped: "+(e.message||e);
+
+    setStatus(
+      "Sepolia Collection deployment failed: "+(e.message||e),
+      "warn"
+    );
+  }finally{
+    btn.disabled=false;
+  }
+}
+
 async function deployOneOfOneSepolia(){
+  if(
+    state.chain==="sepolia" &&
+    state.purpose==="collection" &&
+    state.type==="collection"
+  ){
+    return deployCollectionSepolia();
+  }
+
   if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
     setStatus("Real deployment is currently limited to 1 of 1 on Ethereum Sepolia.","warn");return;
   }

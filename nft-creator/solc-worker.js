@@ -160,26 +160,85 @@ async function getCompiler(){
 
 self.addEventListener("message",async(event)=>{
   const {id,action}=event.data||{};
-  if(action!=="compile")return;
+
+  if(action!=="compile" && action!=="compileCollection")return;
+
   try{
     const compiler=await getCompiler();
+
+    let sourceName;
+    let contractName;
+    let sourceText;
+
+    if(action==="compileCollection"){
+      const response=await fetch("./ANGRYCollection.sol",{cache:"no-store"});
+      if(!response.ok){
+        throw new Error(
+          "Could not load ANGRYCollection.sol ("+response.status+")."
+        );
+      }
+
+      sourceText=await response.text();
+      sourceName="ANGRYCollection.sol";
+      contractName="ANGRYCollection";
+    }else{
+      sourceText=CONTRACT_SOURCE;
+      sourceName="ANGRYOneOfOne.sol";
+      contractName="ANGRYOneOfOne";
+    }
+
     const input={
       language:"Solidity",
-      sources:{"ANGRYOneOfOne.sol":{content:CONTRACT_SOURCE}},
+      sources:{
+        [sourceName]:{content:sourceText}
+      },
       settings:{
         optimizer:{enabled:true,runs:200},
         evmVersion:"prague",
-        outputSelection:{"*":{"*":["abi","evm.bytecode.object"]}}
+        outputSelection:{
+          "*":{
+            "*":["abi","evm.bytecode.object"]
+          }
+        }
       }
     };
-    const output=JSON.parse(compiler.compile(JSON.stringify(input)));
-    const errors=(output.errors||[]);
+
+    const output=JSON.parse(
+      compiler.compile(JSON.stringify(input))
+    );
+
+    const errors=output.errors||[];
     const fatal=errors.filter(x=>x.severity==="error");
-    if(fatal.length)throw new Error(fatal.map(x=>x.formattedMessage||x.message).join("\n"));
-    const c=output.contracts?.["ANGRYOneOfOne.sol"]?.ANGRYOneOfOne;
-    if(!c?.evm?.bytecode?.object)throw new Error("Compiler returned no deployment bytecode.");
-    self.postMessage({id,ok:true,abi:c.abi,bytecode:"0x"+c.evm.bytecode.object,warnings:errors.filter(x=>x.severity!=="error").map(x=>x.formattedMessage||x.message)});
+
+    if(fatal.length){
+      throw new Error(
+        fatal.map(
+          x=>x.formattedMessage||x.message
+        ).join("\n")
+      );
+    }
+
+    const c=output.contracts?.[sourceName]?.[contractName];
+
+    if(!c?.evm?.bytecode?.object){
+      throw new Error("Compiler returned no deployment bytecode.");
+    }
+
+    self.postMessage({
+      id,
+      ok:true,
+      abi:c.abi,
+      bytecode:"0x"+c.evm.bytecode.object,
+      warnings:errors
+        .filter(x=>x.severity!=="error")
+        .map(x=>x.formattedMessage||x.message)
+    });
+
   }catch(error){
-    self.postMessage({id,ok:false,error:error?.message||String(error)});
+    self.postMessage({
+      id,
+      ok:false,
+      error:error?.message||String(error)
+    });
   }
 });
