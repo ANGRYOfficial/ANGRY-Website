@@ -345,7 +345,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
           <button class="network-card" data-chain="polygon"><span class="net-icon">P</span><span>Polygon</span></button>
         </div>
         <div class="help" id="networkHint" style="margin-top:8px">Ethereum Sepolia · ERC-721 / ERC-1155 test environment</div>
-        <button class="btn secondary" id="switchBtn">Switch wallet to selected testnet</button>
+        <button class="btn secondary" id="switchBtn" style="display:none!important">Switch wallet to selected testnet</button>
         <div class="storage-note" style="margin-top:8px">
           <b>Network architecture:</b> Ethereum, Base, Robinhood Chain, BSC, Arbitrum and Polygon use the EVM/ERC path. Solana is listed separately because professional Solana NFTs use a different wallet/program architecture and will use Metaplex Core rather than pretending to be ERC-721/1155.
         </div>
@@ -952,15 +952,37 @@ input[readonly]{opacity:.72;cursor:not-allowed}
         </div>
 
         <div class="review-summary" id="reviewSummary"></div>
-        <details class="metadata-details">
+        <details class="metadata-details" style="display:none!important">
           <summary>Technical metadata JSON</summary>
           <div class="meta" id="metadataPreview"></div>
         </details>
-        <button class="btn primary" id="prepareBtn">Review & prepare configuration</button>
+        <button class="btn primary" id="prepareBtn" style="display:none!important">Review & prepare configuration</button>
 
-        <button class="btn secondary" id="downloadBtn">Download metadata JSON</button>
+        <button class="btn secondary" id="downloadBtn" style="display:none!important">Download metadata JSON</button>
 
-        <div class="live-lab" id="liveLab">
+
+        <div id="simpleCreatePanel" style="margin-top:12px">
+          <button
+            class="btn primary"
+            id="simpleCreateBtn"
+            type="button"
+          >Create NFT</button>
+
+          <div
+            class="status"
+            id="simpleCreateProgress"
+          >
+            Fill in the details, upload the artwork, then create your NFT.
+          </div>
+
+          <div
+            class="live-result live-hidden"
+            id="simpleCreateResult"
+            style="margin-top:10px"
+          ></div>
+        </div>
+
+<div class="live-lab" id="liveLab" style="display:none!important">
           <div class="live-lab-head">
             <div>
               <b>Ethereum Sepolia · Testnet Deployment Lab</b>
@@ -2527,6 +2549,416 @@ function downloadMetadata(){
 }
 $("artModalClose").addEventListener("click",closeCollectionArtwork);
 $("artModalBackdrop").addEventListener("click",closeCollectionArtwork);
+
+function updateSimpleCreateUI(){
+  const btn=$("simpleCreateBtn");
+  const progress=$("simpleCreateProgress");
+
+  if(!btn)return;
+
+  const supply=Math.max(
+    1,
+    Number($("supply")?.value||1)
+  );
+
+  if(state.purpose==="collection"){
+    btn.textContent=
+      "Create "+supply+" NFT Collection";
+
+    if(progress && !btn.disabled){
+      progress.textContent=
+        "Ready to create the collection. ANGRY will handle storage and deployment automatically.";
+    }
+  }
+  else if(state.purpose==="artwork"){
+    btn.textContent="Create NFT";
+
+    if(progress && !btn.disabled){
+      progress.textContent=
+        "Ready to create the NFT. ANGRY will handle storage and deployment automatically.";
+    }
+  }
+  else{
+    btn.textContent="Create NFT";
+
+    if(progress && !btn.disabled){
+      progress.textContent=
+        "This NFT type is not enabled for one-click deployment yet.";
+    }
+  }
+}
+
+
+function simpleStorageReady(){
+  const supply=Math.max(
+    1,
+    Number($("supply")?.value||1)
+  );
+
+  if(state.purpose==="collection"){
+    return (
+      Array.isArray(
+        state.liveCollectionMetadataUris
+      ) &&
+      state.liveCollectionMetadataUris.length===supply
+    );
+  }
+
+  return !!String(
+    state.liveMetadataUri ||
+    $("liveMetadataUri")?.value ||
+    ""
+  ).trim();
+}
+
+
+async function waitForHiddenAction(
+  btn,
+  timeoutMs
+){
+  await new Promise(
+    resolve=>setTimeout(resolve,100)
+  );
+
+  const started=Date.now();
+
+  while(
+    Date.now()-started < timeoutMs
+  ){
+    if(!btn.disabled){
+      return;
+    }
+
+    await new Promise(
+      resolve=>setTimeout(resolve,250)
+    );
+  }
+
+  throw new Error(
+    "The operation is taking too long. Please try again."
+  );
+}
+
+
+async function runSimpleCreate(){
+  const btn=$("simpleCreateBtn");
+  const progress=$("simpleCreateProgress");
+  const result=$("simpleCreateResult");
+
+  if(!btn)return;
+
+  const validation=
+    typeof validateConfiguration==="function"
+      ? validateConfiguration()
+      : {errors:[]};
+
+  if(validation?.errors?.length){
+    progress.textContent=
+      "Check the highlighted fields before creating.";
+
+    setStatus(
+      validation.errors.join(" "),
+      "warn"
+    );
+
+    return;
+  }
+
+
+  if(!$("rightsCheck")?.checked){
+    progress.textContent=
+      "Confirm artwork ownership or permission first.";
+
+    setStatus(
+      "Confirm that you own the artwork or have permission to use it before creating the NFT.",
+      "warn"
+    );
+
+    return;
+  }
+
+
+  if(
+    !(
+      state.chain==="sepolia" &&
+      (
+        state.purpose==="artwork" ||
+        state.purpose==="collection"
+      )
+    )
+  ){
+    progress.textContent=
+      "One-click deployment is currently available for Ethereum Sepolia NFT tests.";
+
+    setStatus(
+      "This setup is not enabled for one-click deployment yet.",
+      "warn"
+    );
+
+    return;
+  }
+
+
+  if(!window.ethereum){
+    progress.textContent=
+      "Open ANGRY NFT Creator in a compatible EVM wallet browser.";
+
+    setStatus(
+      "Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.",
+      "warn"
+    );
+
+    return;
+  }
+
+
+  btn.disabled=true;
+
+  if(result){
+    result.classList.add("live-hidden");
+    result.innerHTML="";
+  }
+
+  if($("deployResult")){
+    $("deployResult").classList.add(
+      "live-hidden"
+    );
+  }
+
+
+  try{
+
+    /* --------------------------------------------
+       WALLET
+    --------------------------------------------- */
+
+    progress.textContent=
+      "Connecting wallet…";
+
+    if(!state.account){
+      await connectWallet();
+
+      if(!state.account){
+        throw new Error(
+          "Wallet connection was not completed."
+        );
+      }
+    }
+
+
+    /* --------------------------------------------
+       NETWORK
+    --------------------------------------------- */
+
+    progress.textContent=
+      "Checking network…";
+
+    await switchChain();
+
+    const actual=String(
+      await ethereum.request({
+        method:"eth_chainId"
+      })
+    ).toLowerCase();
+
+    if(actual!=="0xaa36a7"){
+      throw new Error(
+        "Wallet is not on Ethereum Sepolia."
+      );
+    }
+
+
+    /* --------------------------------------------
+       RESET PREVIOUS STORAGE STATE
+    --------------------------------------------- */
+
+    if(state.purpose==="collection"){
+
+      if(
+        Array.isArray(
+          state.liveCollectionImageUris
+        )
+      ){
+        state.liveCollectionImageUris=[];
+      }
+
+      if(
+        Array.isArray(
+          state.liveCollectionMetadataUris
+        )
+      ){
+        state.liveCollectionMetadataUris=[];
+      }
+
+    }else{
+
+      state.liveImageUri="";
+      state.liveMetadataUri="";
+
+      if($("liveMetadataUri")){
+        $("liveMetadataUri").value="";
+      }
+    }
+
+
+    /* --------------------------------------------
+       IPFS / STORAGE
+       Calls existing tested upload button logic.
+    --------------------------------------------- */
+
+    progress.textContent=
+      state.purpose==="collection"
+        ? "Uploading collection artwork…"
+        : "Uploading artwork…";
+
+    const upload=$("uploadIpfsBtn");
+
+    if(!upload){
+      throw new Error(
+        "Storage action is unavailable."
+      );
+    }
+
+    upload.click();
+
+    await waitForHiddenAction(
+      upload,
+      20*60*1000
+    );
+
+
+    if(!simpleStorageReady()){
+      throw new Error(
+        "Artwork upload did not finish. Check the status message and try again."
+      );
+    }
+
+
+    /* --------------------------------------------
+       DEPLOY
+       Calls existing tested deployment logic.
+    --------------------------------------------- */
+
+    progress.textContent=
+      "Waiting for wallet confirmation…";
+
+    const deploy=$("deployOneOfOneBtn");
+
+    if(!deploy){
+      throw new Error(
+        "Deployment action is unavailable."
+      );
+    }
+
+    deploy.click();
+
+    await waitForHiddenAction(
+      deploy,
+      20*60*1000
+    );
+
+
+    /* --------------------------------------------
+       RESULT
+    --------------------------------------------- */
+
+    const hiddenResult=$("deployResult");
+
+    if(
+      hiddenResult &&
+      !hiddenResult.classList.contains(
+        "live-hidden"
+      )
+    ){
+
+      progress.textContent=
+        state.purpose==="collection"
+          ? "Collection created successfully."
+          : "NFT created successfully.";
+
+      if(result){
+        result.innerHTML=
+          hiddenResult.innerHTML;
+
+        result.classList.remove(
+          "live-hidden"
+        );
+      }
+
+    }else{
+
+      throw new Error(
+        "Deployment did not finish. Check the status message and try again."
+      );
+
+    }
+
+  }
+  catch(e){
+
+    const message=
+      e?.message || String(e);
+
+    progress.textContent=
+      "Creation stopped: "+message;
+
+    setStatus(
+      "NFT creation stopped: "+message,
+      "warn"
+    );
+
+  }
+  finally{
+
+    btn.disabled=false;
+    updateSimpleCreateUI();
+
+  }
+}
+
+
+$("simpleCreateBtn")
+  ?.addEventListener(
+    "click",
+    runSimpleCreate
+  );
+
+
+document.addEventListener(
+  "input",
+  updateSimpleCreateUI
+);
+
+
+document.addEventListener(
+  "change",
+  updateSimpleCreateUI
+);
+
+
+document.addEventListener(
+  "click",
+  event=>{
+    if(
+      event.target.closest?.(
+        "[data-chain],[data-purpose],[data-type]"
+      )
+    ){
+      setTimeout(
+        updateSimpleCreateUI,
+        0
+      );
+    }
+  }
+);
+
+
+setTimeout(
+  updateSimpleCreateUI,
+  0
+);
+
+
 $("walletBtn").addEventListener("click",connectWallet);
 $("switchBtn").addEventListener("click",switchChain);
 document.querySelectorAll(".network-card").forEach(b=>b.addEventListener("click",()=>setChain(b.dataset.chain)));
