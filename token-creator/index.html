@@ -201,6 +201,18 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
 </style>
 
+
+<style id="angry-token-pricing-v1">
+.angry-token-create-fee{
+  display:block;
+  margin-top:10px;
+  color:#ff7a1a;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.35;
+}
+</style>
+
 </head>
 <body>
 
@@ -260,9 +272,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="step">02</div>
           <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
           <div class="type-grid">
-            <button class="type active" type="button" data-type="standard"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="status-badge ready">Deploy ready</span></button>
-            <button class="type" type="button" data-type="liquidity"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, automatic liquidity and creator fee rules.</p><span class="status-badge">Planner</span></button>
-            <button class="type" type="button" data-type="reward"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Reward holders in USDT, USDC, wrapped native coin or a custom token.</p><span class="status-badge">Planner</span></button>
+            <button class="type active" type="button" data-type="standard" data-fee-usd="5.99"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="angry-token-create-fee">Mainnet fee: $5.99 + network gas</span><span class="status-badge ready">Deploy ready</span></button>
+            <button class="type" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, automatic liquidity and creator fee rules.</p><span class="angry-token-create-fee">Mainnet fee: $9.99 + network gas</span><span class="angry-token-create-fee">Mainnet fee: $14.99 + network gas</span><span class="status-badge">Planner</span></button>
+            <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Reward holders in USDT, USDC, wrapped native coin or a custom token.</p><span class="status-badge">Planner</span></button>
           </div>
         </div>
       </section>
