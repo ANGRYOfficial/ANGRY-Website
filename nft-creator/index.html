@@ -441,7 +441,7 @@ input[readonly]{opacity:.72;cursor:not-allowed}
     </div><div class="bulk-feedback hidden" id="bulkFeedback"></div>
         </div>
 
-        <div class="storage-note">Artwork still previews locally first. For the 1 of 1 Ethereum Sepolia test path, a creator can upload artwork + metadata to IPFS using their own temporary Pinata JWT, or paste an existing metadata URI. Production ANGRY storage will later move behind a secure server-side service.</div>
+        <div class="storage-note">Artwork previews locally first. When uploaded, artwork and metadata are stored on IPFS through the ANGRY server-side storage service. No Pinata credential is required in the browser.</div>
 
         <div class="grid2" style="margin-top:12px">
           <div class="field">
@@ -977,10 +977,10 @@ input[readonly]{opacity:.72;cursor:not-allowed}
             <div id="liveSepoliaFlow">
               <div class="live-stage">
                 <div class="live-stage-title"><span class="live-stage-num">1</span><b>Permanent metadata</b></div>
-                <p>Recommended for this developer test: upload the selected artwork and generated metadata to IPFS with your own limited Pinata JWT. The JWT is kept only in this browser field and is cleared after a successful upload.</p>
-                <input class="live-input" id="pinataJwt" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your temporary Pinata JWT (developer test only)">
+                <p>Upload the selected artwork and generated metadata to IPFS through ANGRY secure server-side storage.</p>
+
                 <button class="live-action" id="uploadIpfsBtn" type="button" style="margin-top:7px;width:100%">Upload artwork + metadata to IPFS</button>
-                <div class="live-note">Do not put an ANGRY production/shared API key in public GitHub HTML. This field is only for a creator's own temporary test credential. The production path should use a server-side secret.</div>
+                <div class="live-note">Storage credentials are handled securely on the server and are never exposed in the browser.</div>
               </div>
 
               <div class="live-stage">
@@ -1914,15 +1914,6 @@ async function uploadCollectionToIpfs(){
     return;
   }
 
-  const jwt="worker-proxy";
-
-  if(!jwt){
-    setStatus(
-      "Paste your own temporary Pinata JWT for this developer test.",
-      "warn"
-    );
-    return;
-  }
 
   const btn=$("uploadIpfsBtn");
   btn.disabled=true;
@@ -2018,7 +2009,7 @@ async function uploadCollectionToIpfs(){
       );
     }
 
-    $("pinataJwt").value="";
+
 
     if($("liveMetadataUri")){
       $("liveMetadataUri").value=
@@ -2065,8 +2056,8 @@ async function uploadOneOfOneToIpfs(){
   }
   if(!state.imageFile){setStatus("Upload the 1 of 1 artwork first.","warn");return}
   if(!$("rightsCheck").checked){setStatus("Confirm that you own or have permission to use the artwork first.","warn");return}
-  const jwt="worker-proxy";
-  if(!jwt){setStatus("Paste your own temporary Pinata JWT for this developer test.","warn");return}
+
+
 
   const btn=$("uploadIpfsBtn");
   btn.disabled=true;
@@ -2103,7 +2094,7 @@ async function uploadOneOfOneToIpfs(){
 
     state.liveMetadataUri="ipfs://"+metaData.IpfsHash;
     $("liveMetadataUri").value=state.liveMetadataUri;
-    $("pinataJwt").value="";
+
     $("ipfsProgress").textContent="IPFS ready · artwork "+imageUri+" · metadata "+state.liveMetadataUri;
     setStatus("Artwork and metadata uploaded to IPFS successfully. The temporary JWT field was cleared.","good");
   }catch(e){
