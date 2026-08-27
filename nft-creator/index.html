@@ -1914,7 +1914,7 @@ async function uploadCollectionToIpfs(){
     return;
   }
 
-  const jwt=$("pinataJwt").value.trim();
+  const jwt="worker-proxy";
 
   if(!jwt){
     setStatus(
@@ -1957,10 +1957,10 @@ async function uploadCollectionToIpfs(){
       );
 
       const artRes=await fetch(
-        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        "https://angry-nft-storage.demiandemian147.workers.dev/pinFileToIPFS",
         {
           method:"POST",
-          headers:{Authorization:"Bearer "+jwt},
+
           body:fd
         }
       );
@@ -1994,13 +1994,10 @@ async function uploadCollectionToIpfs(){
       };
 
       const metaRes=await fetch(
-        "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        "https://angry-nft-storage.demiandemian147.workers.dev/pinJSONToIPFS",
         {
           method:"POST",
-          headers:{
-            Authorization:"Bearer "+jwt,
-            "Content-Type":"application/json"
-          },
+          headers:{"Content-Type":"application/json"},
           body:JSON.stringify(metaBody)
         }
       );
@@ -2068,7 +2065,7 @@ async function uploadOneOfOneToIpfs(){
   }
   if(!state.imageFile){setStatus("Upload the 1 of 1 artwork first.","warn");return}
   if(!$("rightsCheck").checked){setStatus("Confirm that you own or have permission to use the artwork first.","warn");return}
-  const jwt=$("pinataJwt").value.trim();
+  const jwt="worker-proxy";
   if(!jwt){setStatus("Paste your own temporary Pinata JWT for this developer test.","warn");return}
 
   const btn=$("uploadIpfsBtn");
@@ -2080,9 +2077,9 @@ async function uploadOneOfOneToIpfs(){
     fd.append("pinataMetadata",JSON.stringify({name:(state.imageFile.name||"nft-artwork")}));
     fd.append("pinataOptions",JSON.stringify({cidVersion:1}));
 
-    const artRes=await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS",{
+    const artRes=await fetch("https://angry-nft-storage.demiandemian147.workers.dev/pinFileToIPFS",{
       method:"POST",
-      headers:{Authorization:"Bearer "+jwt},
+
       body:fd
     });
     const artData=await artRes.json().catch(()=>({}));
@@ -2096,9 +2093,9 @@ async function uploadOneOfOneToIpfs(){
       pinataMetadata:{name:(($("nftName").value.trim()||"ANGRY-NFT").replace(/[^a-z0-9._-]+/gi,"-"))+"-metadata.json"},
       pinataContent:buildLiveMetadata(imageUri)
     };
-    const metaRes=await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS",{
+    const metaRes=await fetch("https://angry-nft-storage.demiandemian147.workers.dev/pinJSONToIPFS",{
       method:"POST",
-      headers:{Authorization:"Bearer "+jwt,"Content-Type":"application/json"},
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify(metaBody)
     });
     const metaData=await metaRes.json().catch(()=>({}));
