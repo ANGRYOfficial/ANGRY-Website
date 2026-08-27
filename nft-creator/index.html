@@ -431,6 +431,17 @@ textarea::placeholder{
 
 </style>
 
+
+<style id="angry-nft-fee-style-v1">
+.angry-create-fee{
+  display:block;
+  margin-top:8px;
+  color:#ff7a1a;
+  font-size:12px;
+  font-weight:800;
+}
+</style>
+
 </head>
 <body>
 
@@ -494,14 +505,14 @@ textarea::placeholder{
         <div class="section-head"><div class="step">02</div><div><div class="sec-title">What do you want to create?</div><div class="sec-sub">Choose the purpose. ANGRY will suggest the NFT structure automatically.</div></div></div><div class="beginner-note">You do not need to understand ERC-721 or ERC-1155. Choose what you want to make and ANGRY will apply beginner-safe defaults.</div>
         <div class="launch-scope-note"><b>Initial launch:</b> 1 of 1 NFT, NFT Collection and Multiple Editions. More creator tools will be released step by step after testing.</div>
         <div class="purpose-grid">
-          <button class="purpose active" data-purpose="artwork">
-            <span class="purpose-icon">1/1</span><b>1 of 1 NFT</b><small>One unique artwork or collectible.</small>
+          <button class="purpose active" data-purpose="artwork" data-fee-usd="0.99">
+            <span class="purpose-icon">1/1</span><b>1 of 1 NFT</b><small>One unique artwork or collectible.</small><span class="angry-create-fee">$0.99 + network gas</span>
           </button>
-          <button class="purpose" data-purpose="collection">
-            <span class="purpose-icon">COL</span><b>NFT Collection</b><small>Many unique NFTs in one collection.</small>
+          <button class="purpose" data-purpose="collection" data-fee-usd="4.99">
+            <span class="purpose-icon">COL</span><b>NFT Collection</b><small>Many unique NFTs in one collection.</small><span class="angry-create-fee">$4.99 + network gas</span>
           </button>
-          <button class="purpose" data-purpose="editions">
-            <span class="purpose-icon">ED</span><b>Multiple Editions</b><small>Many copies of the same item.</small>
+          <button class="purpose" data-purpose="editions" data-fee-usd="1.99">
+            <span class="purpose-icon">ED</span><b>Multiple Editions</b><small>Many copies of the same item.</small><span class="angry-create-fee">$1.99 + network gas</span>
           </button>
           <button class="purpose future-purpose" data-purpose="tickets" aria-disabled="true">
             <span class="purpose-status">Coming soon</span>
