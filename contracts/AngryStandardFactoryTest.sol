@@ -102,7 +102,7 @@ contract AngryStandardTokenTest {
 contract AngryStandardFactoryTest {
 
     address payable public constant TREASURY =
-        payable(0x1479d63c37445bb4dce7a3833809fdab3a7e272a);
+        payable(0x1479d63c37445bB4dCE7a3833809FDAB3A7E272A);
 
     // TESTNET ONLY: 0.000001 ETH
     uint256 public constant TEST_FEE = 0.000001 ether;
