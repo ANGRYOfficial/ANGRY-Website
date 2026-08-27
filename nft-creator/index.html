@@ -319,6 +319,118 @@ textarea::placeholder{
 
 </style>
 <link rel="stylesheet" href="../assets/ecosystem.css">
+
+<style id="angry-unified-mobile-header-v4">
+
+@media(max-width:760px){
+
+  .angry-globalbar{
+    position:sticky !important;
+    top:0 !important;
+    z-index:9999 !important;
+    min-height:68px !important;
+    padding:10px 14px !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    background:rgba(7,8,9,.98) !important;
+    border-bottom:1px solid #24272b !important;
+  }
+
+  .angry-globalbrand{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    margin-right:auto !important;
+    min-width:0 !important;
+  }
+
+  .angry-globalbrand-mark{
+    width:44px !important;
+    height:44px !important;
+    min-width:44px !important;
+    border-radius:12px !important;
+    background:url("../assets/angry-logo.png") center/cover no-repeat !important;
+    color:transparent !important;
+    font-size:0 !important;
+    overflow:hidden !important;
+  }
+
+  .angry-globalbrand > span:last-child{
+    font-size:14px !important;
+    font-weight:900 !important;
+    white-space:nowrap !important;
+  }
+
+  .angry-globalnav{
+    display:none !important;
+    position:absolute !important;
+    top:calc(100% + 6px) !important;
+    left:12px !important;
+    right:12px !important;
+    padding:8px !important;
+    border:1px solid #2b2f34 !important;
+    border-radius:14px !important;
+    background:#0b0d0f !important;
+    box-shadow:0 18px 45px rgba(0,0,0,.55) !important;
+  }
+
+  .angry-globalbar.angry-menu-open .angry-globalnav{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+  }
+
+  .angry-globalnav a{
+    padding:12px !important;
+    text-align:left !important;
+    width:100% !important;
+    border-radius:9px !important;
+  }
+
+  .angry-mobile-menu-btn{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:46px !important;
+    height:46px !important;
+    min-width:46px !important;
+    padding:0 !important;
+    border:1px solid #30343a !important;
+    border-radius:13px !important;
+    background:#121518 !important;
+    color:#fff !important;
+    font-size:25px !important;
+    line-height:1 !important;
+  }
+
+  .angry-globalbar #walletBtn{
+    position:static !important;
+    width:auto !important;
+    max-width:140px !important;
+    min-height:44px !important;
+    margin:0 !important;
+    padding:0 11px !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    border-radius:12px !important;
+    font-size:11px !important;
+    white-space:nowrap !important;
+  }
+
+  .angry-mobile-duplicate-header{
+    display:none !important;
+  }
+}
+
+@media(min-width:761px){
+  .angry-mobile-menu-btn{
+    display:none !important;
+  }
+}
+
+</style>
+
 </head>
 <body>
 
@@ -3429,5 +3541,119 @@ $("liveMetadataUri")?.addEventListener("input",()=>{
 if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";render()})}
 setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 </script>
+
+<script id="angry-unified-mobile-header-script-v4">
+(function(){
+
+  const bar=document.querySelector(".angry-globalbar");
+  if(!bar) return;
+
+  const nav=bar.querySelector(".angry-globalnav");
+
+  let menu=bar.querySelector(".angry-mobile-menu-btn");
+
+  if(!menu){
+    menu=document.createElement("button");
+    menu.type="button";
+    menu.className="angry-mobile-menu-btn";
+    menu.textContent="☰";
+    menu.setAttribute("aria-label","Menu");
+    menu.setAttribute("aria-expanded","false");
+    bar.appendChild(menu);
+  }
+
+  const wallet=document.getElementById("walletBtn");
+
+  const walletHome=wallet ? {
+    parent:wallet.parentNode,
+    next:wallet.nextSibling
+  } : null;
+
+
+  /* Tandai header kedua, jangan hapus */
+  document.querySelectorAll(".topbar").forEach(el=>{
+    if(el !== bar && !bar.contains(el)){
+      el.classList.add("angry-mobile-duplicate-header");
+    }
+  });
+
+
+  /* Tracker duplicate header */
+  document.querySelectorAll("header,nav,section,div").forEach(el=>{
+    if(el===bar || bar.contains(el)) return;
+
+    const txt=(el.textContent||"")
+      .replace(/\s+/g," ")
+      .trim()
+      .toUpperCase();
+
+    if(
+      txt.includes("ANGRY TRACKER") &&
+      el.querySelector("button") &&
+      txt.length < 100
+    ){
+      el.classList.add("angry-mobile-duplicate-header");
+    }
+  });
+
+
+  menu.addEventListener("click",()=>{
+    const open=bar.classList.toggle("angry-menu-open");
+
+    menu.textContent=open ? "×" : "☰";
+
+    menu.setAttribute(
+      "aria-expanded",
+      open ? "true" : "false"
+    );
+  });
+
+
+  if(nav){
+    nav.querySelectorAll("a").forEach(a=>{
+      a.addEventListener("click",()=>{
+        bar.classList.remove("angry-menu-open");
+        menu.textContent="☰";
+        menu.setAttribute("aria-expanded","false");
+      });
+    });
+  }
+
+
+  function apply(){
+
+    const mobile=window.matchMedia("(max-width:760px)").matches;
+
+    if(mobile){
+
+      if(wallet && wallet.parentNode !== bar){
+        bar.insertBefore(wallet,menu);
+      }
+
+    }else{
+
+      bar.classList.remove("angry-menu-open");
+      menu.textContent="☰";
+
+      if(wallet && walletHome && walletHome.parent){
+
+        if(
+          walletHome.next &&
+          walletHome.next.parentNode===walletHome.parent
+        ){
+          walletHome.parent.insertBefore(wallet,walletHome.next);
+        }else{
+          walletHome.parent.appendChild(wallet);
+        }
+      }
+    }
+  }
+
+  apply();
+  window.addEventListener("resize",apply);
+
+})();
+</script>
+
 </body>
 </html>
