@@ -1052,6 +1052,30 @@ footer{
 
 </style>
 
+
+<style id="angry-tracker-hero-cleanup-v1">
+
+/* Tracker hero cleanup only */
+.angry-tracker-clean-hide{
+  display:none !important;
+}
+
+.angry-tracker-clean-hero{
+  min-height:auto !important;
+  padding-top:55px !important;
+  padding-bottom:70px !important;
+}
+
+@media(max-width:760px){
+  .angry-tracker-clean-hero{
+    min-height:auto !important;
+    padding-top:44px !important;
+    padding-bottom:58px !important;
+  }
+}
+
+</style>
+
 </head>
 
 <body>
@@ -15126,6 +15150,152 @@ document.addEventListener("DOMContentLoaded", angryUpdateNetworkUi);
 
   apply();
   window.addEventListener("resize",apply);
+
+})();
+</script>
+
+
+<script id="angry-tracker-hero-cleanup-script-v1">
+(function(){
+
+  const norm = value =>
+    String(value || "")
+      .replace(/\s+/g," ")
+      .trim();
+
+  /* ----------------------------------------
+     Hide duplicate Tracker / Docs hero CTAs
+  ----------------------------------------- */
+
+  document.querySelectorAll("a,button").forEach(el => {
+
+    const text = norm(el.textContent).toLowerCase();
+
+    if(
+      text === "open tracker" ||
+      text === "open angry tracker" ||
+      text === "read docs"
+    ){
+      el.classList.add("angry-tracker-clean-hide");
+    }
+
+  });
+
+
+  /* ----------------------------------------
+     Hide Explore Tracker helper
+  ----------------------------------------- */
+
+  document.querySelectorAll("a,div,p,span").forEach(el => {
+
+    const text = norm(el.textContent)
+      .replace(/^↓\s*/,"")
+      .toLowerCase();
+
+    if(text === "explore tracker"){
+      el.classList.add("angry-tracker-clean-hide");
+    }
+
+  });
+
+
+  /* ----------------------------------------
+     Remove decorative angry emoji.
+     Header logo is an image, so it stays.
+  ----------------------------------------- */
+
+  document.querySelectorAll("div,span,p,i").forEach(el => {
+
+    if(el.closest(".angry-globalbar")){
+      return;
+    }
+
+    const ownText = norm(el.textContent);
+
+    if(
+      ownText === "😡" &&
+      el.children.length === 0
+    ){
+      el.classList.add("angry-tracker-clean-hide");
+    }
+
+  });
+
+
+  /* ----------------------------------------
+     Find main Tracker hero and compact it
+  ----------------------------------------- */
+
+  const headings = [
+    ...document.querySelectorAll("h1,h2")
+  ];
+
+  const title = headings.find(el =>
+    norm(el.textContent)
+      .toUpperCase()
+      .includes("ANGRY TRACKER")
+  );
+
+  if(title){
+
+    let hero = title.parentElement;
+
+    while(
+      hero &&
+      hero !== document.body
+    ){
+
+      const text = norm(hero.textContent);
+
+      if(
+        text.includes("ON-CHAIN RESEARCH") &&
+        text.includes("ANGRY TRACKER")
+      ){
+        hero.classList.add(
+          "angry-tracker-clean-hero"
+        );
+        break;
+      }
+
+      hero = hero.parentElement;
+    }
+
+  }
+
+
+  /* ----------------------------------------
+     Remove empty action containers left behind
+  ----------------------------------------- */
+
+  document.querySelectorAll("div").forEach(el => {
+
+    if(el.closest(".angry-globalbar")){
+      return;
+    }
+
+    const visibleChildren =
+      [...el.children].filter(child =>
+        !child.classList.contains(
+          "angry-tracker-clean-hide"
+        )
+      );
+
+    const text = norm(el.textContent)
+      .toLowerCase();
+
+    if(
+      visibleChildren.length === 0 &&
+      (
+        text === "open tracker read docs" ||
+        text === "open angry tracker read docs"
+      )
+    ){
+      el.classList.add(
+        "angry-tracker-clean-hide"
+      );
+    }
+
+  });
 
 })();
 </script>
