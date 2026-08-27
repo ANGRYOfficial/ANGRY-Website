@@ -290,6 +290,33 @@ input[readonly]{opacity:.72;cursor:not-allowed}
 .live-progress{margin-top:8px;color:#c29b72;font-size:8px;line-height:1.5}
 @media(max-width:620px){.live-row{grid-template-columns:1fr}.live-action{width:100%}}
 
+
+/* === ANGRY PUBLIC NFT FORM POLISH === */
+
+.public-chain-logo{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.public-chain-logo svg{
+  width:27px;
+  height:27px;
+  display:block;
+}
+
+input::placeholder,
+textarea::placeholder{
+  color:#6f747b !important;
+  opacity:.72 !important;
+}
+
+
 </style>
 <link rel="stylesheet" href="../assets/ecosystem.css">
 </head>
@@ -2956,6 +2983,258 @@ document.addEventListener(
 setTimeout(
   updateSimpleCreateUI,
   0
+);
+
+
+
+/* === ANGRY PUBLIC NFT FORM POLISH === */
+
+function angryPublicFormPolish(){
+
+  function findField(ids){
+    for(const id of ids){
+      const el=document.getElementById(id);
+      if(el)return el;
+    }
+    return null;
+  }
+
+  function cleanDefault(el, defaults, placeholder){
+    if(!el)return;
+
+    const current=String(el.value||"").trim();
+
+    if(defaults.includes(current)){
+      el.value="";
+    }
+
+    el.placeholder=placeholder;
+  }
+
+
+  /* ----------------------------------------
+     Public form placeholders
+  ----------------------------------------- */
+
+  cleanDefault(
+    findField(["nftName"]),
+    [
+      "ANGRY NFT #1",
+      "ANGRY NFT"
+    ],
+    "e.g. My First NFT"
+  );
+
+  cleanDefault(
+    findField(["collectionName"]),
+    [
+      "ANGRY Collection",
+      "ANGRY NFT Collection"
+    ],
+    "e.g. My Collection"
+  );
+
+  cleanDefault(
+    findField(["symbol"]),
+    [
+      "ANGNFT",
+      "ANGRY"
+    ],
+    "e.g. MYNFT"
+  );
+
+  cleanDefault(
+    findField([
+      "description",
+      "nftDescription",
+      "descriptionInput"
+    ]),
+    [
+      "Created with ANGRY NFT Creator."
+    ],
+    "Describe your NFT or collection..."
+  );
+
+
+  /* ----------------------------------------
+     Network logos
+  ----------------------------------------- */
+
+  const ethereumLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path fill="#8C8C8C"
+      d="M16 2L7 16l9 5 9-5L16 2z"/>
+    <path fill="#343434"
+      d="M16 2v19l9-5L16 2z"/>
+    <path fill="#8C8C8C"
+      d="M7 18l9 12v-7L7 18z"/>
+    <path fill="#3C3C3D"
+      d="M25 18l-9 12v-7l9-5z"/>
+  </svg>`;
+
+  const baseLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <circle cx="16" cy="16" r="14" fill="#0052FF"/>
+    <path fill="white"
+      d="M8 12.5h11.2a5.2 5.2 0 110 7H8a8 8 0 010-7z"/>
+  </svg>`;
+
+  const bnbLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <rect width="32" height="32" rx="9" fill="#F3BA2F"/>
+    <g fill="#111">
+      <path d="M16 6l4 4-4 4-4-4 4-4z"/>
+      <path d="M9 13l3 3-3 3-3-3 3-3z"/>
+      <path d="M23 13l3 3-3 3-3-3 3-3z"/>
+      <path d="M16 18l4 4-4 4-4-4 4-4z"/>
+      <path d="M16 12l4 4-4 4-4-4 4-4z"/>
+    </g>
+  </svg>`;
+
+  const polygonLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <circle cx="16" cy="16" r="14" fill="#8247E5"/>
+    <g fill="none" stroke="white"
+       stroke-width="2.5"
+       stroke-linecap="round"
+       stroke-linejoin="round">
+      <path d="M10 18l4 2.3 4-2.3v-4.6l-4-2.3-4 2.3z"/>
+      <path d="M18 13.4l4-2.3 4 2.3V18l-4 2.3-4-2.3"/>
+    </g>
+  </svg>`;
+
+  const arbitrumLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path fill="#213147"
+      d="M16 2l12 7v14l-12 7-12-7V9z"/>
+    <path fill="#2D374B"
+      d="M16 5l9 5v12l-9 5-9-5V10z"/>
+    <path fill="#28A0F0"
+      d="M10 22l4-13h3l-4 13z"/>
+    <path fill="#12AAFF"
+      d="M15 22l4-13h3l-4 13z"/>
+    <path fill="white"
+      d="M20 22l2-6 3 6z"/>
+  </svg>`;
+
+  const solanaLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <defs>
+      <linearGradient id="solg"
+        x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%" stop-color="#9945FF"/>
+        <stop offset="100%" stop-color="#14F195"/>
+      </linearGradient>
+    </defs>
+    <rect width="32" height="32" rx="9" fill="#111"/>
+    <g fill="url(#solg)">
+      <path d="M9 8h16l-3 4H6z"/>
+      <path d="M7 14h16l3 4H10z"/>
+      <path d="M9 20h16l-3 4H6z"/>
+    </g>
+  </svg>`;
+
+  const robinhoodLogo=`
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <circle cx="16" cy="16" r="14" fill="#00C805"/>
+    <path fill="#081C15"
+      d="M10 8h7c5 0 8 2.7 8 7 0 3.1-1.7 5.3-4.5 6.3L24 25h-5l-3-3h-2v3h-4V8zm4 4v6h3c2.5 0 4-1 4-3s-1.5-3-4-3h-3z"/>
+  </svg>`;
+
+  const logos={
+    ethereum:ethereumLogo,
+    sepolia:ethereumLogo,
+    base:baseLogo,
+    bsc:bnbLogo,
+    bnb:bnbLogo,
+    "bnb-chain":bnbLogo,
+    arbitrum:arbitrumLogo,
+    polygon:polygonLogo,
+    solana:solanaLogo,
+    robinhood:robinhoodLogo
+  };
+
+
+  document.querySelectorAll("[data-chain]").forEach(card=>{
+
+    if(card.querySelector(".public-chain-logo")){
+      return;
+    }
+
+    let key=String(
+      card.dataset.chain||""
+    ).toLowerCase();
+
+    if(!logos[key]){
+      const text=card.textContent.toLowerCase();
+
+      if(text.includes("ethereum")) key="ethereum";
+      else if(text.includes("base")) key="base";
+      else if(text.includes("bnb") || text.includes("bsc")) key="bsc";
+      else if(text.includes("arbitrum")) key="arbitrum";
+      else if(text.includes("polygon")) key="polygon";
+      else if(text.includes("solana")) key="solana";
+      else if(text.includes("robinhood")) key="robinhood";
+    }
+
+    if(!logos[key]){
+      return;
+    }
+
+
+    /*
+      Hide old one-letter / placeholder icon,
+      but keep labels and Coming Soon badges.
+    */
+
+    for(const child of [...card.children]){
+      const txt=String(
+        child.textContent||""
+      ).trim();
+
+      if(
+        txt.length<=2 &&
+        !child.classList.contains(
+          "public-chain-logo"
+        )
+      ){
+        child.style.display="none";
+        break;
+      }
+    }
+
+
+    const logo=document.createElement("span");
+    logo.className="public-chain-logo";
+    logo.innerHTML=logos[key];
+
+    card.prepend(logo);
+  });
+}
+
+
+if(document.readyState==="loading"){
+  document.addEventListener(
+    "DOMContentLoaded",
+    angryPublicFormPolish
+  );
+}else{
+  angryPublicFormPolish();
+}
+
+
+/*
+  Run again after initial UI rendering in case
+  the NFT form redraws network cards/defaults.
+*/
+setTimeout(
+  angryPublicFormPolish,
+  250
+);
+
+setTimeout(
+  angryPublicFormPolish,
+  1000
 );
 
 
