@@ -242,6 +242,18 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 }
 </style>
 
+
+<style id="angry-wallet-status-colors">
+#walletBtn{
+  color:#f2f2f2 !important;
+  border-color:#777 !important;
+}
+#walletBtn.wallet-connected{
+  color:#ff6a2a !important;
+  border-color:#ff6a2a !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -301,9 +313,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="step">02</div>
           <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
           <div class="type-grid">
-            <button class="type active" type="button" data-type="standard" data-fee-usd="5.99"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="angry-token-create-fee">Mainnet fee: $5.99 + network gas</span><span class="status-badge ready">Deploy ready</span></button>
-            <button class="type" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, liquidity reserve and creator fee rules.</p><span class="angry-token-create-fee">Mainnet fee: $9.99 + network gas</span><span class="status-badge">TESTNET</span></button>
-            <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="angry-token-create-fee">Mainnet fee: $14.99 + network gas</span><span class="status-badge">TESTNET</span></button>
+            <button class="type active" type="button" data-type="standard" data-fee-usd="5.99"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="status-badge ready">Deploy ready</span></button>
+            <button class="type" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, liquidity reserve and creator fee rules.</p><span class="status-badge">TESTNET</span></button>
+            <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="status-badge">TESTNET</span></button>
           </div>
         </div>
       </section>
@@ -778,7 +790,7 @@ async function connectWallet(){
   const c=selectedChain();
   if(c.family!=="evm"){setStatus("Solana wallet support is Coming soon. The current Token Creator uses an EVM wallet for Ethereum, Base and Robinhood Chain test deployments.","warn");return}
   if(!window.ethereum){setStatus("EVM wallet provider not detected. Open the hosted ANGRY Launch page inside MetaMask or another compatible EVM wallet browser.","warn");return}
-  try{const accounts=await ethereum.request({method:"eth_requestAccounts"});state.account=accounts[0];$("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("walletBtn").classList.add("wallet-connected");$("projectWallet").value=state.account;renderPreview();setStatus("EVM wallet connected. Switch to "+c.name+" before deployment.","good")}catch(e){setStatus("Wallet connection cancelled: "+(e.message||e),"bad")}
+  try{const accounts=await ethereum.request({method:"eth_requestAccounts"});state.account=accounts[0];$("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("walletBtn").classList.add("wallet-connected");$("walletBtn").classList.add("wallet-connected");$("projectWallet").value=state.account;renderPreview();setStatus("EVM wallet connected. Switch to "+c.name+" before deployment.","good")}catch(e){setStatus("Wallet connection cancelled: "+(e.message||e),"bad")}
 }
 
 async function ensureNetwork(){

@@ -443,6 +443,18 @@ textarea::placeholder{
 </style>
 
 <script src="../assets/angry-treasury.js"></script>
+
+<style id="angry-wallet-status-colors">
+#walletBtn{
+  color:#f2f2f2 !important;
+  border-color:#777 !important;
+}
+#walletBtn.wallet-connected{
+  color:#ff6a2a !important;
+  border-color:#ff6a2a !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -1249,7 +1261,7 @@ async function connectWallet(){
   try{
     const a=await ethereum.request({method:"eth_requestAccounts"});
     state.account=a[0];
-    $("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);
+    $("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("walletBtn").classList.add("wallet-connected");
     $("recipient").value=state.account;
     render();
     setStatus("EVM wallet connected. You can switch to the selected testnet.","good");
@@ -3550,7 +3562,7 @@ $("deployOneOfOneBtn")?.addEventListener("click",deployOneOfOneSepolia);
 $("liveMetadataUri")?.addEventListener("input",()=>{
   state.liveMetadataUri=$("liveMetadataUri").value.trim();
 });
-if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";render()})}
+if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";$("walletBtn").classList.toggle("wallet-connected",!!state.account);render()})}
 setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 </script>
 
