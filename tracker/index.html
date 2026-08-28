@@ -1039,9 +1039,6 @@ footer{
     white-space:nowrap !important;
   }
 
-  .angry-mobile-duplicate-header{
-    display:none !important;
-  }
 }
 
 @media(min-width:761px){
@@ -1076,67 +1073,135 @@ footer{
 
 </style>
 
+
+
+<style id="angry-tracker-clean-ui">
+
+.angry-globalbrand-mark{
+  width:46px !important;
+  height:46px !important;
+  min-width:46px !important;
+  border-radius:14px !important;
+  background:url("../assets/angry-logo-final.png") center/cover no-repeat !important;
+  color:transparent !important;
+  font-size:0 !important;
+}
+
+.angry-globalbrand > span:last-child{
+  font-size:18px !important;
+  font-weight:900 !important;
+}
+
+.project-hero{
+  min-height:auto !important;
+}
+
+.hero-inner{
+  max-width:900px !important;
+}
+
+</style>
+
+
+<style id="angry-tracker-checker-cleanup">
+
+/* Network selector already shows the active network */
+.network-mini{
+  display:none !important;
+}
+
+/* Helpful internally, but unnecessary in the public flow */
+.checker-hint{
+  display:none !important;
+}
+
+#token-checker > button{
+  min-height:52px !important;
+  border-radius:14px !important;
+}
+
+/* Keep fast module navigation on desktop only */
+@media(max-width:760px){
+  .tool-jump-wrap{
+    display:none !important;
+  }
+}
+
+</style>
+
+
+<style id="angry-tracker-final-cleanup">
+
+/* Detailed trace methodology belongs in Docs, not the main Tracker flow */
+.cross-help{
+  display:none !important;
+}
+
+/* Tracker should remain a research tool.
+   Project documentation belongs on the dedicated Docs page. */
+#documentation{
+  display:none !important;
+}
+
+#mod-cross > button{
+  min-height:48px !important;
+  border-radius:13px !important;
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+
   <a class="angry-globalbrand" href="../index.html">
-    <span class="angry-globalbrand-mark">😡</span>
-    <span>ANGRY <small>ECOSYSTEM</small></span>
+    <span class="angry-globalbrand-mark"></span>
+    <span>ANGRY</span>
   </a>
+
   <nav class="angry-globalnav">
-    <a href="../index.html">Home</a><a class="active" href="../tracker/index.html">Tracker</a><a href="../token-creator/index.html">Token Creator</a><a href="../nft-creator/index.html">NFT Creator</a><a href="../docs/index.html">Docs</a>
+    <a href="../index.html">Home</a>
+    <a class="active" href="../tracker/index.html">Tracker</a>
+    <a href="../token-creator/index.html">Token Creator</a>
+    <a href="../nft-creator/index.html">NFT Creator</a>
+    <a href="../docs/index.html">Docs</a>
   </nav>
+
 </div>
 
-  <nav class="topbar">
-    <div class="container nav">
-      <a class="nav-brand" href="#home">ANGRY <span>😡</span></a>
-      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" onclick="toggleMobileNav(this)">☰</button>
-      <div class="nav-links" id="mainNavLinks">
-        <a class="tools-link" href="#tools">Tracker Tools</a>
-        <a href="#documentation">Project Notes</a>
-        <a href="../docs/index.html">Full Docs</a>
-        <a href="#official-links">Official Links</a>
-      </div>
-    </div>
-  </nav>
-
   <header id="home" class="project-hero">
-    <div class="hero-inner">
-      <div class="logo ecosystem-mark" role="img" aria-label="ANGRY">😡</div>
-      <h1>ANGRY TRACKER</h1>
-      <div class="tagline">ON-CHAIN RESEARCH, MADE EASIER.</div>
-      <p class="intro">
-        Research token activity from one interface. ANGRY Tracker combines market data with
-        explainable on-chain signals so users can review evidence without opening many separate tools.
-      </p>
+  <div class="hero-inner">
 
-      <div class="hero-actions">
-        <a class="hero-btn primary" href="#tools">🔎 Open Tracker</a>
-        <a class="hero-btn" href="../docs/index.html">Read Docs</a>
-      </div>
+    <div class="section-kicker">ANGRY TRACKER</div>
 
-      <span class="scroll">↓ Explore Tracker</span>
+    <h1>
+      Research tokens with
+      <span class="orange">clearer data.</span>
+    </h1>
+
+    <p class="intro">
+      Check token activity, holders, liquidity, creator history
+      and other important on-chain information from one place.
+    </p>
+
+    <div class="hero-actions">
+      <a class="hero-btn primary" href="#token-checker">
+        Open Tracker
+      </a>
     </div>
-  </header>
+
+  </div>
+</header>
 
   <section id="tools" class="tools-zone">
     <div class="tools-container">
       <div class="tools-heading">
-        <div class="emoji">😡</div>
-        <div class="section-kicker">On-chain research suite</div>
-        <h2>ANGRY <span class="orange">TOOLS</span></h2>
-        <p>
-          Analyze tokens on Solana, Ethereum, or Robinhood Chain using market data and explainable
-          on-chain signals. Results are risk signals and observations, not proof of fraud.
-        </p>
-        <div class="tools-status">
-          <span class="status-pill primary">● Solana V1</span>
-          <span class="status-pill">9 analysis modules</span>
-          <span class="status-pill">Explainable evidence</span><span class="status-pill">Smart cache V13</span>
-        </div>
+
+        <div class="section-kicker">TOKEN RESEARCH</div>
+        <h2>Analysis tools</h2>
+        <p>Select a network, enter a token address and run the checks you need.</p>
+
       </div>
 
       <div class="tool-jump-wrap" aria-label="ANGRY Tools navigation">
@@ -1148,13 +1213,10 @@ footer{
       </div>
       <section id="token-checker" class="checker">
         <div class="checker-label-row">
-          <h2>🔎 Token Checker</h2>
+          <h2>Token Checker</h2>
           <span class="network-mini"><span class="network-dot"></span> Solana</span>
         </div>
-        <p>
-          Enter one token contract address. Start with the overview, then open
-          deeper modules only when you need more evidence.
-        </p>
+        <p>Enter a token contract address to start the analysis.</p>
         <div class="angry-network-picker" aria-label="Select blockchain network">
           <div class="angry-network-picker-label">Network</div>
           <div class="angry-network-tabs" role="group" aria-label="Blockchain network">
@@ -1181,74 +1243,70 @@ footer{
 
       <section class="analysis-modules">
         <div class="module-title">
-          <h3>Analysis <span class="orange">Modules</span><span class="module-count">9</span></h3>
-          <p>Run only the checks you need. Each module explains what it can verify.</p>
+          <h3>Analysis <span class="orange">Modules</span></h3>
+          <p>Open the checks you need for deeper token research.</p>
         </div>
 
         <div class="tool" id="mod-burn">
-          <strong>🔥 Token Burn Tracker</strong>
-          <small>Track parsed on-chain burn instructions and current token supply.</small>
-          <button style="margin-top:15px;" onclick="analyzeBurns()">ANALYZE BURNS</button>
+          <strong>Token Burn</strong>
+          <small>Check burn activity and current token supply.</small>
+          <button style="margin-top:15px;" onclick="analyzeBurns()">Check Burn</button>
           <div id="burnResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-liquidity">
-          <strong>💧 Liquidity Checker</strong>
-          <small>Analyze liquidity depth, pool concentration and trading activity.</small>
-          <button style="margin-top:15px;" onclick="analyzeLiquidity()">ANALYZE LIQUIDITY</button>
+          <strong>Liquidity</strong>
+          <small>Check liquidity, pool concentration and trading activity.</small>
+          <button style="margin-top:15px;" onclick="analyzeLiquidity()">Check Liquidity</button>
           <div id="liquidityResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-holders">
-          <strong>👥 Holder Analyzer</strong>
-          <small>Analyze the largest token holders and holder concentration.</small>
-          <button style="margin-top:15px;" onclick="analyzeHolders()">ANALYZE HOLDERS</button>
+          <strong>Holders</strong>
+          <small>Review major holders and token concentration.</small>
+          <button style="margin-top:15px;" onclick="analyzeHolders()">Check Holders</button>
           <div id="holderResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-creator">
-          <strong>🥷 Creator Wallet Checker</strong>
-          <small>Explore the detected creator/deployer candidate and token activity.</small>
-          <button style="margin-top:15px;" onclick="analyzeCreator()">ANALYZE CREATOR</button>
+          <strong>Creator Wallet</strong>
+          <small>Review the detected creator or deployer wallet.</small>
+          <button style="margin-top:15px;" onclick="analyzeCreator()">Check Creator</button>
           <div id="creatorResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-history">
-          <strong>🧾 Creator History</strong>
-          <small>Scan the detected creator/deployer candidate for previous token or contract creation activity.</small>
-          <button style="margin-top:15px;" onclick="analyzeCreatorHistory()">ANALYZE CREATOR HISTORY</button>
+          <strong>Creator History</strong>
+          <small>Check previous token or contract creation activity.</small>
+          <button style="margin-top:15px;" onclick="analyzeCreatorHistory()">Check History</button>
           <div id="creatorHistoryResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-relations">
-          <strong>🔗 Wallet Relationship / Funding Trace</strong>
-          <small>Trace observed creator funding and direct token distribution to linked wallets.</small>
-          <button style="margin-top:15px;" onclick="analyzeWalletRelationships()">ANALYZE WALLET RELATIONS</button>
+          <strong>Wallet Relationships</strong>
+          <small>Review funding and direct wallet relationships.</small>
+          <button style="margin-top:15px;" onclick="analyzeWalletRelationships()">Check Relationships</button>
           <div id="walletRelationResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-timeline">
-          <strong>🕒 Risk Timeline</strong>
-          <small>Build a chronological view of creator funding, token distribution and linked-wallet behavior.</small>
-          <button style="margin-top:15px;" onclick="analyzeRiskTimeline()">BUILD RISK TIMELINE</button>
+          <strong>Activity Timeline</strong>
+          <small>View important token and creator activity chronologically.</small>
+          <button style="margin-top:15px;" onclick="analyzeRiskTimeline()">Build Timeline</button>
           <div id="riskTimelineResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-kol">
-          <strong>📣 KOL / Promotion Activity</strong>
+          <strong>KOL / Promotion</strong>
           <small>
             Check public KOL trading and promotion signals connected to this token.
             KOL activity is informational and does not by itself indicate fraud or a scam.
           </small>
 
-          <div class="kol-note">
-            🔵 Neutral research signal — ANGRY separates KOL activity from risk.
-            Concern should only increase when promotion activity is combined with other
-            explainable evidence such as unusual creator-linked selling or coordinated behavior.
-          </div>
+          <div class="kol-note">Promotion activity is informational and is not a scam signal by itself.</div>
 
           <button style="margin-top:15px;" onclick="analyzeKolPromotion()">
-            ANALYZE KOL / PROMOTION
+            Check Promotion
           </button>
 
           <div id="kolPromotionResult" style="display:none;margin-top:15px;"></div>
@@ -1256,7 +1314,7 @@ footer{
 
 
         <div class="tool" id="mod-cross">
-          <strong>🧬 Cross-Token / Developer Relationship</strong>
+          <strong>Cross-Token Relationships</strong>
           <small>
             Compare two tokens on the selected network and search for explainable on-chain
             links between deployer/creator candidates, funding sources and direct recipients.
@@ -1298,7 +1356,7 @@ footer{
           </div>
 
           <button style="margin-top:15px;" onclick="analyzeCrossTokenRelationship()">
-            COMPARE TOKEN RELATIONSHIPS
+            Compare Tokens
           </button>
 
           <div id="crossTokenResult" style="display:none;margin-top:15px;"></div>
@@ -1397,7 +1455,7 @@ footer{
 
   <footer>
     <div>© 2026 ANGRY. All rights reserved.</div>
-    <div class="footer-note">ANGRY is just an angry meme. ANGRY Tracker provides research signals and observations, not guarantees.</div>
+    <div class="footer-note">ANGRY Tracker provides research signals and observations, not guarantees.</div>
   </footer>
 
   <script>
@@ -15061,52 +15119,15 @@ document.addEventListener("DOMContentLoaded", angryUpdateNetworkUi);
     bar.appendChild(menu);
   }
 
-  const wallet=document.getElementById("walletBtn");
-
-  const walletHome=wallet ? {
-    parent:wallet.parentNode,
-    next:wallet.nextSibling
-  } : null;
-
-
-  /* Tandai header kedua, jangan hapus */
-  document.querySelectorAll(".topbar").forEach(el=>{
-    if(el !== bar && !bar.contains(el)){
-      el.classList.add("angry-mobile-duplicate-header");
-    }
-  });
-
-
-  /* Tracker duplicate header */
-  document.querySelectorAll("header,nav,section,div").forEach(el=>{
-    if(el===bar || bar.contains(el)) return;
-
-    const txt=(el.textContent||"")
-      .replace(/\s+/g," ")
-      .trim()
-      .toUpperCase();
-
-    if(
-      txt.includes("ANGRY TRACKER") &&
-      el.querySelector("button") &&
-      txt.length < 100
-    ){
-      el.classList.add("angry-mobile-duplicate-header");
-    }
-  });
-
-
   menu.addEventListener("click",()=>{
     const open=bar.classList.toggle("angry-menu-open");
 
     menu.textContent=open ? "×" : "☰";
-
     menu.setAttribute(
       "aria-expanded",
       open ? "true" : "false"
     );
   });
-
 
   if(nav){
     nav.querySelectorAll("a").forEach(a=>{
@@ -15118,187 +15139,19 @@ document.addEventListener("DOMContentLoaded", angryUpdateNetworkUi);
     });
   }
 
-
-  function apply(){
-
-    const mobile=window.matchMedia("(max-width:760px)").matches;
-
-    if(mobile){
-
-      if(wallet && wallet.parentNode !== bar){
-        bar.insertBefore(wallet,menu);
-      }
-
-    }else{
-
+  window.addEventListener("resize",()=>{
+    if(!window.matchMedia("(max-width:760px)").matches){
       bar.classList.remove("angry-menu-open");
       menu.textContent="☰";
-
-      if(wallet && walletHome && walletHome.parent){
-
-        if(
-          walletHome.next &&
-          walletHome.next.parentNode===walletHome.parent
-        ){
-          walletHome.parent.insertBefore(wallet,walletHome.next);
-        }else{
-          walletHome.parent.appendChild(wallet);
-        }
-      }
+      menu.setAttribute("aria-expanded","false");
     }
-  }
-
-  apply();
-  window.addEventListener("resize",apply);
-
-})();
-</script>
-
-
-<script id="angry-tracker-hero-cleanup-script-v1">
-(function(){
-
-  const norm = value =>
-    String(value || "")
-      .replace(/\s+/g," ")
-      .trim();
-
-  /* ----------------------------------------
-     Hide duplicate Tracker / Docs hero CTAs
-  ----------------------------------------- */
-
-  document.querySelectorAll("a,button").forEach(el => {
-
-    const text = norm(el.textContent).toLowerCase();
-
-    if(
-      text === "open tracker" ||
-      text === "open angry tracker" ||
-      text === "read docs"
-    ){
-      el.classList.add("angry-tracker-clean-hide");
-    }
-
-  });
-
-
-  /* ----------------------------------------
-     Hide Explore Tracker helper
-  ----------------------------------------- */
-
-  document.querySelectorAll("a,div,p,span").forEach(el => {
-
-    const text = norm(el.textContent)
-      .replace(/^↓\s*/,"")
-      .toLowerCase();
-
-    if(text === "explore tracker"){
-      el.classList.add("angry-tracker-clean-hide");
-    }
-
-  });
-
-
-  /* ----------------------------------------
-     Remove decorative angry emoji.
-     Header logo is an image, so it stays.
-  ----------------------------------------- */
-
-  document.querySelectorAll("div,span,p,i").forEach(el => {
-
-    if(el.closest(".angry-globalbar")){
-      return;
-    }
-
-    const ownText = norm(el.textContent);
-
-    if(
-      ownText === "😡" &&
-      el.children.length === 0
-    ){
-      el.classList.add("angry-tracker-clean-hide");
-    }
-
-  });
-
-
-  /* ----------------------------------------
-     Find main Tracker hero and compact it
-  ----------------------------------------- */
-
-  const headings = [
-    ...document.querySelectorAll("h1,h2")
-  ];
-
-  const title = headings.find(el =>
-    norm(el.textContent)
-      .toUpperCase()
-      .includes("ANGRY TRACKER")
-  );
-
-  if(title){
-
-    let hero = title.parentElement;
-
-    while(
-      hero &&
-      hero !== document.body
-    ){
-
-      const text = norm(hero.textContent);
-
-      if(
-        text.includes("ON-CHAIN RESEARCH") &&
-        text.includes("ANGRY TRACKER")
-      ){
-        hero.classList.add(
-          "angry-tracker-clean-hero"
-        );
-        break;
-      }
-
-      hero = hero.parentElement;
-    }
-
-  }
-
-
-  /* ----------------------------------------
-     Remove empty action containers left behind
-  ----------------------------------------- */
-
-  document.querySelectorAll("div").forEach(el => {
-
-    if(el.closest(".angry-globalbar")){
-      return;
-    }
-
-    const visibleChildren =
-      [...el.children].filter(child =>
-        !child.classList.contains(
-          "angry-tracker-clean-hide"
-        )
-      );
-
-    const text = norm(el.textContent)
-      .toLowerCase();
-
-    if(
-      visibleChildren.length === 0 &&
-      (
-        text === "open tracker read docs" ||
-        text === "open angry tracker read docs"
-      )
-    ){
-      el.classList.add(
-        "angry-tracker-clean-hide"
-      );
-    }
-
   });
 
 })();
 </script>
+
+
+
 
 </body>
 </html>
