@@ -33,10 +33,12 @@ contract AngryLiquidityTokenTest {
     uint16 public immutable holderFeeBps;
     uint16 public immutable liquidityFeeBps;
     uint16 public immutable projectFeeBps;
+    uint16 public immutable burnFeeBps;
 
     uint256 public totalHolderFees;
     uint256 public totalLiquidityReserved;
     uint256 public totalProjectFees;
+    uint256 public totalBurned;
 
     event Transfer(
         address indexed from,
@@ -53,7 +55,8 @@ contract AngryLiquidityTokenTest {
     event FeesTaken(
         uint256 holderAmount,
         uint256 liquidityAmount,
-        uint256 projectAmount
+        uint256 projectAmount,
+        uint256 burnAmount
     );
 
     constructor(
@@ -63,7 +66,8 @@ contract AngryLiquidityTokenTest {
         address projectWallet_,
         uint16 holderFeeBps_,
         uint16 liquidityFeeBps_,
-        uint16 projectFeeBps_
+        uint16 projectFeeBps_,
+        uint16 burnFeeBps_
     ) {
         require(bytes(name_).length > 0, "Name required");
         require(bytes(symbol_).length > 0, "Symbol required");
@@ -73,12 +77,14 @@ contract AngryLiquidityTokenTest {
         require(holderFeeBps_ <= 500, "Holder fee max 5%");
         require(liquidityFeeBps_ <= 500, "Liquidity fee max 5%");
         require(projectFeeBps_ <= 500, "Project fee max 5%");
+        require(burnFeeBps_ <= 500, "Burn fee max 5%");
 
         // Safer combined limit for the real deployment path.
         require(
             uint256(holderFeeBps_) +
             uint256(liquidityFeeBps_) +
-            uint256(projectFeeBps_) <= 1000,
+            uint256(projectFeeBps_) +
+            uint256(burnFeeBps_) <= 1000,
             "Total fee max 10%"
         );
 
@@ -90,6 +96,7 @@ contract AngryLiquidityTokenTest {
         holderFeeBps = holderFeeBps_;
         liquidityFeeBps = liquidityFeeBps_;
         projectFeeBps = projectFeeBps_;
+        burnFeeBps = burnFeeBps_;
 
         _totalSupply = supply_ * (10 ** uint256(decimals));
 
@@ -255,11 +262,15 @@ contract AngryLiquidityTokenTest {
         uint256 projectAmount =
             amount * projectFeeBps / 10000;
 
+        uint256 burnAmount =
+            amount * burnFeeBps / 10000;
+
         uint256 receivedAmount =
             amount -
             holderAmount -
             liquidityAmount -
-            projectAmount;
+            projectAmount -
+            burnAmount;
 
         uint256 rate =
             _reflectedSupply / _totalSupply;
@@ -270,15 +281,6 @@ contract AngryLiquidityTokenTest {
         uint256 reflectedReceived =
             receivedAmount * rate;
 
-        uint256 reflectedHolder =
-            holderAmount * rate;
-
-        uint256 reflectedLiquidity =
-            liquidityAmount * rate;
-
-        uint256 reflectedProject =
-            projectAmount * rate;
-
         _reflectedBalance[from] -=
             reflectedAmount;
 
@@ -288,7 +290,7 @@ contract AngryLiquidityTokenTest {
         // Reserve liquidity tokens in this contract.
         if (liquidityAmount > 0) {
             _reflectedBalance[address(this)] +=
-                reflectedLiquidity;
+                liquidityAmount * rate;
 
             totalLiquidityReserved +=
                 liquidityAmount;
@@ -303,7 +305,7 @@ contract AngryLiquidityTokenTest {
         // Send project allocation directly.
         if (projectAmount > 0) {
             _reflectedBalance[projectWallet] +=
-                reflectedProject;
+                projectAmount * rate;
 
             totalProjectFees +=
                 projectAmount;
@@ -315,11 +317,25 @@ contract AngryLiquidityTokenTest {
             );
         }
 
+        // True burn: permanently remove tokens from both
+        // token supply and reflected supply.
+        if (burnAmount > 0) {
+            _reflectedSupply -= burnAmount * rate;
+            _totalSupply -= burnAmount;
+            totalBurned += burnAmount;
+
+            emit Transfer(
+                from,
+                address(0),
+                burnAmount
+            );
+        }
+
         // Reflection: reducing reflected supply increases
         // the token balance represented by existing holders.
         if (holderAmount > 0) {
             _reflectedSupply -=
-                reflectedHolder;
+                holderAmount * rate;
 
             totalHolderFees +=
                 holderAmount;
@@ -334,7 +350,8 @@ contract AngryLiquidityTokenTest {
         emit FeesTaken(
             holderAmount,
             liquidityAmount,
-            projectAmount
+            projectAmount,
+            burnAmount
         );
     }
 }
