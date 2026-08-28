@@ -1176,7 +1176,7 @@ textarea::placeholder{
               </div>
 
               <div class="live-stage">
-                <div class="live-stage-title"><span class="live-stage-num">3</span><b>Deploy fixed-supply ERC-721</b></div>
+                <div class="live-stage-title"><span class="live-stage-num">3</span><b>Deploy NFT contract</b></div>
                 <p>Deploys a new ERC-721 contract for this 1 of 1 NFT and mints Token ID #1 directly to the recipient wallet. The contract has no extra mint function after deployment. Royalty information is exposed through ERC-2981.</p>
                 <button class="live-action primary" id="deployOneOfOneBtn" type="button" style="width:100%">Deploy 1 of 1 on Ethereum Sepolia</button>
                 <div class="live-note">Direct deployment does not charge the form's Mint Price. Mint Price is a future public-sale setting. Sepolia ETH is test ETH and has no real monetary value.</div>
@@ -1186,7 +1186,7 @@ textarea::placeholder{
             </div>
           </div>
         </div>
-        <div class="status" id="status">Ready. 1 of 1 and NFT Collection Ethereum Sepolia test deployment is available in the Testnet Deployment Lab. Multiple Editions remains configuration-only.</div>
+        <div class="status" id="status">Ready. 1 of 1 and NFT Collection Ethereum Sepolia test deployment is available in the Testnet Deployment Lab. Multiple Editions ERC-1155 test deployment is available on Ethereum Sepolia.</div>
       </div>
     </aside>
   </main>
@@ -1961,7 +1961,11 @@ function updateLiveLab(){
     state.purpose==="collection" &&
     state.type==="collection";
 
-  const enabled=isOne||isCollection;
+  const isEditions=
+    state.chain==="sepolia" &&
+    state.purpose==="editions";
+
+  const enabled=isOne||isCollection||isEditions;
 
   $("liveSepoliaFlow")?.classList.toggle("live-hidden",!enabled);
   $("liveUnsupported")?.classList.toggle("live-hidden",enabled);
@@ -1977,9 +1981,11 @@ function updateLiveLab(){
     $("liveLabPill").textContent=
       isCollection
         ?"Collection beta"
-        : isOne
-          ?"1 of 1 beta"
-          :"Limited beta";
+        : isEditions
+          ?"Multiple Editions beta"
+          : isOne
+            ?"1 of 1 beta"
+            :"Limited beta";
   }
 
   if($("uploadIpfsBtn")){
@@ -1995,7 +2001,9 @@ function updateLiveLab(){
     $("deployOneOfOneBtn").textContent=
       isCollection
         ?"Deploy "+supply+" NFT Collection on Ethereum Sepolia"
-        :"Deploy 1 of 1 on Ethereum Sepolia";
+        : isEditions
+          ?"Deploy "+supply+" Multiple Editions on Ethereum Sepolia"
+          :"Deploy 1 of 1 on Ethereum Sepolia";
   }
 
   if($("liveMetadataUri")){
@@ -2008,25 +2016,36 @@ function updateLiveLab(){
 
 function buildLiveMetadata(imageUri){
   const base=metadata(imageUri);
+  const isEditions=state.purpose==="editions";
+  const supply=isEditions
+    ? Number($("supply")?.value||0)
+    : 1;
+
   return {
     name:$("nftName").value.trim()||"Untitled NFT",
     description:$("description").value.trim(),
     image:imageUri,
     attributes:[
       {trait_type:"Created with",value:"ANGRY NFT Creator"},
-      {trait_type:"NFT type",value:"1 of 1"}
+      {
+        trait_type:"NFT type",
+        value:isEditions
+          ?"Multiple Editions"
+          :"1 of 1"
+      }
     ],
     angry_creator:{
       network:"Ethereum Sepolia",
-      structure:"ERC-721",
-      supply:1,
+      structure:isEditions
+        ?"ERC-1155"
+        :"ERC-721",
+      supply:supply,
       creator_wallet:$("recipient").value.trim()||state.account||"",
       royalty_percent:Number($("royalty").value||0)
     },
     source_configuration:base
   };
 }
-
 
 function buildLiveCollectionMetadata(imageUri,index){
   const base=metadata();
@@ -2236,10 +2255,17 @@ async function uploadOneOfOneToIpfs(){
     return uploadCollectionToIpfs();
   }
 
-  if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
-    setStatus("IPFS test upload is currently available only for 1 of 1 on Ethereum Sepolia.","warn");return;
+  if(!(
+    state.chain==="sepolia" &&
+    (
+      (state.purpose==="artwork" && state.type==="single") ||
+      state.purpose==="editions"
+    )
+  )){
+    setStatus("IPFS upload is currently available for 1 of 1 and Multiple Editions on Ethereum Sepolia.","warn");
+    return;
   }
-  if(!state.imageFile){setStatus("Upload the 1 of 1 artwork first.","warn");return}
+  if(!state.imageFile){setStatus("Upload the artwork first.","warn");return}
   if(!$("rightsCheck").checked){setStatus("Confirm that you own or have permission to use the artwork first.","warn");return}
 
 
