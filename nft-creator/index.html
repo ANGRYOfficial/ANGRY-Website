@@ -455,36 +455,155 @@ textarea::placeholder{
 }
 </style>
 
+
+<style id="angry-nft-clean-header">
+.angry-globalbrand-mark{
+  width:46px !important;
+  height:46px !important;
+  min-width:46px !important;
+  border-radius:14px !important;
+  background:url("../assets/angry-logo-final.png") center/cover no-repeat !important;
+  color:transparent !important;
+  font-size:0 !important;
+  overflow:hidden !important;
+}
+
+.angry-globalbrand > span:last-child{
+  font-size:18px !important;
+  font-weight:900 !important;
+  white-space:nowrap !important;
+}
+
+.angry-globalbar > .wallet{
+  flex:0 0 auto !important;
+  margin-left:10px !important;
+}
+
+@media(max-width:760px){
+  .angry-globalbar > .wallet{
+    margin-left:auto !important;
+  }
+}
+</style>
+
+
+<style id="angry-nft-purpose-cleanup">
+
+/* Keep future creator modes in the code, but hide them from public UI */
+.purpose.future-purpose{
+  display:none !important;
+}
+
+/* Advanced ERC selector is not part of the beginner flow */
+#advancedPicker{
+  display:none !important;
+}
+
+</style>
+
+
+<style id="angry-nft-settings-cleanup">
+
+/*
+Keep these fields in the DOM for existing JS,
+but do not present unsupported sale controls to users.
+*/
+#mintPriceField,
+#maxWalletField{
+  display:none !important;
+}
+
+/* 1 of 1 already explains itself through the selected NFT type */
+#artworkSettings{
+  display:none !important;
+}
+
+/* Future collection generator stays in code, not in the public flow */
+.pro-option.future-option,
+.future-panel{
+  display:none !important;
+}
+
+</style>
+
+
+<style id="angry-nft-purpose-settings-cleanup">
+
+/*
+Current Collection flow uses stable defaults.
+Keep its controls in DOM for existing JS but remove visual clutter.
+*/
+#collectionSettings{
+  display:none !important;
+}
+
+/*
+Current ERC-1155 Editions use one token ID with multiple units.
+Do not present individual numbering controls as if each copy were unique.
+*/
+#editionSettings{
+  display:none !important;
+}
+
+</style>
+
+
+<style id="angry-nft-final-ui-cleanup">
+
+/* Existing JS can continue writing here, but user-facing progress
+   is handled by simpleCreateProgress instead. */
+#status{
+  display:none !important;
+}
+
+#simpleCreateBtn{
+  min-height:54px !important;
+  border-radius:14px !important;
+  font-size:13px !important;
+}
+
+#simpleCreateProgress{
+  margin-top:10px !important;
+  font-size:11px !important;
+  line-height:1.5 !important;
+}
+
+</style>
 </head>
 <body>
 
 <div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+
   <a class="angry-globalbrand" href="../index.html">
-    <span class="angry-globalbrand-mark">😡</span>
-    <span>ANGRY <small>ECOSYSTEM</small></span>
+    <span class="angry-globalbrand-mark"></span>
+    <span>ANGRY</span>
   </a>
+
   <nav class="angry-globalnav">
-    <a href="../index.html">Home</a><a href="../tracker/index.html">Tracker</a><a href="../token-creator/index.html">Token Creator</a><a class="active" href="../nft-creator/index.html">NFT Creator</a><a href="../docs/index.html">Docs</a>
+    <a href="../index.html">Home</a>
+    <a href="../tracker/index.html">Tracker</a>
+    <a href="../token-creator/index.html">Token Creator</a>
+    <a class="active" href="../nft-creator/index.html">NFT Creator</a>
+    <a href="../docs/index.html">Docs</a>
   </nav>
+
+  <button class="wallet" id="walletBtn" type="button">
+    Connect Wallet
+  </button>
+
 </div>
 
 <div class="shell">
-  <header class="topbar">
-    <div class="brand">
-      <div class="mark">😡</div>
-      <div class="brand-name">ANGRY <span style="color:#ff7f54">NFT Creator</span><span class="beta">Beta v0.7.1</span></div>
-    </div>
-    <button class="wallet" id="walletBtn">Connect wallet</button>
-  </header>
 
   <section class="hero">
-    <div>
-      <div class="eyebrow">No-code NFT creation</div>
-      <h1>Create NFTs without writing a smart contract.</h1>
-      <p>Choose a network, upload artwork and configure the NFT from one interface. The 1 of 1 path now includes a real Ethereum Sepolia test-deployment lab; Collection and Multiple Editions remain configuration-only while testing continues.</p>
-    </div>
-    <div class="env">TESTNET BETA<br>No mainnet assets required</div>
-  </section>
+  <div>
+    <div class="eyebrow">NFT CREATOR</div>
+    <h1>Create NFTs with a clear workflow.</h1>
+    <p>Choose a network, select the NFT type, upload your artwork and review everything before deployment.</p>
+  </div>
+
+  <div class="env">TESTNET MODE</div>
+</section>
 
   <main class="layout">
     <section class="card">
@@ -507,25 +626,23 @@ textarea::placeholder{
           <button class="network-card" data-chain="arb"><span class="net-icon">A</span><span>Arbitrum</span></button>
           <button class="network-card" data-chain="polygon"><span class="net-icon">P</span><span>Polygon</span></button>
         </div>
-        <div class="help" id="networkHint" style="margin-top:8px">Ethereum Sepolia · ERC-721 / ERC-1155 test environment</div>
+        <div class="help" id="networkHint" style="margin-top:8px">Ethereum Sepolia test network</div>
         <button class="btn secondary" id="switchBtn" style="display:none!important">Switch wallet to selected testnet</button>
-        <div class="storage-note" style="margin-top:8px">
-          <b>Network architecture:</b> Ethereum, Base, Robinhood Chain, BSC, Arbitrum and Polygon use the EVM/ERC path. Solana is listed separately because professional Solana NFTs use a different wallet/program architecture and will use Metaplex Core rather than pretending to be ERC-721/1155.
-        </div>
+
       </div>
 
       <div class="section">
-        <div class="section-head"><div class="step">02</div><div><div class="sec-title">What do you want to create?</div><div class="sec-sub">Choose the purpose. ANGRY will suggest the NFT structure automatically.</div></div></div><div class="beginner-note">You do not need to understand ERC-721 or ERC-1155. Choose what you want to make and ANGRY will apply beginner-safe defaults.</div>
-        <div class="launch-scope-note"><b>Initial launch:</b> 1 of 1 NFT, NFT Collection and Multiple Editions. More creator tools will be released step by step after testing.</div>
+        <div class="section-head"><div class="step">02</div><div><div class="sec-title">What do you want to create?</div><div class="sec-sub">Choose the purpose. ANGRY will suggest the NFT structure automatically.</div></div></div><div class="beginner-note">Choose what you want to create. ANGRY will select the appropriate NFT structure automatically.</div>
+
         <div class="purpose-grid">
           <button class="purpose active" data-purpose="artwork" data-fee-usd="0.99">
-            <span class="purpose-icon">1/1</span><b>1 of 1 NFT</b><small>One unique artwork or collectible.</small><span class="angry-create-fee">$0.99 + network gas</span>
+            <span class="purpose-icon">1/1</span><b>1 of 1 NFT</b><small>One unique artwork or collectible.</small>
           </button>
           <button class="purpose" data-purpose="collection" data-fee-usd="4.99">
-            <span class="purpose-icon">COL</span><b>NFT Collection</b><small>Many unique NFTs in one collection.</small><span class="angry-create-fee">$4.99 + network gas</span>
+            <span class="purpose-icon">COL</span><b>NFT Collection</b><small>Many unique NFTs in one collection.</small>
           </button>
           <button class="purpose" data-purpose="editions" data-fee-usd="1.99">
-            <span class="purpose-icon">ED</span><b>Multiple Editions</b><small>Many copies of the same item.</small><span class="angry-create-fee">$1.99 + network gas</span>
+            <span class="purpose-icon">ED</span><b>Multiple Editions</b><small>Many copies of the same item.</small>
           </button>
           <button class="purpose future-purpose" data-purpose="tickets" aria-disabled="true">
             <span class="purpose-status">Coming soon</span>
@@ -573,7 +690,7 @@ textarea::placeholder{
           <div id="emptyUpload">
             <div class="upload-icon">↑</div>
             <div class="drop-title" id="uploadTitle">Upload NFT artwork</div>
-            <div class="drop-sub" id="uploadSub">PNG, JPG, WEBP or GIF · Local preview in this beta</div><div class="collection-drop-status hidden" id="collectionDropStatus">0 selected · Target 100</div>
+            <div class="drop-sub" id="uploadSub">PNG, JPG, WEBP or GIF</div><div class="collection-drop-status hidden" id="collectionDropStatus">0 selected · Target 100</div>
           </div>
           <img id="artPreview" class="preview-img hidden" alt="NFT preview">
         </div>
@@ -604,7 +721,7 @@ textarea::placeholder{
     </div><div class="bulk-feedback hidden" id="bulkFeedback"></div>
         </div>
 
-        <div class="storage-note">Artwork previews locally first. When uploaded, artwork and metadata are stored on IPFS through the ANGRY server-side storage service. No Pinata credential is required in the browser.</div>
+        <div class="storage-note">Your artwork and NFT metadata will be prepared automatically during creation.</div>
 
         <div class="grid2" style="margin-top:12px">
           <div class="field">
@@ -623,7 +740,7 @@ textarea::placeholder{
       </div>
 
       <div class="section">
-        <div class="section-head"><div class="step">04</div><div><div class="sec-title">Guided settings</div><div class="sec-sub">Configure supply, minting and royalty preferences.</div></div></div>
+        <div class="section-head"><div class="step">04</div><div><div class="sec-title">NFT settings</div><div class="sec-sub">Review supply and royalty settings.</div></div></div>
         <div class="grid2">
           <div class="field">
             <label>Symbol</label>
@@ -1073,8 +1190,8 @@ textarea::placeholder{
         </div>
 
         <div class="validation-box" id="validationBox">
-          <b>Configuration check</b>
-          <div id="validationMessages">✓ Settings look consistent.</div>
+          <b>Ready check</b>
+          <div id="validationMessages">✓ NFT settings are ready.</div>
         </div>
 
         <div class="rights-box">
@@ -1089,7 +1206,7 @@ textarea::placeholder{
     <aside class="card review">
       <div class="card-head">
         <div class="card-title">NFT preview</div>
-        <div class="card-sub">Live preview and metadata generated from the form.</div>
+        <div class="card-sub">Preview your NFT before creation.</div>
       </div>
       <div class="section">
         <div class="nft-preview" id="singlePreviewPanel">
@@ -1135,7 +1252,7 @@ textarea::placeholder{
             class="status"
             id="simpleCreateProgress"
           >
-            Fill in the details, upload the artwork, then create your NFT.
+            Complete the details above, then create your NFT.
           </div>
 
           <div
@@ -1203,8 +1320,8 @@ textarea::placeholder{
   </div>
 
   <footer class="footer">
-    <span>ANGRY NFT Creator Beta v0.7.1 · No-code NFT tooling</span>
-    <span>Testnet planning · Separate page, same ANGRY ecosystem</span>
+    <span>© 2026 ANGRY</span>
+    <span>Testnet environment · Do not use mainnet funds.</span>
   </footer>
 </div>
 
