@@ -2957,7 +2957,15 @@ function updateSimpleCreateUI(){
         "Ready to create the NFT. ANGRY will handle storage and deployment automatically.";
     }
   }
-  else{
+  else if(state.purpose==="editions"){
+    btn.textContent="Create NFT";
+
+    if(progress && !btn.disabled){
+        progress.textContent=
+            "Ready to create Multiple Editions on Ethereum Sepolia.";
+    }
+}
+else{
     btn.textContent="Create NFT";
 
     if(progress && !btn.disabled){
@@ -3062,7 +3070,8 @@ async function runSimpleCreate(){
       state.chain==="sepolia" &&
       (
         state.purpose==="artwork" ||
-        state.purpose==="collection"
+        state.purpose==="collection" ||
+        state.purpose==="editions"
       )
     )
   ){
@@ -3151,7 +3160,11 @@ async function runSimpleCreate(){
        RESET PREVIOUS STORAGE STATE
     --------------------------------------------- */
 
-    if(state.purpose==="collection"){
+    if(state.purpose==="editions"){
+    return await deployEditionsSepolia();
+}
+
+if(state.purpose==="collection"){
 
       if(
         Array.isArray(
