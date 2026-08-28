@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>ANGRY | On-Chain Research & Creator Tools</title>
+<link rel="stylesheet" href="assets/ecosystem.css">
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:
+radial-gradient(circle at 50% -15%,rgba(255,84,28,.15),transparent 34rem),
+#050607;color:#f5f7f8;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}.wrap{width:min(1180px,calc(100% - 30px));margin:0 auto}
+.home-nav{position:sticky;top:0;z-index:50;background:rgba(5,6,7,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)}
+.home-nav .inner{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.03em}.brand-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#ff692a,#f04712);font-size:20px}
+.navlinks{display:flex;gap:4px}.navlinks a{padding:9px 11px;border-radius:9px;color:#8f979e;font-size:11px;font-weight:800}.navlinks a:hover,.navlinks a.active{color:#fff;background:#111519}
+.hero{min-height:620px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(310px,.7fr);align-items:center;gap:44px;padding:70px 0}
+.kicker{color:#ff8458;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;margin-bottom:13px}
+h1{font-size:clamp(42px,7vw,78px);line-height:.98;letter-spacing:-.055em;margin:0;max-width:850px}.orange{color:#ff5a20}
+.hero p{max-width:720px;color:#9ba2a8;font-size:16px;line-height:1.65;margin:20px 0 0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 17px;border-radius:11px;border:1px solid #2d3339;background:#101316;color:#e7eaec;font-size:12px;font-weight:850}.btn.primary{border-color:#ff541c;background:linear-gradient(180deg,#ff6425,#ff4d12);color:#fff;box-shadow:0 12px 30px rgba(255,84,28,.16)}
+.hero-console{border:1px solid #242a2f;background:linear-gradient(180deg,#101316,#080a0c);border-radius:22px;padding:18px;box-shadow:0 28px 80px rgba(0,0,0,.32)}
+.console-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px solid #22282d}.console-head b{font-size:13px}.live{font-size:9px;font-weight:900;color:#7edc99;border:1px solid rgba(75,211,116,.23);background:rgba(75,211,116,.05);border-radius:999px;padding:5px 8px}
+.console-list{display:grid;gap:8px;margin-top:14px}.console-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #20262b;border-radius:11px;background:#0b0e10;padding:11px}.console-row span{color:#818a91;font-size:10px}.console-row strong{font-size:10px;text-align:right}.status-good{color:#78d994}.status-beta{color:#ffb95a}
+.section{padding:82px 0;border-top:1px solid #15191d}.section-head{max-width:740px;margin-bottom:30px}.section-head h2{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.045em;margin:0}.section-head p{color:#8f979e;line-height:1.6;font-size:14px}
+.products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.product{position:relative;min-height:270px;border:1px solid #242a2f;border-radius:18px;background:linear-gradient(180deg,#0f1215,#090b0d);padding:20px;overflow:hidden;transition:.16s}.product:hover{transform:translateY(-2px);border-color:#343c43}.product::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:2px;background:linear-gradient(90deg,#ff541c,transparent 70%)}.product-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#171b1f;border:1px solid #2a3036;font-size:21px;margin-bottom:23px}.product h3{font-size:20px;letter-spacing:-.03em;margin:0 0 9px}.product p{font-size:12px;color:#8b949b;line-height:1.55;margin:0}.product-footer{position:absolute;left:20px;right:20px;bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:10px}.chip{display:inline-flex;border:1px solid #2c3238;border-radius:999px;padding:5px 8px;color:#9aa2a8;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.arrow{color:#ff7b4b;font-weight:900}
+.architecture{display:grid;grid-template-columns:1fr 1fr;gap:14px}.arch-card{border:1px solid #242a2f;border-radius:18px;background:#0b0e10;padding:22px}.arch-card h3{font-size:16px;margin:0 0 9px}.arch-card p{font-size:12px;color:#8e969d;line-height:1.6;margin:0}.network-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}.net{border:1px solid #2a3036;border-radius:999px;padding:7px 9px;background:#101316;color:#aab0b5;font-size:9px;font-weight:850}
+.notice{margin-top:18px;border:1px solid rgba(255,84,28,.26);background:rgba(255,84,28,.045);border-radius:14px;padding:14px;color:#c49a8a;font-size:11px;line-height:1.55}
+footer{border-top:1px solid #171b1f;padding:30px 0 40px;color:#676f75;font-size:10px}.footer-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:850px){.hero{grid-template-columns:1fr;min-height:auto;padding:64px 0}.hero-console{max-width:620px}.products{grid-template-columns:1fr}.product{min-height:220px}.architecture{grid-template-columns:1fr}}
+@media(max-width:640px){.wrap{width:min(100% - 22px,1180px)}.home-nav .inner{min-height:58px}.navlinks{overflow-x:auto;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}.navlinks a{flex:0 0 auto;font-size:9.5px;padding:8px}.brand span:last-child{display:none}.hero{padding:50px 0}.hero p{font-size:13px}.section{padding:58px 0}.product{min-height:235px}}
+</style>
+</head>
+<body>
+<nav class="home-nav">
+  <div class="wrap inner">
+    <a class="brand" href="index.html"><span class="brand-mark">😡</span><span>ANGRY</span></a>
+    <div class="navlinks">
+      <a class="active" href="index.html">Home</a>
+      <a href="tracker/index.html">Tracker</a>
+      <a href="token-creator/index.html">Token Creator</a>
+      <a href="nft-creator/index.html">NFT Creator</a>
+      <a href="docs/index.html">Docs</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="wrap hero">
+    <div>
+      <div class="kicker">ANGRY on-chain toolkit</div>
+      <h1>Research. Create. <span class="orange">Launch.</span></h1>
+      <p>
+        One ANGRY website for token research, token creation and NFT creation.
+        The tools stay separated internally so each product can be tested and maintained without turning the site into one fragile file.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="tracker/index.html">Open ANGRY Tracker</a>
+        <a class="btn" href="docs/index.html">Read Documentation</a>
+      </div>
+    </div>
+    <aside class="hero-console">
+      <div class="console-head"><b>Product status</b><span class="live">ACTIVE DEVELOPMENT</span></div>
+      <div class="console-list">
+        <div class="console-row"><span>ANGRY Tracker</span><strong class="status-good">Multi-chain beta</strong></div>
+        <div class="console-row"><span>Token Creator</span><strong class="status-good">Standard test deploy</strong></div>
+        <div class="console-row"><span>NFT Creator</span><strong class="status-beta">Configurator beta</strong></div>
+        <div class="console-row"><span>Documentation</span><strong class="status-good">Available</strong></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Products</div>
+        <h2>One ecosystem, separate tools.</h2>
+        <p>Each product has one clear job and its own code path. This keeps the user experience connected while making maintenance safer.</p>
+      </div>
+      <div class="products">
+        <a class="product" href="tracker/index.html">
+          <div class="product-icon">🔎</div>
+          <h3>ANGRY Tracker</h3>
+          <p>Review market data, holders, liquidity, creator activity, wallet relationships, KOL signals and other explainable on-chain evidence.</p>
+          <div class="product-footer"><span class="chip">Research</span><span class="arrow">Open →</span></div>
+        </a>
+        <a class="product" href="token-creator/index.html">
+          <div class="product-icon">T</div>
+          <h3>Token Creator</h3>
+          <p>Create and review token settings without writing a contract manually. Standard Token test deployment is enabled on selected EVM testnets.</p>
+          <div class="product-footer"><span class="chip">Testnet Beta</span><span class="arrow">Open →</span></div>
+        </a>
+        <a class="product" href="nft-creator/index.html">
+          <div class="product-icon">NFT</div>
+          <h3>NFT Creator</h3>
+          <p>Prepare 1 of 1 NFTs, unique collections and multiple editions with guided settings. Live NFT deployment remains a later stage.</p>
+          <div class="product-footer"><span class="chip">Configurator Beta</span><span class="arrow">Open →</span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Architecture</div>
+        <h2>Multi-chain without pretending every chain is the same.</h2>
+        <p>ANGRY can share one interface while keeping EVM and Solana logic separated where their wallets, token standards or NFT systems differ.</p>
+      </div>
+      <div class="architecture">
+        <div class="arch-card">
+          <h3>EVM path</h3>
+          <p>Ethereum, Base, Robinhood Chain, BNB Smart Chain, Arbitrum and Polygon can use EVM-compatible wallet and contract patterns when the specific tool has that network enabled.</p>
+          <div class="network-row">
+            <span class="net">Ethereum</span><span class="net">Base</span><span class="net">Robinhood Chain</span><span class="net">BSC</span><span class="net">Arbitrum</span><span class="net">Polygon</span>
+          </div>
+        </div>
+        <div class="arch-card">
+          <h3>Solana path</h3>
+          <p>Solana uses its own token and wallet architecture. ANGRY keeps Solana-specific implementation separate instead of routing Solana through ERC logic.</p>
+          <div class="network-row"><span class="net">Solana</span><span class="net">SPL Token</span><span class="net">Solana wallet path</span></div>
+        </div>
+      </div>
+      <div class="notice"><b>Beta notice:</b> testnet and planner features are clearly separated from live deployment. A visible network card does not automatically mean every contract type is deployment-ready on that network.</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 ANGRY. Built step by step.</span>
+    <span>Research signals are not guarantees. Test beta deployments before mainnet use.</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,2226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANGRY NFT Creator — Beta</title>
+<style>
+:root{
+  --bg:#070808;--surface:#0d0f10;--surface2:#111416;--line:#252a2e;--text:#f5f6f7;
+  --muted:#8b949b;--muted2:#687178;--orange:#ff571f;--orange2:#ff7a45;--green:#50d378;
+  --warn:#ffbd4a;--red:#ff7169;--radius:16px;--shadow:0 22px 70px rgba(0,0,0,.32);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:
+  radial-gradient(circle at 14% -10%,rgba(255,87,31,.13),transparent 30rem),
+  radial-gradient(circle at 100% 0%,rgba(255,87,31,.05),transparent 24rem),var(--bg);
+  color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,textarea,select{font:inherit}.hidden{display:none!important}
+.shell{max-width:1180px;margin:auto;padding:0 20px 42px}
+.topbar{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.055)}
+.brand{display:flex;align-items:center;gap:10px}.mark{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#ff682d,#e94612);font-size:20px}
+.brand-name{font-weight:850;letter-spacing:-.03em}.beta{font-size:9px;font-weight:900;color:#ff9c78;border:1px solid rgba(255,87,31,.28);padding:4px 7px;border-radius:999px;margin-left:5px}
+.nav{display:flex;gap:5px;padding:4px;background:#0d1012;border:1px solid #21262a;border-radius:11px}
+.nav a{color:#8d969d;text-decoration:none;font-size:10px;font-weight:800;padding:7px 9px;border-radius:8px}
+.nav a.active{background:#191d20;color:#fff}
+.wallet{border:1px solid #30363b;background:#15191c;color:#fff;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:800}
+.hero{padding:38px 0 23px;display:flex;justify-content:space-between;gap:24px;align-items:flex-end}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.13em;font-weight:900;color:#ff8d63;margin-bottom:9px}
+.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.02;letter-spacing:-.045em;margin:0;max-width:700px}
+.hero p{max-width:670px;color:#99a2a9;line-height:1.58;font-size:13px;margin:13px 0 0}
+.env{border:1px solid #242a2e;background:#0c0f11;padding:10px 12px;border-radius:11px;color:#929aa0;font-size:10px;line-height:1.45;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:17px;align-items:start}
+.card{background:rgba(13,15,16,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-head{padding:16px 18px;border-bottom:1px solid #1d2226}
+.card-title{font-size:13px;font-weight:850}.card-sub{font-size:9px;color:#798289;margin-top:3px}
+.section{padding:18px;border-bottom:1px solid #1d2226}.section:last-child{border-bottom:0}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step{width:26px;height:26px;border-radius:8px;border:1px solid #2a3035;background:#171b1e;display:grid;place-items:center;font-size:9px;font-weight:900;color:#b5bdc3}
+.sec-title{font-size:12px;font-weight:850}.sec-sub{font-size:8.5px;color:#717a81;margin-top:2px}
+.network-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.network-card{min-height:64px;border:1px solid #293036;background:#0b0e10;color:#bfc5ca;border-radius:11px;padding:8px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:9px;font-weight:850}
+.network-card.active{border-color:var(--orange);background:linear-gradient(145deg,rgba(255,87,31,.12),rgba(255,87,31,.02));color:#fff;box-shadow:inset 0 0 0 1px rgba(255,87,31,.08)}
+.net-icon{width:23px;height:23px;border-radius:7px;display:grid;place-items:center;background:#171b1f;border:1px solid #30363b;font-size:10px}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.type{min-height:100px;border:1px solid #293036;background:#0b0e10;color:#fff;border-radius:12px;padding:11px;text-align:left}
+.type.active{border-color:var(--orange);background:linear-gradient(145deg,rgba(255,87,31,.11),rgba(255,87,31,.02))}
+.type-top{display:flex;align-items:center;gap:8px}.type-icon{width:27px;height:27px;border-radius:8px;background:#171b1f;border:1px solid #30363b;display:grid;place-items:center;font-size:9px;font-weight:900}
+.type.active .type-icon{background:linear-gradient(145deg,#ff652b,#f04b15);border-color:#ff652b}
+.type b{font-size:10.5px}.type p{font-size:8px;color:#747d84;line-height:1.35;margin:7px 0 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field label{display:block;color:#b9c0c5;font-size:9px;font-weight:760;margin-bottom:6px}
+input,textarea,select{width:100%;border:1px solid #293036;background:#090b0d;color:#f4f5f6;border-radius:10px;padding:10px 11px;font-size:11px;outline:none}
+textarea{resize:vertical;min-height:86px;line-height:1.45}
+input:focus,textarea:focus,select:focus{border-color:rgba(255,87,31,.75);box-shadow:0 0 0 3px rgba(255,87,31,.07)}
+.help{font-size:8px;color:#667077;line-height:1.42;margin-top:5px}
+.dropzone{border:1px dashed #3a4248;background:#0a0d0f;border-radius:13px;padding:14px;text-align:center;cursor:pointer;transition:.15s}
+.dropzone:hover{border-color:#596269}.dropzone.has-image{padding:8px;text-align:left}
+.preview-img{width:100%;max-height:260px;object-fit:contain;border-radius:10px;background:#060708}
+.upload-icon{width:42px;height:42px;border-radius:12px;margin:0 auto 9px;display:grid;place-items:center;background:#171b1f;border:1px solid #30363b;color:#ff875e;font-size:17px}
+.drop-title{font-size:10.5px;font-weight:850}.drop-sub{font-size:8px;color:#737c83;margin-top:4px}
+.storage-note{margin-top:8px;padding:9px 10px;border:1px solid rgba(255,189,74,.17);background:rgba(255,189,74,.04);border-radius:10px;color:#b49a64;font-size:8px;line-height:1.45}
+.segment{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.segment button{border:1px solid #293036;background:#0b0e10;color:#aeb5ba;border-radius:9px;padding:9px;font-size:9px;font-weight:800}
+.segment button.active{border-color:var(--orange);color:#fff;background:rgba(255,87,31,.08)}
+.review{position:sticky;top:14px}
+.nft-preview{border:1px solid #242a2e;background:#090b0d;border-radius:13px;overflow:hidden}
+.nft-visual{aspect-ratio:1/1;background:linear-gradient(145deg,#14181b,#090b0d);display:grid;place-items:center;color:#626b72;font-size:12px;border-bottom:1px solid #242a2e}
+.nft-visual img{width:100%;height:100%;object-fit:cover}
+.nft-info{padding:13px}.nft-name{font-size:14px;font-weight:900;letter-spacing:-.02em}.nft-collection{font-size:9px;color:#838c93;margin-top:3px}
+.meta{margin-top:12px;border:1px solid #242a2e;background:#090b0d;border-radius:11px;padding:11px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:8.5px;line-height:1.55;color:#aeb6bc;white-space:pre-wrap;word-break:break-word;max-height:250px;overflow:auto}
+.btn{width:100%;border-radius:10px;padding:11px 12px;font-weight:850;font-size:10px;margin-top:9px;border:0}
+.primary{background:linear-gradient(180deg,#ff642a,#ef4d15);color:#fff}.secondary{background:#15191c;border:1px solid #293036;color:#dce0e3}
+.status{margin-top:10px;border:1px solid #252b2f;background:#0a0c0e;border-radius:10px;padding:10px;color:#7b858c;font-size:8.5px;line-height:1.5}
+.status.good{color:#95d8a5;border-color:rgba(80,211,120,.2);background:rgba(80,211,120,.035)}
+.status.warn{color:#cfb471;border-color:rgba(255,189,74,.2);background:rgba(255,189,74,.035)}
+.footer{padding:22px 1px 4px;color:#616970;font-size:9px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+.purpose-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.purpose{min-height:92px;border:1px solid #293036;background:#0b0e10;color:#fff;border-radius:12px;padding:10px;text-align:left;display:flex;flex-direction:column;align-items:flex-start}
+.purpose.active{border-color:var(--orange);background:linear-gradient(145deg,rgba(255,87,31,.11),rgba(255,87,31,.02));box-shadow:inset 0 0 0 1px rgba(255,87,31,.06)}
+.purpose-icon{height:24px;min-width:30px;padding:0 6px;border-radius:7px;background:#171b1f;border:1px solid #30363b;display:grid;place-items:center;font-size:7.5px;font-weight:950;color:#bdc4c8}
+.purpose.active .purpose-icon{background:linear-gradient(145deg,#ff652b,#f04b15);border-color:#ff652b;color:#fff}
+.purpose b{font-size:9.4px;margin-top:8px}.purpose small{font-size:7.2px;color:#747d84;line-height:1.35;margin-top:3px}
+.guide-card{margin-top:10px;padding:11px 12px;border:1px solid rgba(255,87,31,.19);background:rgba(255,87,31,.035);border-radius:11px}
+.guide-title{font-size:9.5px;font-weight:900;color:#ff936d}.guide-text{font-size:8.4px;line-height:1.5;color:#879097;margin-top:4px}
+.advanced-picker{margin-top:10px}.advanced-picker>label{display:block;font-size:8px;color:#818a91;margin-bottom:6px}
+
+.config-hidden-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.collection-option-group{margin-top:12px}
+.collection-option-group:first-of-type{margin-top:8px}
+.collection-option-label{margin-bottom:7px;color:#aeb5ba;font-size:8.5px;font-weight:850}
+.pro-option{width:100%;display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #293036;border-radius:11px;background:#0a0d0f;text-align:left;color:#d9dee1}
+.active-option{border-color:rgba(80,211,120,.22);background:rgba(80,211,120,.025)}
+.pro-option-icon{flex:0 0 30px;height:30px;border-radius:9px;display:grid;place-items:center;border:1px solid #30373c;background:#15191c;color:#9da5aa;font-size:12px;font-weight:900}
+.active-option .pro-option-icon{border-color:rgba(80,211,120,.28);background:rgba(80,211,120,.06);color:#8ed49e}
+.pro-option-copy{min-width:0;flex:1}
+.pro-option-copy>span{display:block;margin-top:4px;color:#747e84;font-size:7.8px;line-height:1.45}
+.pro-option-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pro-option-title-row b{color:#eef1f3;font-size:9px}
+.status-pill{flex:0 0 auto;padding:4px 7px;border-radius:999px;font-size:6.8px;font-weight:900;letter-spacing:.01em}
+.status-pill.available{border:1px solid rgba(80,211,120,.20);background:rgba(80,211,120,.05);color:#8ed49e}
+.status-pill.coming{border:1px solid rgba(255,189,74,.20);background:rgba(255,189,74,.045);color:#d8b76f}
+.future-option{margin-top:7px;cursor:pointer;appearance:none}
+.future-option:active{transform:scale(.997)}
+.future-option[aria-expanded="true"]{border-color:rgba(255,87,31,.38);background:rgba(255,87,31,.035);border-radius:11px 11px 8px 8px}
+.future-option[aria-expanded="true"] .pro-option-icon{border-color:rgba(255,87,31,.40);background:rgba(255,87,31,.08);color:#ff966f}
+.future-chevron{flex:0 0 auto;color:#7f888e;font-size:14px;transition:transform .2s ease}
+.future-option[aria-expanded="true"] .future-chevron{transform:rotate(180deg);color:#ff966f}
+.future-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .24s ease,opacity .18s ease}
+.future-panel.open{grid-template-rows:1fr;opacity:1}
+.future-panel-inner{overflow:hidden}
+.future-panel-inner>b,.future-panel-inner>p,.future-note{margin-left:10px;margin-right:10px}
+.future-panel-inner>b{display:block;margin-top:10px;color:#e1e5e7;font-size:8.5px}
+.future-panel-inner>p{margin-top:5px;margin-bottom:0;color:#7e878d;font-size:7.8px;line-height:1.55}
+.future-note{margin-top:8px;margin-bottom:3px;padding:8px 9px;border-left:2px solid #ff571f;background:rgba(255,87,31,.035);border-radius:0 8px 8px 0;color:#a48d84;font-size:7.5px;line-height:1.45}
+
+.purpose-settings{margin-top:12px;padding:12px;border:1px solid #252b2f;background:#0a0d0f;border-radius:11px}
+.purpose-settings-title{font-size:9.5px;font-weight:900;margin-bottom:9px;color:#d4d9dc}
+.validation-box{margin-top:12px;padding:11px 12px;border:1px solid rgba(80,211,120,.18);background:rgba(80,211,120,.035);border-radius:11px;color:#9edbaa;font-size:8.5px;line-height:1.55}
+.validation-box.warn{border-color:rgba(255,189,74,.23);background:rgba(255,189,74,.04);color:#d5bb7d}
+.validation-box.bad{border-color:rgba(255,113,105,.24);background:rgba(255,113,105,.04);color:#e99a95}
+.validation-box b{display:block;color:#dbe1dc;font-size:9px;margin-bottom:3px}
+.rights-box{margin-top:10px;padding:11px;border:1px solid #282f33;background:#0a0d0f;border-radius:11px}
+.check-row{display:flex!important;align-items:flex-start;gap:9px;margin:0!important;cursor:pointer}
+.check-row input{width:17px;height:17px;flex:0 0 auto;margin-top:1px;accent-color:#ff571f}
+.check-row span{display:block}.check-row b{display:block;font-size:8.8px;color:#cfd5d9}.check-row small{display:block;font-size:7.6px;color:#727b82;line-height:1.45;margin-top:4px}
+.review-summary{margin-top:12px;border:1px solid rgba(255,87,31,.16);background:rgba(255,87,31,.028);border-radius:11px;padding:11px;color:#bfc6ca;font-size:8.6px;line-height:1.55}
+.review-summary b{color:#fff}
+.collection-preview{border:1px solid #242a2e;background:#090b0d;border-radius:13px;padding:12px}
+.collection-preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.collection-preview-head b{display:block;font-size:11px;color:#eef1f3}
+.collection-preview-head small{display:block;margin-top:3px;color:#788188;font-size:8px}
+.collection-count-pill{padding:5px 8px;border-radius:999px;border:1px solid rgba(255,87,31,.24);background:rgba(255,87,31,.06);color:#ff9b76;font-size:8px;font-weight:900}
+.collection-preview-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:11px}
+.collection-preview-item{position:relative;aspect-ratio:1/1;border-radius:9px;overflow:hidden;border:1px solid #293036;background:#0c0f11;cursor:pointer}
+.collection-preview-item img{width:100%;height:100%;object-fit:cover;display:block}
+.collection-preview-item span{position:absolute;left:4px;bottom:4px;padding:2px 5px;border-radius:6px;background:rgba(0,0,0,.72);color:#fff;font-size:6.5px;font-weight:850}
+.collection-preview-more{display:grid;place-items:center;color:#8a9399;font-size:8px;border:1px dashed #394147;background:#0b0e10}
+.collection-empty{grid-column:1/-1;padding:28px 12px;border:1px dashed #30383e;border-radius:10px;text-align:center;color:#707980;font-size:8.5px}
+.collection-preview-note{margin-top:9px;color:#697279;font-size:7.7px;line-height:1.45}
+.metadata-details{margin-top:12px;border:1px solid #242a2e;border-radius:11px;background:#090b0d;overflow:hidden}
+.metadata-details summary{cursor:pointer;list-style:none;padding:10px 11px;color:#9aa3a9;font-size:8.5px;font-weight:850}
+.metadata-details summary::-webkit-details-marker{display:none}
+.metadata-details[open] summary{border-bottom:1px solid #242a2e}
+.metadata-details .meta{margin-top:0;border:0;border-radius:0;max-height:260px}
+.art-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:18px}
+.art-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82)}
+.art-modal-card{position:relative;width:min(92vw,560px);max-height:88vh;border-radius:14px;border:1px solid #30373c;background:#0c0f11;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.55)}
+.art-modal-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #242a2e}
+.art-modal-head b{font-size:10px}
+.art-modal-head button{width:30px;height:30px;border-radius:8px;border:1px solid #30373c;background:#15191c;color:#fff;font-size:18px}
+.art-modal-card img{display:block;width:100%;max-height:76vh;object-fit:contain;background:#050606}
+@media(max-width:620px){.collection-preview-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+
+
+
+.collection-drop-status{margin-top:10px;display:inline-flex;padding:6px 9px;border-radius:999px;border:1px solid rgba(255,87,31,.22);background:rgba(255,87,31,.05);color:#ff9b76;font-size:8px;font-weight:900}
+.collection-drop-status.good{border-color:rgba(80,211,120,.25);background:rgba(80,211,120,.04);color:#8bd59d}
+
+.bulk-feedback{margin-top:7px;padding:8px 9px;border-radius:8px;border:1px solid #2d3439;background:#0b0e10;font-size:7.8px;line-height:1.45;color:#899299}
+.bulk-feedback.good{border-color:rgba(80,211,120,.23);background:rgba(80,211,120,.035);color:#94d9a4}
+.bulk-feedback.warn{border-color:rgba(255,189,74,.24);background:rgba(255,189,74,.04);color:#d9bc7b}
+.bulk-feedback.bad{border-color:rgba(255,113,105,.24);background:rgba(255,113,105,.04);color:#e99a95}
+
+.bulk-panel{margin-top:9px;padding:11px;border:1px solid #282f34;background:#090c0e;border-radius:11px}
+.bulk-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bulk-head b{display:block;color:#dce1e4;font-size:9px}
+.bulk-head small{display:block;color:#737c83;font-size:7.6px;line-height:1.4;margin-top:3px}
+.bulk-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.native-multi-wrap{position:relative;display:inline-flex}
+.native-multi-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.native-multi-label{display:inline-flex;align-items:center;justify-content:center}
+.mini-btn{border:1px solid #30373c;background:#14181b;color:#cbd1d5;border-radius:8px;padding:6px 9px;font-size:8px;font-weight:850;white-space:nowrap}.primary-mini{border-color:rgba(255,87,31,.55);background:rgba(255,87,31,.10);color:#ff9a75}
+.bulk-progress{display:flex;justify-content:space-between;gap:10px;margin-top:10px;padding:8px 9px;border:1px solid #242b2f;background:#0c0f11;border-radius:9px;color:#8d969c;font-size:8px}
+.bulk-progress .good{color:#76d88e}.bulk-progress .warn{color:#e3bd68}.bulk-progress .bad{color:#ef8e88}
+.thumb-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:8px}
+.thumb{position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;border:1px solid #282f34;background:#0d1012}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb span{position:absolute;left:4px;bottom:4px;padding:2px 4px;border-radius:5px;background:rgba(0,0,0,.72);font-size:6.5px;color:#fff}
+
+.thumb-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.24);background:rgba(0,0,0,.70);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:900;line-height:1;padding:0}
+.thumb-remove:active{transform:scale(.94)}
+
+.thumb-more{display:grid;place-items:center;color:#8b949a;font-size:8px;border:1px dashed #343c42}
+@media(max-width:620px){.thumb-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.beginner-note{margin:-3px 0 12px;padding:9px 10px;border:1px solid rgba(255,87,31,.14);background:rgba(255,87,31,.025);border-radius:10px;color:#8f989f;font-size:8.4px;line-height:1.45}
+.info-strip{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #252c30;background:#090c0e;border-radius:10px}
+.info-strip b{min-width:104px;color:#e1e5e8;font-size:8.5px}
+.info-strip span{color:#788188;font-size:8px;line-height:1.45}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.25)}
+.field-error input,.field-error select{border-color:rgba(255,113,105,.55)!important}
+.mobile-upload-note{margin-top:9px;padding:9px 10px;border:1px solid rgba(255,189,74,.18);background:rgba(255,189,74,.035);border-radius:9px;line-height:1.5}
+.mobile-upload-note b{color:#d7c59a}
+.purpose-readiness{margin-top:8px;color:#899299;font-size:7.8px;line-height:1.45}
+
+input[readonly]{opacity:.72;cursor:not-allowed}
+
+@media(max-width:900px){.purpose-grid{grid-template-columns:repeat(3,1fr)}.layout{grid-template-columns:1fr}.review{position:static}.env{display:none}.network-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:620px){.purpose-grid{grid-template-columns:repeat(2,1fr)}
+  .shell{padding:0 11px 28px}.topbar{min-height:60px}.nav{display:none}.hero{padding:27px 2px 18px}.hero h1{font-size:29px}.hero p{font-size:11px}
+  .network-grid{grid-template-columns:repeat(3,1fr)}.network-card{min-height:55px;font-size:8px}.types{grid-template-columns:repeat(3,1fr)}.type{min-height:88px;padding:8px}.type p{font-size:7px}
+  .grid2{grid-template-columns:1fr 1fr}.section{padding:13px}.card-head{padding:14px}.segment{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:390px){.purpose-grid{grid-template-columns:repeat(2,1fr)}.network-grid{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.types{grid-template-columns:1fr 1fr}.types .type:last-child{grid-column:1/-1}}
+
+.launch-scope-note{
+  margin-top:10px;
+  padding:11px 12px;
+  border:1px solid rgba(255,145,0,.25);
+  border-radius:12px;
+  background:rgba(255,145,0,.06);
+  color:#cfcfcf;
+  font-size:12px;
+  line-height:1.55;
+}
+.launch-scope-note b{color:#ff9d1c}
+.purpose.future-purpose{
+  position:relative;
+  opacity:.68;
+  cursor:not-allowed;
+  border-style:dashed;
+}
+.purpose.future-purpose:hover{transform:none}
+.purpose-status{
+  position:absolute;
+  top:8px;
+  right:8px;
+  padding:3px 7px;
+  border-radius:999px;
+  border:1px solid rgba(255,157,28,.28);
+  background:rgba(255,157,28,.08);
+  color:#ffad42;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.2px;
+  text-transform:uppercase;
+}
+
+
+.network-card{position:relative}
+.network-card>span:not(.net-icon):not(.network-badge){min-width:0}
+.network-card.planned-network{
+  opacity:.68;
+  border-style:dashed;
+  cursor:pointer;
+}
+.network-card.planned-network:hover{transform:none}
+.network-badge{
+  position:absolute;
+  top:5px;
+  right:5px;
+  padding:2px 5px;
+  border-radius:999px;
+  border:1px solid rgba(255,189,74,.22);
+  background:rgba(255,189,74,.05);
+  color:#d8b76f;
+  font-size:5.8px;
+  line-height:1.1;
+  font-weight:900;
+  letter-spacing:.01em;
+  text-transform:uppercase;
+}
+
+
+.live-lab{margin-top:14px;border:1px solid rgba(255,84,28,.34);border-radius:14px;background:linear-gradient(180deg,rgba(255,84,28,.055),rgba(8,10,12,.96));overflow:hidden}
+.live-lab-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.075)}
+.live-lab-head b{display:block;font-size:11px;color:#f4f6f7}.live-lab-head small{display:block;margin-top:4px;color:#8f979e;font-size:8.5px;line-height:1.45}
+.live-pill{flex:0 0 auto;border:1px solid rgba(75,211,116,.26);background:rgba(75,211,116,.055);color:#86dfa0;border-radius:999px;padding:5px 7px;font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.live-lab-body{padding:13px 14px}
+.live-stage{border:1px solid #252b30;border-radius:11px;background:#090b0d;padding:11px;margin-top:9px}
+.live-stage:first-child{margin-top:0}
+.live-stage-title{display:flex;align-items:center;gap:8px;margin-bottom:8px}.live-stage-num{width:23px;height:23px;display:grid;place-items:center;border-radius:7px;border:1px solid #30363c;background:#12161a;color:#ff8458;font-size:8px;font-weight:900}
+.live-stage-title b{font-size:9.5px}.live-stage p{margin:0 0 8px;color:#818a91;font-size:8.5px;line-height:1.5}
+.live-input{width:100%;min-height:40px;border:1px solid #2b3137;border-radius:9px;background:#080a0c;color:#eef1f3;padding:0 10px;font:inherit;font-size:9px;outline:none}
+.live-input:focus{border-color:rgba(255,84,28,.55)}
+.live-input[readonly]{color:#9ca4aa;background:#07090a}
+.live-row{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}
+.live-action{min-height:40px;border-radius:9px;border:1px solid #333a40;background:#111519;color:#e9edef;padding:0 12px;font-size:8.5px;font-weight:900;cursor:pointer}
+.live-action.primary{border-color:#ff541c;background:linear-gradient(180deg,#ff6425,#ff4d12);color:white}
+.live-action:disabled{opacity:.45;cursor:not-allowed}
+.live-note{margin-top:8px;border-left:2px solid #ff6a31;padding-left:8px;color:#817f7d;font-size:7.8px;line-height:1.5}
+.live-result{margin-top:9px;border:1px solid rgba(75,211,116,.23);background:rgba(75,211,116,.035);border-radius:10px;padding:10px;color:#a9cdb3;font-size:8.5px;line-height:1.55}
+.live-result a{color:#8edda5;text-decoration:underline;font-weight:800}
+.live-hidden{display:none!important}
+.live-progress{margin-top:8px;color:#c29b72;font-size:8px;line-height:1.5}
+@media(max-width:620px){.live-row{grid-template-columns:1fr}.live-action{width:100%}}
+
+</style>
+<link rel="stylesheet" href="../assets/ecosystem.css">
+</head>
+<body>
+
+<div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+  <a class="angry-globalbrand" href="../index.html">
+    <span class="angry-globalbrand-mark">😡</span>
+    <span>ANGRY <small>ECOSYSTEM</small></span>
+  </a>
+  <nav class="angry-globalnav">
+    <a href="../index.html">Home</a><a href="../tracker/index.html">Tracker</a><a href="../token-creator/index.html">Token Creator</a><a class="active" href="../nft-creator/index.html">NFT Creator</a><a href="../docs/index.html">Docs</a>
+  </nav>
+</div>
+
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">😡</div>
+      <div class="brand-name">ANGRY <span style="color:#ff7f54">NFT Creator</span><span class="beta">Beta v0.7.1</span></div>
+    </div>
+    <button class="wallet" id="walletBtn">Connect wallet</button>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow">No-code NFT creation</div>
+      <h1>Create NFTs without writing a smart contract.</h1>
+      <p>Choose a network, upload artwork and configure the NFT from one interface. The 1 of 1 path now includes a real Ethereum Sepolia test-deployment lab; Collection and Multiple Editions remain configuration-only while testing continues.</p>
+    </div>
+    <div class="env">TESTNET BETA<br>No mainnet assets required</div>
+  </section>
+
+  <main class="layout">
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title">NFT configuration</div>
+        <div class="card-sub">Build the NFT or collection settings step by step.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><div class="step">01</div><div><div class="sec-title">Network</div><div class="sec-sub">Choose the blockchain for the NFT contract.</div></div></div>
+        <div class="network-grid">
+          <button class="network-card active" data-chain="sepolia"><span class="net-icon">◆</span><span>Ethereum</span></button>
+          <button class="network-card" data-chain="base"><span class="net-icon">B</span><span>Base</span></button>
+          <button class="network-card" data-chain="robinhood"><span class="net-icon">R</span><span>Robinhood</span></button>
+          <button class="network-card planned-network" data-chain="solana" aria-disabled="true">
+            <span class="network-badge">Coming soon</span>
+            <span class="net-icon">S</span><span>Solana</span>
+          </button>
+          <button class="network-card" data-chain="bsc"><span class="net-icon">B</span><span>BSC</span></button>
+          <button class="network-card" data-chain="arb"><span class="net-icon">A</span><span>Arbitrum</span></button>
+          <button class="network-card" data-chain="polygon"><span class="net-icon">P</span><span>Polygon</span></button>
+        </div>
+        <div class="help" id="networkHint" style="margin-top:8px">Ethereum Sepolia · ERC-721 / ERC-1155 test environment</div>
+        <button class="btn secondary" id="switchBtn">Switch wallet to selected testnet</button>
+        <div class="storage-note" style="margin-top:8px">
+          <b>Network architecture:</b> Ethereum, Base, Robinhood Chain, BSC, Arbitrum and Polygon use the EVM/ERC path. Solana is listed separately because professional Solana NFTs use a different wallet/program architecture and will use Metaplex Core rather than pretending to be ERC-721/1155.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><div class="step">02</div><div><div class="sec-title">What do you want to create?</div><div class="sec-sub">Choose the purpose. ANGRY will suggest the NFT structure automatically.</div></div></div><div class="beginner-note">You do not need to understand ERC-721 or ERC-1155. Choose what you want to make and ANGRY will apply beginner-safe defaults.</div>
+        <div class="launch-scope-note"><b>Initial launch:</b> 1 of 1 NFT, NFT Collection and Multiple Editions. More creator tools will be released step by step after testing.</div>
+        <div class="purpose-grid">
+          <button class="purpose active" data-purpose="artwork">
+            <span class="purpose-icon">1/1</span><b>1 of 1 NFT</b><small>One unique artwork or collectible.</small>
+          </button>
+          <button class="purpose" data-purpose="collection">
+            <span class="purpose-icon">COL</span><b>NFT Collection</b><small>Many unique NFTs in one collection.</small>
+          </button>
+          <button class="purpose" data-purpose="editions">
+            <span class="purpose-icon">ED</span><b>Multiple Editions</b><small>Many copies of the same item.</small>
+          </button>
+          <button class="purpose future-purpose" data-purpose="tickets" aria-disabled="true">
+            <span class="purpose-status">Coming soon</span>
+            <span class="purpose-icon">TKT</span><b>Event Tickets</b><small>Tickets for events, shows or conferences.</small>
+          </button>
+          <button class="purpose future-purpose" data-purpose="membership" aria-disabled="true">
+            <span class="purpose-status">Coming soon</span>
+            <span class="purpose-icon">PASS</span><b>Membership Pass</b><small>Access pass for a community or service.</small>
+          </button>
+          <button class="purpose future-purpose" data-purpose="certificate" aria-disabled="true">
+            <span class="purpose-status">Coming soon</span>
+            <span class="purpose-icon">CERT</span><b>Certificate</b><small>Digital certificate or achievement.</small>
+          </button>
+          <button class="purpose future-purpose" data-purpose="game" aria-disabled="true">
+            <span class="purpose-status">Coming soon</span>
+            <span class="purpose-icon">GAME</span><b>Game / Digital Item</b><small>Collectibles or reusable digital items.</small>
+          </button>
+          <button class="purpose future-purpose" data-purpose="advanced" aria-disabled="true">
+            <span class="purpose-status">Coming soon</span>
+            <span class="purpose-icon">ADV</span><b>Advanced</b><small>Choose the NFT standard yourself.</small>
+          </button>
+        </div>
+
+        <div class="guide-card" id="purposeGuide">
+          <div class="guide-title" id="guideTitle">Recommended: ERC-721 · Supply fixed to 1</div>
+          <div class="guide-text" id="guideText">Best for one unique NFT. ANGRY locks Supply and Max per wallet to 1 so a beginner cannot accidentally create conflicting settings.</div>
+        </div>
+
+        <div class="advanced-picker hidden" id="advancedPicker">
+          <label>Technical NFT structure</label>
+          <div class="segment">
+            <button class="active" data-type="single" type="button">ERC-721 Single</button>
+            <button data-type="collection" type="button">ERC-721 Collection</button>
+            <button data-type="edition" type="button">ERC-1155 Editions</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><div class="step">03</div><div><div class="sec-title">Artwork & metadata</div><div class="sec-sub">Add the media and public NFT information.</div></div></div>
+        <input class="hidden" type="file" id="artFile" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif">
+        <input class="hidden" type="file" id="collectionSingleInput" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif">
+        <input class="hidden" type="file" id="collectionFileInput" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif" multiple>
+        <div class="dropzone" id="dropzone">
+          <div id="emptyUpload">
+            <div class="upload-icon">↑</div>
+            <div class="drop-title" id="uploadTitle">Upload NFT artwork</div>
+            <div class="drop-sub" id="uploadSub">PNG, JPG, WEBP or GIF · Local preview in this beta</div><div class="collection-drop-status hidden" id="collectionDropStatus">0 selected · Target 100</div>
+          </div>
+          <img id="artPreview" class="preview-img hidden" alt="NFT preview">
+        </div>
+
+        <div class="bulk-panel hidden" id="bulkPanel">
+          <div class="bulk-head">
+            <div>
+              <b>Collection artwork</b>
+              <small>Add images one by one reliably, or use Select multiple when your browser supports it.</small>
+            </div>
+            <div class="bulk-actions">
+              <button type="button" class="mini-btn primary-mini" id="addOneBtn">Add 1 image</button>
+              <label class="native-multi-wrap">
+                <span class="mini-btn native-multi-label">Add up to 10</span>
+                <input id="nativeMultiInput" class="native-multi-input" type="file"
+                       accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif" multiple>
+              </label>
+              <button type="button" class="mini-btn" id="clearBulkBtn">Clear</button>
+            </div>
+          </div>
+          <div class="bulk-progress">
+            <span id="bulkCount">0 images uploaded</span>
+            <span id="bulkTarget">Target: 100</span>
+          </div>
+          <div class="thumb-grid" id="bulkThumbs"></div>
+          <div class="help" id="bulkHelp">For a unique collection, the artwork count should match Supply before live deployment.</div><div class="purpose-readiness mobile-upload-note">
+      <b>Using a phone?</b> We recommend <b>Add 1 image</b> for the most reliable upload experience. Multi-image upload availability depends on your browser or gallery support.
+    </div><div class="bulk-feedback hidden" id="bulkFeedback"></div>
+        </div>
+
+        <div class="storage-note">Artwork still previews locally first. For the 1 of 1 Ethereum Sepolia test path, a creator can upload artwork + metadata to IPFS using their own temporary Pinata JWT, or paste an existing metadata URI. Production ANGRY storage will later move behind a secure server-side service.</div>
+
+        <div class="grid2" style="margin-top:12px">
+          <div class="field">
+            <label>NFT name</label>
+            <input id="nftName" value="ANGRY NFT #1" maxlength="60">
+          </div>
+          <div class="field">
+            <label>Collection name</label>
+            <input id="collectionName" value="ANGRY Collection" maxlength="60">
+          </div>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Description</label>
+          <textarea id="description">Created with ANGRY NFT Creator.</textarea>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><div class="step">04</div><div><div class="sec-title">Guided settings</div><div class="sec-sub">Configure supply, minting and royalty preferences.</div></div></div>
+        <div class="grid2">
+          <div class="field">
+            <label>Symbol</label>
+            <input id="symbol" value="ANGNFT" maxlength="10">
+            <div class="help">Short collection identifier. Example: ANGRY Collection → ANGNFT.</div>
+          </div>
+          <div class="field">
+            <label id="supplyLabel">Supply</label>
+            <input id="supply" type="number" min="1" value="1">
+            <div class="help" id="supplyHelp">Single NFT = exactly 1.</div>
+          </div>
+          <div class="field" id="mintPriceField">
+            <label id="mintPriceLabel">Mint price (ETH)</label>
+            <input id="mintPrice" type="number" min="0" step="0.001" value="0">
+            <div class="help" id="mintPriceHelp">0 means no mint price is charged by the NFT contract.</div>
+          </div>
+          <div class="field" id="maxWalletField">
+            <label id="maxWalletLabel">Max per wallet</label>
+            <input id="maxWallet" type="number" min="1" value="1">
+            <div class="help" id="maxWalletHelp">Single NFT is locked to 1.</div>
+          </div>
+          <div class="field" id="royaltyField">
+            <label>Royalty (%)</label>
+            <input id="royalty" type="number" min="0" max="10" step="0.1" value="2.5">
+            <div class="help">Allowed range: 0–10%. Marketplace royalty enforcement can differ.</div>
+          </div>
+          <div class="field" id="recipientField">
+            <label id="recipientLabel">Royalty recipient</label>
+            <input id="recipient" placeholder="Connect wallet to fill automatically" readonly>
+            <div class="help" id="recipientHelp">Connect the creator wallet to fill this automatically.</div>
+          </div>
+        </div>
+
+        <div class="purpose-settings" id="artworkSettings">
+          <div class="purpose-settings-title">1 of 1 NFT settings</div>
+          <div class="info-strip">
+            <b>Unique by design</b>
+            <span>Supply and Max per wallet are locked to 1. Use this for one artwork or collectible that should exist only once.</span>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="collectionSettings">
+          <div class="purpose-settings-title">NFT collection settings</div>
+
+          <!-- Hidden selects preserve the stable collection logic while the UI stays beginner-friendly. -->
+          <select id="collectionArtworkMode" class="config-hidden-select" aria-hidden="true" tabindex="-1">
+            <option value="unique" selected>Different artwork for each NFT</option>
+            <option value="mixed">Mixed / generated artwork</option>
+          </select>
+          <select id="collectionReveal" class="config-hidden-select" aria-hidden="true" tabindex="-1">
+            <option value="instant" selected>Show artwork immediately</option>
+            <option value="later">Reveal later</option>
+          </select>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Collection artwork plan</div>
+
+            <div class="pro-option active-option">
+              <div class="pro-option-icon">✓</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row">
+                  <b>Different artwork for each NFT</b>
+                  <span class="status-pill available">Available now</span>
+                </div>
+                <span>Each NFT uses its own artwork and metadata. This is the current stable collection mode.</span>
+              </div>
+            </div>
+
+            <button type="button" class="pro-option future-option" data-future="generated" aria-expanded="false">
+              <div class="pro-option-icon">＋</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row">
+                  <b>Mixed / generated artwork</b>
+                  <span class="status-pill coming">Coming later</span>
+                </div>
+                <span>Automatic collection generation from artwork layers.</span>
+              </div>
+              <span class="future-chevron">⌄</span>
+            </button>
+            <div class="future-panel" data-panel="generated">
+              <div class="future-panel-inner">
+                <b>Planned Collection Generator</b>
+                <p>Creators will be able to add layers such as background, body, eyes, clothing and accessories. ANGRY will combine them into unique artwork and metadata automatically.</p>
+                <div class="future-note">Not selectable in this beta. Your collection will continue using Different artwork for each NFT.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Reveal style</div>
+
+            <div class="pro-option active-option">
+              <div class="pro-option-icon">✓</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row">
+                  <b>Show artwork immediately</b>
+                  <span class="status-pill available">Available now</span>
+                </div>
+                <span>Artwork is visible as soon as the NFT metadata is available.</span>
+              </div>
+            </div>
+
+            <button type="button" class="pro-option future-option" data-future="reveal" aria-expanded="false">
+              <div class="pro-option-icon">＋</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row">
+                  <b>Reveal later</b>
+                  <span class="status-pill coming">Coming later</span>
+                </div>
+                <span>Start with hidden artwork and reveal the collection later.</span>
+              </div>
+              <span class="future-chevron">⌄</span>
+            </button>
+            <div class="future-panel" data-panel="reveal">
+              <div class="future-panel-inner">
+                <b>Planned Reveal System</b>
+                <p>The collection will first use placeholder metadata. When the creator is ready, a dedicated reveal action will switch the collection to its final artwork metadata.</p>
+                <div class="future-note">Not selectable in this beta. Show artwork immediately remains active.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="editionSettings">
+          <div class="purpose-settings-title">Multiple editions settings</div>
+          <div class="stable-limit">
+            <b>Edition limit</b>
+            <span>Upload one artwork and create up to 10,000 copies in this beta configuration.</span>
+          </div>
+          <div class="info-strip">
+            <b>Same item, multiple copies</b>
+            <span>Upload one artwork and choose how many editions should exist. Example: one poster with 100 numbered copies.</span>
+          </div>
+          <div class="grid2" style="margin-top:10px">
+            <div class="field"><label>Edition label</label><input id="editionLabel" value="Edition"></div>
+            <div class="field">
+              <label>Numbering</label>
+              <select id="editionNumbering"><option value="numbered">Numbered: #1, #2, #3…</option><option value="same">Same display name</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="ticketSettings">
+          <div class="purpose-settings-title">Event ticket settings</div>
+
+          <div class="stable-limit">
+            <b>Professional ticket setup</b>
+            <span>Scalable ticket supply · direct organizer payout · transparent reserve · public mint rules · sale controls.</span>
+          </div>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Event details</div>
+            <div class="grid2">
+              <div class="field">
+                <label>Event name</label>
+                <input id="eventName" maxlength="80" placeholder="Example: ANGRY Community Night">
+                <div class="help">Required. The public event name shown to ticket buyers.</div>
+              </div>
+              <div class="field">
+                <label>Organizer / issuer</label>
+                <input id="eventOrganizer" maxlength="80" placeholder="Example: ANGRY Events">
+                <div class="help">Required. Identifies who is issuing the ticket.</div>
+              </div>
+              <div class="field">
+                <label>Ticket category</label>
+                <input id="ticketCategory" maxlength="50" value="General Admission">
+                <div class="help">Example: General Admission, VIP, Balcony.</div>
+              </div>
+              <div class="field">
+                <label>Venue / location</label>
+                <input id="eventVenue" maxlength="100" placeholder="Example: Kuala Lumpur Convention Centre">
+                <div class="help">Required. Use a venue name or clear event location.</div>
+              </div>
+              <div class="field">
+                <label>Event date</label>
+                <input id="eventDate" type="date">
+                <div class="help">Must not be a past date.</div>
+              </div>
+              <div class="field">
+                <label>Event time</label>
+                <input id="eventTime" type="time">
+                <div class="help">Required. This is the local event time.</div>
+              </div>
+              <div class="field">
+                <label>Event timezone / UTC offset</label>
+                <input id="eventTimezone" maxlength="50" placeholder="Example: UTC+8 or Asia/Kuala_Lumpur">
+                <div class="help">Recommended so buyers in other regions interpret the event time correctly.</div>
+              </div>
+              <div class="field">
+                <label>Support contact</label>
+                <input id="eventSupport" maxlength="100" placeholder="Email, website or community support">
+                <div class="help">Recommended for buyer questions, cancellations or event updates.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Ticket allocation</div>
+            <div class="grid2">
+              <div class="field">
+                <label>Organizer reserve</label>
+                <input id="ticketReserve" type="number" min="0" step="1" value="0">
+                <div class="help">Optional. Reserved inside the total supply for staff, guests, sponsors or giveaways. It is not extra supply.</div>
+              </div>
+              <div class="field">
+                <label>Public ticket supply</label>
+                <input id="ticketPublicSupply" type="number" value="1" readonly>
+                <div class="help">Calculated automatically: Total ticket supply − Organizer reserve.</div>
+              </div>
+              <div class="info-strip" style="grid-column:1/-1">
+                <b>Transparent allocation</b>
+                <span id="ticketAllocationSummary">1 public · 0 organizer reserve · 1 total.</span>
+              </div>
+            </div>
+
+            <div class="pro-option active-option" style="margin-top:10px">
+              <div class="pro-option-icon">✓</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row"><b>Fixed total supply after deployment</b><span class="status-pill available">Contract rule</span></div>
+                <span>Total ticket supply is intended to become fixed when deployed. Organizer reserve always remains inside the same total supply.</span>
+              </div>
+            </div>
+            <div class="pro-option active-option">
+              <div class="pro-option-icon">✓</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row"><b>Mint only when needed</b><span class="status-pill available">Contract rule</span></div>
+                <span>Public tickets mint directly to buyers when purchased. Reserve tickets mint only when the organizer distributes them. Unsold capacity is not pre-minted to the creator wallet.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Sale controls</div>
+            <div class="grid2">
+              <div class="field">
+                <label>Public sale starts</label>
+                <select id="ticketSaleStart">
+                  <option value="deployment">When public mint is opened after deployment</option>
+                  <option value="scheduled">Scheduled date & time</option>
+                </select>
+                <div class="help">Open after deployment or schedule a future start.</div>
+              </div>
+              <div class="field hidden" id="ticketSaleStartAtField">
+                <label>Scheduled sale start</label>
+                <input id="ticketSaleStartAt" type="datetime-local">
+                <div class="help">Confirm the intended timezone before deployment.</div>
+              </div>
+              <div class="field">
+                <label>Public sale closes</label>
+                <select id="ticketSaleEnd">
+                  <option value="event_start">At event start</option>
+                  <option value="custom">Custom date & time</option>
+                  <option value="manual">Manual close by organizer</option>
+                </select>
+                <div class="help">Default: stop public minting when the event starts.</div>
+              </div>
+              <div class="field hidden" id="ticketSaleEndAtField">
+                <label>Custom sale close</label>
+                <input id="ticketSaleEndAt" type="datetime-local">
+                <div class="help">Custom close must be later than a scheduled sale start.</div>
+              </div>
+              <div class="info-strip" style="grid-column:1/-1">
+                <b>Unsold tickets</b>
+                <span>When public mint closes, unused public capacity remains unminted and unavailable. It is not automatically sent to the organizer.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Payment & payout</div>
+            <div class="info-strip">
+              <b>Non-custodial flow</b>
+              <span>Buyer pays through the smart contract. Ticket revenue is intended to go directly to the organizer payout wallet, while ANGRY receives only the disclosed platform fee.</span>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div class="field">
+                <label>Platform fee</label>
+                <input id="ticketPlatformFee" value="Not configured in beta" readonly>
+                <div class="help">Platform-level setting. The creator cannot edit it. Exact live fee must be disclosed before deployment.</div>
+              </div>
+              <div class="field">
+                <label>Buyer network gas</label>
+                <input value="Paid separately by buyer" readonly>
+                <div class="help">Network gas is separate from ticket price and changes with network conditions.</div>
+              </div>
+              <div class="info-strip" style="grid-column:1/-1">
+                <b>Payment flow</b>
+                <span id="ticketPaymentSummary">Buyer pays ticket price + network gas → organizer receives ticket revenue minus disclosed ANGRY fee → NFT ticket mints directly to buyer.</span>
+              </div>
+            </div>
+
+            <div class="pro-option active-option" style="margin-top:10px">
+              <div class="pro-option-icon">✓</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row"><b>Network native coin</b><span class="status-pill available">Configured now</span></div>
+                <span id="ticketCurrencyNote">Ticket price currently uses the selected network's native coin.</span>
+              </div>
+            </div>
+
+            <button type="button" class="pro-option future-option" data-future="ticket-stablecoin" aria-expanded="false">
+              <div class="pro-option-icon">＋</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row"><b>Stablecoin payment (for example USDC)</b><span class="status-pill coming">Coming later</span></div>
+                <span>Useful when organizers want a ticket price that does not move with ETH/BNB/POL.</span>
+              </div>
+              <span class="future-chevron">⌄</span>
+            </button>
+            <div class="future-panel" data-panel="ticket-stablecoin">
+              <div class="future-panel-inner">
+                <b>Planned stablecoin payments</b>
+                <p>A later contract version can support approved stablecoins such as USDC. Contract addresses and decimals must be verified per network before live deployment.</p>
+                <div class="future-note">Not selectable in this beta. Native-coin pricing remains the current configuration mode.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="collection-option-group">
+            <div class="collection-option-label">Buyer & organizer rules</div>
+            <div class="grid2">
+              <div class="field">
+                <label>Transfer policy</label>
+                <select id="ticketTransfer">
+                  <option value="transferable">Transferable</option>
+                  <option value="locked">Non-transferable after mint</option>
+                </select>
+                <div class="help" id="ticketTransferHelp">Transferable tickets may be sent or resold by the holder.</div>
+              </div>
+              <div class="field">
+                <label>Refund / cancellation policy</label>
+                <input id="ticketRefundPolicy" maxlength="240" placeholder="Example: Refunds are handled by the organizer if the event is cancelled">
+                <div class="help">Recommended. Show this to buyers. Local consumer laws may still apply.</div>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <label>Ticket note</label>
+                <input id="ticketNote" maxlength="160" placeholder="Optional: doors open 30 minutes before the event">
+                <div class="help">Optional instructions displayed with the ticket metadata.</div>
+              </div>
+            </div>
+
+            <div class="rights-box" style="margin-top:10px">
+              <label class="check-row">
+                <input type="checkbox" id="ticketAuthorityCheck">
+                <span><b>I confirm that I am authorized to issue tickets for this event.</b><small>The event creator is responsible for having permission to sell or distribute tickets for the event represented here.</small></span>
+              </label>
+            </div>
+          </div>
+
+          <input id="ticketCheckin" type="hidden" value="not_enabled">
+
+          <div class="collection-option-group ticket-coming-group">
+            <div class="collection-option-label">Buyer mint page & verification</div>
+            <div class="pro-option active-option">
+              <div class="pro-option-icon">✓</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row"><b>Public mint page flow</b><span class="status-pill available">Deployment stage</span></div>
+                <span>After deployment: buyer opens event page → connects wallet → chooses quantity → pays → NFT ticket mints directly to the buyer wallet.</span>
+              </div>
+            </div>
+
+            <button type="button" class="pro-option future-option" data-future="ticket-checkin" aria-expanded="false">
+              <div class="pro-option-icon">＋</div>
+              <div class="pro-option-copy">
+                <div class="pro-option-title-row"><b>QR check-in / redemption</b><span class="status-pill coming">Coming later</span></div>
+                <span>One-time entry verification with USED / redeemed status.</span>
+              </div>
+              <span class="future-chevron">⌄</span>
+            </button>
+            <div class="future-panel" data-panel="ticket-checkin">
+              <div class="future-panel-inner">
+                <b>Planned ticket verification</b>
+                <p>A later version will add venue check-in so a valid ticket can be redeemed and marked as used. The final design should not rely on a simple static QR image that can be copied or screenshotted.</p>
+                <div class="future-note">Not enabled in this beta. Live check-in requires a separate verification/scanner system in addition to the NFT contract.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="membershipSettings">
+          <div class="purpose-settings-title">Membership pass settings</div>
+          <div class="grid2">
+            <div class="field"><label>Membership name</label><input id="membershipName" placeholder="Example: ANGRY Member Pass"></div>
+            <div class="field"><label>Access / benefit</label><input id="membershipAccess" placeholder="Example: Community access"></div>
+            <div class="field">
+              <label>Membership duration</label>
+              <select id="membershipDuration">
+                <option value="permanent">No expiry</option>
+                <option value="30d">30 days</option>
+                <option value="90d">90 days</option>
+                <option value="365d">1 year</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Pass transfer</label>
+              <select id="membershipTransfer">
+                <option value="transferable">Transferable</option>
+                <option value="locked">Non-transferable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="certificateSettings">
+          <div class="purpose-settings-title">Digital certificate settings</div>
+          <div class="grid2">
+            <div class="field"><label>Issuer / organization</label><input id="certificateIssuer" placeholder="Organization or creator name"></div>
+            <div class="field"><label>Certificate title</label><input id="certificateTitle" placeholder="Example: Completion Certificate"></div>
+            <div class="field"><label>Recipient name</label><input id="certificateRecipient" placeholder="Name printed on certificate"></div>
+            <div class="field"><label>Credential ID</label><input id="certificateCredential" placeholder="Example: CERT-2026-0001"></div>
+            <div class="field"><label>Issue date</label><input id="certificateDate" type="date"></div>
+            <div class="field">
+              <label>Transferability</label>
+              <input value="Non-transferable recommended" readonly>
+              <div class="help">Certificates generally should not be transferable between owners.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="gameSettings">
+          <div class="purpose-settings-title">Game / digital item settings</div>
+          <div class="grid2">
+            <div class="field"><label>Item category</label><input id="gameCategory" placeholder="Example: Weapon, Skin, Badge"></div>
+            <div class="field">
+              <label>Rarity</label>
+              <select id="gameRarity">
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="epic">Epic</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <div class="field"><label>Item utility</label><input id="gameNote" placeholder="What can the holder use this item for?"></div>
+            <div class="field">
+              <label>Transfer policy</label>
+              <select id="gameTransfer"><option value="transferable">Transferable</option><option value="locked">Non-transferable</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="purpose-settings hidden" id="advancedSettings">
+          <div class="purpose-settings-title">Advanced creator controls</div>
+          <div class="info-strip">
+            <b>For experienced creators</b>
+            <span>You choose the technical NFT structure yourself. ANGRY will still validate supply, wallet limits, price and royalty before deployment.</span>
+          </div>
+        </div>
+
+        <div class="validation-box" id="validationBox">
+          <b>Configuration check</b>
+          <div id="validationMessages">✓ Settings look consistent.</div>
+        </div>
+
+        <div class="rights-box">
+          <label class="check-row">
+            <input type="checkbox" id="rightsCheck">
+            <span><b>I confirm that I own this artwork or have permission to use it.</b><small>ANGRY NFT Creator does not verify copyright ownership. The creator is responsible for the content they upload.</small></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card review">
+      <div class="card-head">
+        <div class="card-title">NFT preview</div>
+        <div class="card-sub">Live preview and metadata generated from the form.</div>
+      </div>
+      <div class="section">
+        <div class="nft-preview" id="singlePreviewPanel">
+          <div class="nft-visual" id="nftVisual"><span>No artwork uploaded</span></div>
+          <div class="nft-info">
+            <div class="nft-name" id="previewName">ANGRY NFT #1</div>
+            <div class="nft-collection" id="previewCollection">ANGRY Collection · Ethereum Sepolia</div>
+          </div>
+        </div>
+
+        <div class="collection-preview hidden" id="collectionPreviewPanel">
+          <div class="collection-preview-head">
+            <div>
+              <b>Collection Preview</b>
+              <small id="collectionPreviewSubtitle">0 of 100 artwork loaded</small>
+            </div>
+            <span class="collection-count-pill" id="collectionPreviewCount">0 / 100</span>
+          </div>
+          <div class="collection-preview-grid" id="collectionPreviewGrid">
+            <div class="collection-empty">Upload artwork to preview the collection.</div>
+          </div>
+          <div class="collection-preview-note">Tap any thumbnail to inspect that artwork. This view uses small previews so large collections stay lighter on mobile.</div>
+        </div>
+
+        <div class="review-summary" id="reviewSummary"></div>
+        <details class="metadata-details">
+          <summary>Technical metadata JSON</summary>
+          <div class="meta" id="metadataPreview"></div>
+        </details>
+        <button class="btn primary" id="prepareBtn">Review & prepare configuration</button>
+
+        <button class="btn secondary" id="downloadBtn">Download metadata JSON</button>
+
+        <div class="live-lab" id="liveLab">
+          <div class="live-lab-head">
+            <div>
+              <b>Ethereum Sepolia · Testnet Deployment Lab</b>
+              <small>Real 1 of 1 test deployment. This lab is deliberately limited while the contract and storage flow are tested end to end.</small>
+            </div>
+            <span class="live-pill" id="liveLabPill">1 of 1 only</span>
+          </div>
+          <div class="live-lab-body">
+            <div id="liveUnsupported" class="live-stage live-hidden">
+              <div class="live-stage-title"><span class="live-stage-num">!</span><b>Not enabled for this setup</b></div>
+              <p id="liveUnsupportedText">Select 1 of 1 NFT and Ethereum Sepolia to use real test deployment.</p>
+            </div>
+
+            <div id="liveSepoliaFlow">
+              <div class="live-stage">
+                <div class="live-stage-title"><span class="live-stage-num">1</span><b>Permanent metadata</b></div>
+                <p>Recommended for this developer test: upload the selected artwork and generated metadata to IPFS with your own limited Pinata JWT. The JWT is kept only in this browser field and is cleared after a successful upload.</p>
+                <input class="live-input" id="pinataJwt" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your temporary Pinata JWT (developer test only)">
+                <button class="live-action" id="uploadIpfsBtn" type="button" style="margin-top:7px;width:100%">Upload artwork + metadata to IPFS</button>
+                <div class="live-note">Do not put an ANGRY production/shared API key in public GitHub HTML. This field is only for a creator's own temporary test credential. The production path should use a server-side secret.</div>
+              </div>
+
+              <div class="live-stage">
+                <div class="live-stage-title"><span class="live-stage-num">2</span><b>Metadata URI</b></div>
+                <p>After IPFS upload this fills automatically. Advanced testers can instead paste an existing <b>ipfs://</b> or HTTPS metadata JSON URI.</p>
+                <input class="live-input" id="liveMetadataUri" spellcheck="false" placeholder="ipfs://...">
+                <div class="live-progress" id="ipfsProgress">No IPFS metadata uploaded yet.</div>
+              </div>
+
+              <div class="live-stage">
+                <div class="live-stage-title"><span class="live-stage-num">3</span><b>Deploy fixed-supply ERC-721</b></div>
+                <p>Deploys a new ERC-721 contract for this 1 of 1 NFT and mints Token ID #1 directly to the recipient wallet. The contract has no extra mint function after deployment. Royalty information is exposed through ERC-2981.</p>
+                <button class="live-action primary" id="deployOneOfOneBtn" type="button" style="width:100%">Deploy 1 of 1 on Ethereum Sepolia</button>
+                <div class="live-note">Direct deployment does not charge the form's Mint Price. Mint Price is a future public-sale setting. Sepolia ETH is test ETH and has no real monetary value.</div>
+                <div class="live-progress" id="deployProgress">Compiler and wallet transaction have not started.</div>
+                <div class="live-result live-hidden" id="deployResult"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="status" id="status">Ready. 1 of 1 Ethereum Sepolia test deployment is available in the Testnet Deployment Lab below. Collection and Multiple Editions are still configuration-only.</div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="art-modal hidden" id="artModal" role="dialog" aria-modal="true">
+    <div class="art-modal-backdrop" id="artModalBackdrop"></div>
+    <div class="art-modal-card">
+      <div class="art-modal-head">
+        <b id="artModalTitle">NFT #1</b>
+        <button type="button" id="artModalClose">×</button>
+      </div>
+      <img id="artModalImage" alt="NFT artwork preview">
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>ANGRY NFT Creator Beta v0.7.1 · No-code NFT tooling</span>
+    <span>Testnet planning · Separate page, same ANGRY ecosystem</span>
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const CHAINS={
+  sepolia:{
+    name:"Ethereum Sepolia",family:"evm",enabled:true,
+    chainId:"0xaa36a7",rpc:"https://rpc.sepolia.org",native:"ETH",
+    explorer:"https://sepolia.etherscan.io",standard:"ERC-721 / ERC-1155"
+  },
+  base:{
+    name:"Base Sepolia",family:"evm",enabled:true,
+    chainId:"0x14a34",rpc:"https://sepolia.base.org",native:"ETH",
+    explorer:"https://sepolia.basescan.org",standard:"ERC-721 / ERC-1155"
+  },
+  robinhood:{
+    name:"Robinhood Chain Testnet",family:"evm",enabled:true,
+    chainId:"0xb626",rpc:"https://rpc.testnet.chain.robinhood.com",native:"ETH",
+    explorer:"https://explorer.testnet.chain.robinhood.com",standard:"ERC-721 / ERC-1155"
+  },
+  solana:{
+    name:"Solana Devnet",family:"solana",enabled:false,
+    rpc:"https://api.devnet.solana.com",native:"SOL",
+    explorer:"https://explorer.solana.com/?cluster=devnet",standard:"Metaplex Core"
+  },
+  bsc:{
+    name:"BSC Testnet",family:"evm",enabled:true,
+    chainId:"0x61",rpc:"https://bsc-testnet-dataseed.bnbchain.org",native:"tBNB",
+    explorer:"https://testnet.bscscan.com",standard:"ERC-721 / ERC-1155"
+  },
+  arb:{
+    name:"Arbitrum Sepolia",family:"evm",enabled:true,
+    chainId:"0x66eee",rpc:"https://sepolia-rollup.arbitrum.io/rpc",native:"ETH",
+    explorer:"https://sepolia.arbiscan.io",standard:"ERC-721 / ERC-1155"
+  },
+  polygon:{
+    name:"Polygon Amoy",family:"evm",enabled:true,
+    chainId:"0x13882",rpc:"https://rpc-amoy.polygon.technology",native:"POL",
+    explorer:"https://amoy.polygonscan.com",standard:"ERC-721 / ERC-1155"
+  }
+};
+const state={chain:"sepolia",purpose:"artwork",type:"single",account:null,imageFile:null,imageUrl:null,collectionFiles:[],collectionUrls:[],liveImageUri:"",liveMetadataUri:"",lastNftContract:""};
+
+function currentChain(){return CHAINS[state.chain]}
+function setStatus(text,kind=""){const s=$("status");s.className="status"+(kind?" "+kind:"");s.textContent=text}
+async function connectWallet(){
+  const chain=currentChain();
+  if(chain.family!=="evm"){
+    setStatus("Solana uses a different wallet and NFT engine. It is listed as Coming soon until the Metaplex Core + Solana wallet path is implemented.","warn");
+    return;
+  }
+  if(!window.ethereum){setStatus("EVM wallet provider not detected. Open the hosted NFT Creator inside MetaMask or another compatible EVM wallet browser.","warn");return}
+  try{
+    const a=await ethereum.request({method:"eth_requestAccounts"});
+    state.account=a[0];
+    $("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);
+    $("recipient").value=state.account;
+    render();
+    setStatus("EVM wallet connected. You can switch to the selected testnet.","good");
+  }catch(e){setStatus("Wallet connection cancelled.","warn")}
+}
+async function switchChain(){
+  const chain=currentChain();
+  if(chain.family!=="evm"){
+    setStatus("Solana Devnet is Coming soon. It needs a Solana wallet connector and Metaplex Core integration rather than MetaMask network switching.","warn");
+    return;
+  }
+  if(!window.ethereum){setStatus("Open this hosted page inside MetaMask or another compatible EVM wallet to switch networks.","warn");return}
+  try{
+    await ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:chain.chainId}]});
+    setStatus("Wallet switched to "+chain.name+".","good");
+  }catch(e){
+    if(e?.code===4902 || String(e?.message||"").toLowerCase().includes("unrecognized chain")){
+      try{
+        await ethereum.request({
+          method:"wallet_addEthereumChain",
+          params:[{
+            chainId:chain.chainId,
+            chainName:chain.name,
+            nativeCurrency:{name:chain.native,symbol:chain.native,decimals:18},
+            rpcUrls:[chain.rpc],
+            blockExplorerUrls:chain.explorer?[chain.explorer]:[]
+          }]
+        });
+        setStatus(chain.name+" was added to the wallet. Select it if the wallet does not switch automatically.","good");
+      }catch(addError){
+        setStatus("The wallet could not add "+chain.name+" automatically. Add the network manually and try again.","warn");
+      }
+    }else{
+      setStatus("Could not switch automatically. Select "+chain.name+" in your EVM wallet and try again.","warn");
+    }
+  }
+}
+function setChain(key){
+  const next=CHAINS[key];
+  if(!next)return;
+
+  if(next.enabled===false){
+    $("networkHint").textContent=next.name+" · "+next.standard+" · separate Solana engine required";
+    setStatus("Solana has been added to the ANGRY NFT Creator roadmap, but it is not selectable yet. The current creator uses EVM/ERC logic; enabling Solana correctly requires Metaplex Core and a Solana wallet connector.","warn");
+    return;
+  }
+
+  state.chain=key;
+  document.querySelectorAll(".network-card").forEach(b=>b.classList.toggle("active",b.dataset.chain===key));
+  $("networkHint").textContent=currentChain().name+" · "+currentChain().standard+" test environment";
+  $("switchBtn").textContent="Switch wallet to selected testnet";
+  $("mintPriceLabel").textContent=(state.purpose==="tickets"?"Ticket price (":"Mint price (")+currentChain().native+")";
+  render();
+}
+function setType(type){
+  state.type=type;
+  document.querySelectorAll("[data-type]").forEach(b=>b.classList.toggle("active",b.dataset.type===type));
+  applyPurposeRules();
+  render();
+}
+const PURPOSES={
+  artwork:{type:"single",title:"Recommended: ERC-721 · Supply fixed to 1",text:"Best for one unique NFT. ANGRY locks Supply and Max per wallet to 1 so a beginner cannot accidentally create conflicting settings."},
+  collection:{type:"collection",title:"Recommended: ERC-721 Collection",text:"Best when each NFT can be unique. You choose a collection supply and ANGRY checks that wallet limits do not exceed the supply."},
+  editions:{type:"edition",title:"Recommended: ERC-1155 Editions",text:"Best when the same artwork or item has multiple copies. Example: 100 copies of one poster or collectible."},
+  tickets:{type:"edition",title:"Recommended: ERC-1155-style Tickets",text:"Professional pre-deploy setup: event details, fixed total supply, organizer reserve, public mint limits, sale controls, direct payout flow and buyer disclosures. QR check-in remains a separate verification system."},
+  membership:{type:"collection",title:"Recommended: Membership Pass Collection",text:"Good for access passes. ANGRY defaults to one pass per wallet and keeps the setup simple for non-technical creators."},
+  certificate:{type:"collection",title:"Recommended: Certificate Collection",text:"Good for certificates or achievements. Mint price defaults to 0 because certificates are normally issued rather than sold."},
+  game:{type:"edition",title:"Recommended: ERC-1155 Digital Items",text:"Good for reusable item types such as badges, skins or game assets with more than one copy."},
+  advanced:{type:"collection",title:"Advanced mode",text:"Choose the technical NFT structure yourself. This mode is intended for creators who already understand ERC-721 and ERC-1155."}
+};
+function setPurpose(purpose){
+  const launchPurposes=["artwork","collection","editions"];
+  if(!launchPurposes.includes(purpose)){
+    setStatus("Coming soon — the initial ANGRY NFT Creator launch includes 1 of 1 NFT, NFT Collection and Multiple Editions.","warn");
+    return;
+  }
+  state.purpose=purpose;
+  if(purpose!=="advanced")state.type=PURPOSES[purpose].type;
+  document.querySelectorAll(".purpose").forEach(b=>b.classList.toggle("active",b.dataset.purpose===purpose));
+  $("advancedPicker").classList.toggle("hidden",purpose!=="advanced");
+  $("guideTitle").textContent=PURPOSES[purpose].title;
+  $("guideText").textContent=PURPOSES[purpose].text;
+  applyPurposeDefaults();
+  applyPurposeRules();
+  updateArtworkMode();
+  render();
+}
+function showOnlyPurposeSettings(){
+  ["artworkSettings","collectionSettings","editionSettings","ticketSettings","membershipSettings","certificateSettings","gameSettings","advancedSettings"].forEach(id=>$(id).classList.add("hidden"));
+  const map={
+    artwork:"artworkSettings",
+    collection:"collectionSettings",
+    editions:"editionSettings",
+    tickets:"ticketSettings",
+    membership:"membershipSettings",
+    certificate:"certificateSettings",
+    game:"gameSettings",
+    advanced:"advancedSettings"
+  };
+  if(map[state.purpose])$(map[state.purpose]).classList.remove("hidden");
+}
+function applyPurposeDefaults(){
+  const supply=$("supply"), max=$("maxWallet"), price=$("mintPrice");
+  if(state.purpose==="artwork"){supply.value=1;max.value=1;}
+  if(state.purpose==="collection"){if(+supply.value<2)supply.value=100;if(+max.value<1||+max.value>+supply.value)max.value=2;}
+  if(state.purpose==="editions"){if(+supply.value<2||+supply.value>10000)supply.value=100;max.value=Math.min(5,+supply.value);}
+  if(state.purpose==="tickets"){supply.value=500;max.value=4;price.value=0;$("royalty").value=0;}
+  if(state.purpose==="membership"){supply.value=100;max.value=1;}
+  if(state.purpose==="certificate"){supply.value=100;max.value=1;price.value=0;$("royalty").value=0;}
+  if(state.purpose==="game"){supply.value=1000;max.value=20;}
+  showOnlyPurposeSettings();
+}
+function applyPurposeRules(){
+  const supply=$("supply"),max=$("maxWallet");
+  const locked=state.purpose==="artwork" || (state.purpose==="advanced"&&state.type==="single");
+  supply.readOnly=locked;max.readOnly=locked;
+
+  if(state.purpose==="collection"){
+    supply.min="2";
+    supply.max="100";
+  }else if(state.purpose==="editions"){
+    supply.min="2";
+    supply.max="10000";
+  }else if(state.purpose==="tickets"){
+    supply.min="1";
+    supply.removeAttribute("max");
+  }else{
+    supply.min="1";
+    supply.removeAttribute("max");
+  }
+
+  $("mintPriceField").classList.remove("hidden");
+  $("maxWalletField").classList.remove("hidden");
+  $("royaltyField").classList.remove("hidden");
+  $("recipientField").classList.remove("hidden");
+  $("maxWalletLabel").textContent="Max per wallet";
+
+  if(locked){
+    supply.value=1;max.value=1;
+    $("supplyHelp").textContent="Single NFT is locked to exactly 1.";
+    $("maxWalletHelp").textContent="Single NFT is locked to 1 per wallet.";
+  }else{
+    $("supplyHelp").textContent=state.purpose==="collection"
+      ?"Beta limit: 2–100 unique NFTs per collection."
+      : state.purpose==="editions"
+      ?"One artwork can create 2–10,000 editions. The artwork is uploaded only once."
+      : state.purpose==="tickets"
+      ?"Total tickets in this category. ANGRY does not apply an arbitrary event-size cap in the configurator; final deployment must still be verified on testnet."
+      : state.purpose==="certificate"
+      ?"Maximum number of certificates that can be issued."
+      :"Maximum number of NFTs/items in this setup.";
+    $("maxWalletHelp").textContent="Cannot be higher than the total supply.";
+  }
+
+  if(state.purpose==="editions") $("supplyLabel").textContent="Number of editions";
+  else if(state.purpose==="tickets") $("supplyLabel").textContent="Ticket supply";
+  else if(state.purpose==="membership") $("supplyLabel").textContent="Membership supply";
+  else if(state.purpose==="certificate") $("supplyLabel").textContent="Certificate supply";
+  else if(state.purpose==="game") $("supplyLabel").textContent="Item supply";
+  else $("supplyLabel").textContent="Supply";
+
+  $("recipientLabel").textContent="Royalty recipient";
+  $("recipient").readOnly=true;
+  $("recipientHelp").textContent="Connect the creator wallet to fill this automatically.";
+  $("mintPriceLabel").textContent="Mint price ("+currentChain().native+")";
+
+  if(state.purpose==="certificate"){
+    $("mintPriceField").classList.add("hidden");
+    $("royaltyField").classList.add("hidden");
+    $("recipientField").classList.add("hidden");
+    $("maxWalletLabel").textContent="Max certificates per wallet";
+    $("mintPriceHelp").textContent="Certificates are configured as issuer-created items with no mint price.";
+  }else if(state.purpose==="tickets"){
+    $("royaltyField").classList.add("hidden");
+    $("recipientLabel").textContent="Organizer payout wallet";
+    $("recipient").readOnly=false;
+    $("recipientHelp").textContent="Connected wallet is filled automatically, but a dedicated organizer EVM payout address can be entered before deployment.";
+    $("mintPriceLabel").textContent="Ticket price ("+currentChain().native+")";
+    $("maxWalletLabel").textContent="Max public mint per wallet";
+    $("mintPriceHelp").textContent="Price paid for one public ticket. Set 0 for a free public mint. Organizer reserve distribution does not require buying the ticket.";
+    $("maxWalletHelp").textContent="Applies only to public minting. Organizer reserve is tracked separately and remains inside total supply.";
+  }else if(state.purpose==="membership"){
+    $("mintPriceHelp").textContent="Membership purchase price per pass. Set 0 for free/issuer-distributed access.";
+  }else{
+    $("mintPriceHelp").textContent="0 means no mint price is charged by the NFT contract.";
+  }
+}
+
+
+function fileExt(name){
+  const m=String(name||"").toLowerCase().match(/\.([a-z0-9]+)$/);
+  return m?m[1]:"";
+}
+function isSupportedImageFile(file){
+  const mime=String(file?.type||"").toLowerCase();
+  if(mime.startsWith("image/"))return true;
+  return ["jpg","jpeg","png","webp","gif","bmp","avif"].includes(fileExt(file?.name));
+}
+function setBulkFeedback(message,kind=""){
+  const el=$("bulkFeedback");
+  if(!el)return;
+  if(!message){
+    el.textContent="";
+    el.className="bulk-feedback hidden";
+    return;
+  }
+  el.textContent=message;
+  el.className="bulk-feedback"+(kind?" "+kind:"");
+}
+
+function updateArtworkMode(){
+  const isCollection=state.purpose==="collection";
+  $("bulkPanel").classList.toggle("hidden",!isCollection);
+  $("collectionDropStatus").classList.toggle("hidden",!isCollection);
+
+  if(isCollection){
+    const count=state.collectionFiles.length;
+    const supply=Number($("supply").value||0);
+    $("uploadTitle").textContent="Select collection artwork";
+    $("uploadSub").textContent="Tap here to add 1 image safely on phone · Use Select multiple below when supported";
+    $("collectionDropStatus").textContent=count+" saved · Target "+supply;
+    $("collectionDropStatus").className="collection-drop-status"+(count===supply&&supply>0?" good":"");
+
+    // Keep the top box as an uploader, never as a single-image preview.
+    $("artPreview").classList.add("hidden");
+    $("emptyUpload").classList.remove("hidden");
+    $("dropzone").classList.remove("has-image");
+    $("nftVisual").innerHTML="<span>Collection preview shown below</span>";
+  }else{
+    $("collectionDropStatus").classList.add("hidden");
+    $("uploadTitle").textContent="Upload NFT artwork";
+    $("uploadSub").textContent="PNG, JPG, WEBP or GIF · Local preview in this beta";
+    if(state.imageUrl){
+      $("artPreview").src=state.imageUrl;
+      $("artPreview").classList.remove("hidden");
+      $("emptyUpload").classList.add("hidden");
+      $("dropzone").classList.add("has-image");
+      $("nftVisual").innerHTML='<img src="'+state.imageUrl+'" alt="NFT preview">';
+    }else{
+      $("artPreview").classList.add("hidden");
+      $("emptyUpload").classList.remove("hidden");
+      $("dropzone").classList.remove("has-image");
+      $("nftVisual").innerHTML="<span>No artwork uploaded</span>";
+    }
+  }
+
+  renderBulkPanel();
+}
+function renderBulkPanel(){
+  if(!$("bulkPanel"))return;
+  const count=state.collectionFiles.length;
+  const supply=Number($("supply").value||0);
+  $("bulkCount").textContent=count+" image"+(count===1?"":"s")+" uploaded";
+  $("bulkTarget").textContent="Target: "+supply;
+
+  $("bulkCount").className="";
+  if(count===0)$("bulkCount").classList.add("warn");
+  else if(count>supply)$("bulkCount").classList.add("bad");
+  else if(count===supply)$("bulkCount").classList.add("good");
+  else $("bulkCount").classList.add("warn");
+
+  const thumbs=$("bulkThumbs");
+  thumbs.innerHTML="";
+  const shown=Math.min(count,60);
+  for(let i=0;i<shown;i++){
+    const d=document.createElement("div");
+    d.className="thumb";
+    const url=state.collectionUrls[i]||"";
+    d.innerHTML=(url
+      ? '<img src="'+url+'" alt="NFT '+(i+1)+'"><span>#'+(i+1)+'</span>'
+      : '<div class="thumb-more">Preview unavailable</div><span>#'+(i+1)+'</span>')
+      + '<button type="button" class="thumb-remove" data-index="'+i+'" aria-label="Remove image">×</button>';
+    thumbs.appendChild(d);
+  }
+  thumbs.querySelectorAll(".thumb-remove").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.stopPropagation();
+      removeCollectionImage(Number(btn.dataset.index));
+    });
+  });
+  if(count>60){
+    const more=document.createElement("div");
+    more.className="thumb thumb-more";
+    more.textContent="+"+(count-60)+" more";
+    thumbs.appendChild(more);
+  }
+
+  const mode=$("collectionArtworkMode")?.value;
+  if(mode==="unique"){
+    $("bulkHelp").textContent=(count===supply && supply>0)
+      ?"Artwork count matches collection supply."
+      :("Unique collection: "+count+" of "+supply+" artwork files currently loaded.");
+  }else{
+    $("bulkHelp").textContent="Mixed/generated mode can use uploaded source artwork. Automatic layer generation will be a separate feature later.";
+  }
+}
+function removeCollectionImage(index){
+  if(index<0 || index>=state.collectionFiles.length)return;
+  const url=state.collectionUrls[index];
+  if(url){try{URL.revokeObjectURL(url)}catch(_){}}
+  state.collectionFiles.splice(index,1);
+  state.collectionUrls.splice(index,1);
+  setBulkFeedback("Image #"+(index+1)+" removed. Remaining: "+state.collectionFiles.length+".","warn");
+  updateArtworkMode();
+  render();
+}
+function clearCollectionFiles(){
+  state.collectionUrls.forEach(url=>{try{URL.revokeObjectURL(url)}catch(_){}});
+  state.collectionFiles=[];
+  state.collectionUrls=[];
+  setBulkFeedback("Collection artwork cleared.","warn");
+  updateArtworkMode();
+  render();
+}
+function addCollectionFiles(files){
+  const incoming=[...(files||[])];
+  if(!incoming.length){
+    setBulkFeedback("No files were received from the phone file picker. Try selecting the image again.","bad");
+    setStatus("No files were received. Please choose the image again.","warn");
+    return;
+  }
+
+  const valid=incoming.filter(isSupportedImageFile);
+  const rejected=incoming.filter(f=>!isSupportedImageFile(f));
+
+  if(!valid.length){
+    const names=rejected.slice(0,3).map(f=>f.name||"unnamed file").join(", ");
+    setBulkFeedback(
+      "The selected file was not recognized as JPG, JPEG, PNG, WEBP, GIF, BMP or AVIF"+
+      (names?": "+names:"")+".",
+      "bad"
+    );
+    setStatus("The selected file was not recognized as a supported image.","warn");
+    return;
+  }
+
+  const existing=new Set(
+    state.collectionFiles.map(f=>[f.name||"",f.size||0,f.lastModified||0].join("|"))
+  );
+
+  let added=0, duplicates=0;
+  for(const file of valid){
+    const key=[file.name||"",file.size||0,file.lastModified||0].join("|");
+    if(existing.has(key)){duplicates++;continue}
+    existing.add(key);
+    state.collectionFiles.push(file);
+    try{
+      state.collectionUrls.push(URL.createObjectURL(file));
+    }catch(_){
+      state.collectionUrls.push("");
+    }
+    added++;
+  }
+
+  updateArtworkMode();
+  render();
+
+  const details=[];
+  if(added)details.push(added+" image"+(added===1?"":"s")+" added");
+  if(duplicates)details.push(duplicates+" duplicate image"+(duplicates===1?"":"s")+" skipped");
+  if(rejected.length)details.push(rejected.length+" unsupported file"+(rejected.length===1?"":"s")+" skipped");
+
+  let feedbackKind=added?"good":"warn";
+  let feedbackText=details.join(" · ");
+
+  if(duplicates && !added && !rejected.length){
+    feedbackKind="bad";
+    feedbackText=duplicates===1
+      ?"Duplicate image skipped — this artwork is already in your collection."
+      :duplicates+" duplicate images skipped — these artworks are already in your collection.";
+  }else if(duplicates){
+    feedbackKind="bad";
+    feedbackText += duplicates===1
+      ? ". One selected image was already in your collection."
+      : ". Some selected images were already in your collection.";
+  }
+
+  if(added) feedbackText += ". You can select another batch to add more.";
+  setBulkFeedback(feedbackText || "No new images were added.", feedbackKind);
+  setStatus(
+    added
+      ? added+" collection image"+(added===1?"":"s")+" added successfully."
+      : (duplicates
+          ? (duplicates===1
+              ?"Duplicate image skipped. This artwork is already in the collection."
+              :duplicates+" duplicate images skipped. They are already in the collection.")
+          :"No new collection images were added."),
+    added?"good":"warn"
+  );
+}
+
+function metadata(imageOverride=""){
+  const extra={};
+  if(state.purpose==="collection")Object.assign(extra,{
+    artwork_mode:$("collectionArtworkMode").value,
+    reveal_style:$("collectionReveal").value,
+    artwork_files_loaded:state.collectionFiles.length
+  });
+  if(state.purpose==="editions")Object.assign(extra,{
+    edition_label:$("editionLabel").value.trim(),
+    numbering:$("editionNumbering").value
+  });
+  if(state.purpose==="tickets")Object.assign(extra,{
+    event_name:$("eventName").value.trim(),
+    organizer_issuer:$("eventOrganizer").value.trim(),
+    event_date:$("eventDate").value,
+    event_time:$("eventTime").value,
+    event_timezone:$("eventTimezone").value.trim(),
+    venue:$("eventVenue").value.trim(),
+    support_contact:$("eventSupport").value.trim(),
+    ticket_category:$("ticketCategory").value.trim(),
+    transfer_policy:$("ticketTransfer").value,
+    organizer_reserve:Number($("ticketReserve").value||0),
+    public_ticket_supply:Math.max(0,Number($("supply").value||0)-Number($("ticketReserve").value||0)),
+    max_public_mint_per_wallet:Number($("maxWallet").value||0),
+    sale_start_mode:$("ticketSaleStart").value,
+    sale_start_at:$("ticketSaleStart").value==="scheduled"?$("ticketSaleStartAt").value:"",
+    sale_end_mode:$("ticketSaleEnd").value,
+    sale_end_at:$("ticketSaleEnd").value==="custom"?$("ticketSaleEndAt").value:"",
+    total_supply_policy:"fixed_after_deployment",
+    minting_model:"mint_on_purchase_or_reserve_distribution",
+    unsold_ticket_policy:"remain_unminted_and_unavailable_after_sale_close",
+    payout_recipient:$("recipient").value.trim(),
+    payment_flow:"direct_split_non_custodial",
+    platform_fee_status:"not_configured_beta",
+    buyer_pays_network_gas:true,
+    refund_cancellation_policy:$("ticketRefundPolicy").value.trim(),
+    checkin_model:"not_enabled",
+    ticket_note:$("ticketNote").value.trim()
+  });
+  if(state.purpose==="membership")Object.assign(extra,{
+    membership_name:$("membershipName").value.trim(),
+    access_note:$("membershipAccess").value.trim(),
+    duration:$("membershipDuration").value,
+    transfer_policy:$("membershipTransfer").value
+  });
+  if(state.purpose==="certificate")Object.assign(extra,{
+    issuer:$("certificateIssuer").value.trim(),
+    certificate_title:$("certificateTitle").value.trim(),
+    recipient_name:$("certificateRecipient").value.trim(),
+    credential_id:$("certificateCredential").value.trim(),
+    issue_date:$("certificateDate").value,
+    transfer_policy:"non-transferable recommended"
+  });
+  if(state.purpose==="game")Object.assign(extra,{
+    item_category:$("gameCategory").value.trim(),
+    rarity:$("gameRarity").value,
+    item_utility:$("gameNote").value.trim(),
+    transfer_policy:$("gameTransfer").value
+  });
+
+  return {
+    name:$("nftName").value.trim(),
+    description:$("description").value.trim(),
+    image:imageOverride || (state.purpose==="collection" ? "ipfs://<collection-artwork-folder>/<tokenId>" : (state.imageFile ? "ipfs://<uploaded-artwork-cid>" : "ipfs://<artwork-cid>")),
+    collection:$("collectionName").value.trim(),
+    symbol:$("symbol").value.trim(),
+    purpose:state.purpose,
+    structure:state.type,
+    supply:Number($("supply").value||0),
+    mint_price:state.purpose==="certificate"?0:Number($("mintPrice").value||0),
+    mint_currency:currentChain().native,
+    max_per_wallet:Number($("maxWallet").value||0),
+    royalty_percent:["certificate","tickets"].includes(state.purpose)?0:Number($("royalty").value||0),
+    ...extra,
+    attributes:[
+      {trait_type:"Creator platform",value:"ANGRY NFT Creator"},
+      {trait_type:"Network",value:currentChain().name},
+      {trait_type:"Purpose",value:state.purpose},
+      {trait_type:"NFT structure",value:state.type}
+    ]
+  };
+}
+function validateConfiguration(){
+  const errors=[],warnings=[];
+  const supply=Number($("supply").value),max=Number($("maxWallet").value),price=Number($("mintPrice").value),royalty=Number($("royalty").value);
+
+  if(!$("nftName").value.trim())errors.push("NFT name is required.");
+  if(!$("collectionName").value.trim())errors.push("Collection name is required.");
+  if(!$("symbol").value.trim())errors.push("Symbol is required.");
+
+  if(!Number.isInteger(supply)||supply<1)errors.push("Supply must be a whole number of at least 1.");
+  if(!Number.isInteger(max)||max<1)errors.push("Max per wallet must be a whole number of at least 1.");
+  if(state.purpose!=="tickets"&&Number.isFinite(supply)&&Number.isFinite(max)&&max>supply)errors.push("Max per wallet cannot be higher than total supply.");
+  if(state.purpose==="artwork"&&(supply!==1||max!==1))errors.push("1 of 1 NFT must keep Supply and Max per wallet at 1.");
+  if(["collection","editions"].includes(state.purpose)&&supply<2)errors.push("This NFT type needs a supply of at least 2.");
+  if(state.purpose==="collection"&&supply>100)errors.push("NFT Collection beta limit is 100 unique NFTs.");
+  if(state.purpose==="editions"&&supply>10000)errors.push("Multiple Editions beta limit is 10,000 copies.");
+
+  if(state.purpose!=="certificate"){
+    if(price<0||!Number.isFinite(price))errors.push("Mint price cannot be negative.");
+    if(price>=1)warnings.push("Mint price is "+price+" "+currentChain().native+" per NFT. This is a high native-coin amount—confirm it is intentional.");
+  }
+  if(!["certificate","tickets"].includes(state.purpose)){
+    if(royalty<0||royalty>10||!Number.isFinite(royalty))errors.push("Royalty must stay between 0% and 10%.");
+  }
+
+  if(state.purpose==="collection" && $("collectionArtworkMode").value==="unique"){
+    const artworkCount=state.collectionFiles.length;
+    if(artworkCount>supply)errors.push("Uploaded artwork count cannot be higher than collection supply.");
+    else if(artworkCount<supply)warnings.push("Unique collection currently has "+artworkCount+" of "+supply+" artwork files. The counts must match before live deployment.");
+  }
+
+  if(state.purpose==="tickets"){
+    const eventName=$("eventName").value.trim();
+    const organizer=$("eventOrganizer").value.trim();
+    const eventDate=$("eventDate").value;
+    const eventTime=$("eventTime").value;
+    const timezone=$("eventTimezone").value.trim();
+    const venue=$("eventVenue").value.trim();
+    const support=$("eventSupport").value.trim();
+    const category=$("ticketCategory").value.trim();
+    const reserve=Number($("ticketReserve").value);
+    const publicSupply=supply-reserve;
+    const payout=$("recipient").value.trim();
+    const evmAddress=/^0x[a-fA-F0-9]{40}$/;
+
+    if(!eventName)errors.push("Event name is required for Event Tickets.");
+    if(!organizer)errors.push("Organizer / issuer is required for Event Tickets.");
+    if(!eventDate)errors.push("Event date is required for Event Tickets.");
+    if(!eventTime)errors.push("Event time is required for Event Tickets.");
+    if(!venue)errors.push("Venue / location is required for Event Tickets.");
+    if(!category)errors.push("Ticket category is required.");
+    if(!timezone)warnings.push("Add an event timezone or UTC offset so remote buyers can interpret the event time correctly.");
+    if(!support)warnings.push("Add a support contact so buyers know where to ask about event changes or ticket problems.");
+    if(!$("ticketRefundPolicy").value.trim())warnings.push("Add a refund / cancellation policy before a real public sale.");
+    if(!$("ticketAuthorityCheck").checked)errors.push("Confirm that you are authorized to issue tickets for this event.");
+
+    if(!Number.isSafeInteger(supply)||supply<1)errors.push("Ticket supply must be a safe whole number of at least 1.");
+    if(!Number.isSafeInteger(reserve)||reserve<0)errors.push("Organizer reserve must be a whole number of 0 or more.");
+    if(Number.isFinite(reserve)&&reserve>supply)errors.push("Organizer reserve cannot be higher than total ticket supply.");
+
+    if(Number.isSafeInteger(reserve)&&reserve>=0&&reserve<=supply){
+      if(publicSupply>0&&max>publicSupply)errors.push("Max public mint per wallet cannot be higher than the public ticket supply.");
+      if(publicSupply===0)warnings.push("All tickets are reserved for organizer distribution, so public minting has no available supply.");
+    }
+
+    if(payout && !evmAddress.test(payout))errors.push("Organizer payout wallet must be a valid EVM address beginning with 0x.");
+    if(!payout)warnings.push("Connect a wallet or enter the organizer payout wallet before live deployment.");
+
+    if(eventDate){
+      const today=new Date();
+      today.setHours(0,0,0,0);
+      const chosen=new Date(eventDate+"T00:00:00");
+      if(chosen<today)errors.push("Event date cannot be in the past.");
+      if(chosen.getTime()===today.getTime() && eventTime){
+        const now=new Date();
+        const nowMinutes=now.getHours()*60+now.getMinutes();
+        const parts=eventTime.split(":").map(Number);
+        const eventMinutes=(parts[0]||0)*60+(parts[1]||0);
+        if(eventMinutes<nowMinutes)warnings.push("The selected event time is earlier than the current local time today.");
+      }
+    }
+
+    if($("ticketSaleStart").value==="scheduled" && !$("ticketSaleStartAt").value){
+      errors.push("Scheduled public sale start requires a date and time.");
+    }
+    if($("ticketSaleEnd").value==="custom" && !$("ticketSaleEndAt").value){
+      errors.push("Custom public sale close requires a date and time.");
+    }
+
+    const saleStart=$("ticketSaleStart").value==="scheduled"?$("ticketSaleStartAt").value:"";
+    const saleEnd=$("ticketSaleEnd").value==="custom"?$("ticketSaleEndAt").value:"";
+    if(saleStart && saleEnd){
+      const s=new Date(saleStart),e=new Date(saleEnd);
+      if(Number.isFinite(s.getTime())&&Number.isFinite(e.getTime())&&e<=s){
+        errors.push("Public sale close must be later than the scheduled public sale start.");
+      }
+    }
+    if(eventDate && eventTime && saleEnd){
+      const eventLocal=new Date(eventDate+"T"+eventTime);
+      const closeLocal=new Date(saleEnd);
+      if(Number.isFinite(eventLocal.getTime())&&Number.isFinite(closeLocal.getTime())&&closeLocal>eventLocal){
+        warnings.push("Custom public sale close is after the event start. Confirm that sales during the event are intentional.");
+      }
+    }
+
+    if($("ticketTransfer").value==="locked")warnings.push("Non-transferable is selected. The final smart contract must enforce this rule before mainnet use.");
+    warnings.push("ANGRY platform fee is not configured in this beta yet. The exact fee must be disclosed before a live ticket sale.");
+  }
+
+  if(state.purpose==="membership"){
+    if(!$("membershipName").value.trim())errors.push("Membership name is required.");
+    if(!$("membershipAccess").value.trim())warnings.push("Describe what access or benefit the pass provides.");
+  }
+
+  if(state.purpose==="certificate"){
+    if(!$("certificateIssuer").value.trim())errors.push("Certificate issuer is required.");
+    if(!$("certificateTitle").value.trim())errors.push("Certificate title is required.");
+    if(!$("certificateRecipient").value.trim())errors.push("Certificate recipient name is required.");
+    if(!$("certificateCredential").value.trim())errors.push("Credential ID is required.");
+    if(!$("certificateDate").value)warnings.push("Issue date is still empty.");
+  }
+
+  if(state.purpose==="game"){
+    if(!$("gameCategory").value.trim())errors.push("Game/digital item category is required.");
+    if(!$("gameNote").value.trim())warnings.push("Explain the item utility so holders understand what it is for.");
+  }
+
+  if(state.purpose==="collection"){if(state.collectionFiles.length===0)warnings.push("No collection artwork has been uploaded yet.");}
+  else if(!state.imageFile && state.purpose!=="certificate")warnings.push("Artwork has not been uploaded yet.");
+  if(!$("recipient").value && !["certificate","tickets"].includes(state.purpose))warnings.push("Connect the creator wallet before live deployment.");
+
+  return {errors,warnings};
+}
+
+function openCollectionArtwork(index){
+  if(index<0 || index>=state.collectionUrls.length)return;
+  const url=state.collectionUrls[index];
+  if(!url)return;
+  $("artModalTitle").textContent="NFT #"+(index+1);
+  $("artModalImage").src=url;
+  $("artModal").classList.remove("hidden");
+}
+function closeCollectionArtwork(){
+  $("artModal").classList.add("hidden");
+  $("artModalImage").removeAttribute("src");
+}
+function renderCollectionPreview(){
+  const panel=$("collectionPreviewPanel");
+  const single=$("singlePreviewPanel");
+  const isCollection=state.purpose==="collection";
+
+  panel.classList.toggle("hidden",!isCollection);
+  single.classList.toggle("hidden",isCollection);
+  if(!isCollection)return;
+
+  const count=state.collectionFiles.length;
+  const supply=Number($("supply").value||0);
+  $("collectionPreviewSubtitle").textContent=count+" of "+supply+" artwork loaded";
+  $("collectionPreviewCount").textContent=count+" / "+supply;
+
+  const grid=$("collectionPreviewGrid");
+  grid.innerHTML="";
+
+  if(!count){
+    grid.innerHTML='<div class="collection-empty">Upload artwork to preview the collection.</div>';
+    return;
+  }
+
+  const shown=Math.min(count,12);
+  for(let i=0;i<shown;i++){
+    const item=document.createElement("button");
+    item.type="button";
+    item.className="collection-preview-item";
+    const url=state.collectionUrls[i]||"";
+    item.innerHTML=url
+      ? '<img src="'+url+'" alt="NFT '+(i+1)+'"><span>#'+(i+1)+'</span>'
+      : '<span>#'+(i+1)+'</span>';
+    item.addEventListener("click",()=>openCollectionArtwork(i));
+    grid.appendChild(item);
+  }
+
+  if(count>12){
+    const more=document.createElement("div");
+    more.className="collection-preview-item collection-preview-more";
+    more.textContent="+"+(count-12)+" more";
+    grid.appendChild(more);
+  }
+}
+
+function updateTicketAllocation(){
+  if(state.purpose!=="tickets")return;
+  const total=Number($("supply").value||0);
+  const reserve=Number($("ticketReserve").value||0);
+  const validTotal=Number.isFinite(total)&&total>=0?total:0;
+  const validReserve=Number.isFinite(reserve)&&reserve>=0?reserve:0;
+  const publicSupply=Math.max(0,validTotal-validReserve);
+
+  $("ticketPublicSupply").value=String(publicSupply);
+  $("ticketAllocationSummary").textContent=publicSupply+" public · "+validReserve+" organizer reserve · "+validTotal+" total.";
+  $("maxWalletHelp").textContent=publicSupply===0
+    ?"No public ticket supply is available. This setting will not apply unless some tickets are allocated to public minting."
+    :"Applies only to public minting. Organizer reserve is tracked separately and still counts inside the same total supply.";
+
+  $("ticketCurrencyNote").textContent="Ticket price currently uses "+currentChain().native+", the selected network's native coin.";
+  $("ticketPaymentSummary").textContent=
+    "Buyer pays "+$("mintPrice").value+" "+currentChain().native+
+    " per ticket + network gas → organizer payout wallet receives ticket revenue minus the disclosed ANGRY platform fee → NFT ticket mints directly to buyer.";
+}
+
+function updateTicketSaleControls(){
+  if(!$("ticketSaleStart")||!$("ticketSaleEnd"))return;
+  $("ticketSaleStartAtField").classList.toggle("hidden",$("ticketSaleStart").value!=="scheduled");
+  $("ticketSaleEndAtField").classList.toggle("hidden",$("ticketSaleEnd").value!=="custom");
+}
+
+
+function updateLiveLab(){
+  const enabled=state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single";
+  $("liveSepoliaFlow")?.classList.toggle("live-hidden",!enabled);
+  $("liveUnsupported")?.classList.toggle("live-hidden",enabled);
+  if(!enabled && $("liveUnsupportedText")){
+    $("liveUnsupportedText").textContent=state.purpose!=="artwork"
+      ?"Real deployment is currently limited to 1 of 1 NFT while the first contract path is tested."
+      : state.chain!=="sepolia"
+        ?"Real 1 of 1 deployment is currently enabled only on Ethereum Sepolia."
+        :"This configuration is not enabled for live test deployment yet.";
+  }
+  if($("liveLabPill"))$("liveLabPill").textContent=enabled?"Sepolia real test":"Limited beta";
+}
+
+function buildLiveMetadata(imageUri){
+  const base=metadata(imageUri);
+  return {
+    name:$("nftName").value.trim()||"Untitled NFT",
+    description:$("description").value.trim(),
+    image:imageUri,
+    attributes:[
+      {trait_type:"Created with",value:"ANGRY NFT Creator"},
+      {trait_type:"NFT type",value:"1 of 1"}
+    ],
+    angry_creator:{
+      network:"Ethereum Sepolia",
+      structure:"ERC-721",
+      supply:1,
+      creator_wallet:$("recipient").value.trim()||state.account||"",
+      royalty_percent:Number($("royalty").value||0)
+    },
+    source_configuration:base
+  };
+}
+
+async function uploadOneOfOneToIpfs(){
+  if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
+    setStatus("IPFS test upload is currently available only for 1 of 1 on Ethereum Sepolia.","warn");return;
+  }
+  if(!state.imageFile){setStatus("Upload the 1 of 1 artwork first.","warn");return}
+  if(!$("rightsCheck").checked){setStatus("Confirm that you own or have permission to use the artwork first.","warn");return}
+  const jwt=$("pinataJwt").value.trim();
+  if(!jwt){setStatus("Paste your own temporary Pinata JWT for this developer test.","warn");return}
+
+  const btn=$("uploadIpfsBtn");
+  btn.disabled=true;
+  try{
+    $("ipfsProgress").textContent="Uploading artwork to IPFS…";
+    const fd=new FormData();
+    fd.append("file",state.imageFile,state.imageFile.name||"nft-artwork");
+    fd.append("pinataMetadata",JSON.stringify({name:(state.imageFile.name||"nft-artwork")}));
+    fd.append("pinataOptions",JSON.stringify({cidVersion:1}));
+
+    const artRes=await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+jwt},
+      body:fd
+    });
+    const artData=await artRes.json().catch(()=>({}));
+    if(!artRes.ok||!artData.IpfsHash)throw new Error(artData.error?.details||artData.error||artData.message||("Artwork upload failed ("+artRes.status+")"));
+    const imageUri="ipfs://"+artData.IpfsHash;
+    state.liveImageUri=imageUri;
+
+    $("ipfsProgress").textContent="Artwork pinned. Uploading metadata JSON…";
+    const metaBody={
+      pinataOptions:{cidVersion:1},
+      pinataMetadata:{name:(($("nftName").value.trim()||"ANGRY-NFT").replace(/[^a-z0-9._-]+/gi,"-"))+"-metadata.json"},
+      pinataContent:buildLiveMetadata(imageUri)
+    };
+    const metaRes=await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS",{
+      method:"POST",
+      headers:{Authorization:"Bearer "+jwt,"Content-Type":"application/json"},
+      body:JSON.stringify(metaBody)
+    });
+    const metaData=await metaRes.json().catch(()=>({}));
+    if(!metaRes.ok||!metaData.IpfsHash)throw new Error(metaData.error?.details||metaData.error||metaData.message||("Metadata upload failed ("+metaRes.status+")"));
+
+    state.liveMetadataUri="ipfs://"+metaData.IpfsHash;
+    $("liveMetadataUri").value=state.liveMetadataUri;
+    $("pinataJwt").value="";
+    $("ipfsProgress").textContent="IPFS ready · artwork "+imageUri+" · metadata "+state.liveMetadataUri;
+    setStatus("Artwork and metadata uploaded to IPFS successfully. The temporary JWT field was cleared.","good");
+  }catch(e){
+    $("ipfsProgress").textContent="IPFS upload stopped: "+(e.message||e);
+    setStatus("IPFS upload failed: "+(e.message||e),"warn");
+  }finally{btn.disabled=false}
+}
+
+let compilerWorker=null;
+let compilerRequest=0;
+const compilerPending=new Map();
+
+function getCompilerWorker(){
+  if(compilerWorker)return compilerWorker;
+  compilerWorker=new Worker("./solc-worker.js",{type:"module"});
+  compilerWorker.onmessage=(event)=>{
+    const data=event.data||{};
+    const pending=compilerPending.get(data.id);
+    if(!pending)return;
+    compilerPending.delete(data.id);
+    data.ok?pending.resolve(data):pending.reject(new Error(data.error||"Solidity compilation failed."));
+  };
+  compilerWorker.onerror=(event)=>{
+    for(const [,pending] of compilerPending)pending.reject(new Error(event.message||"Solidity compiler worker failed."));
+    compilerPending.clear();
+  };
+  return compilerWorker;
+}
+
+function compileOneOfOne(){
+  return new Promise((resolve,reject)=>{
+    const id=++compilerRequest;
+    compilerPending.set(id,{resolve,reject});
+    getCompilerWorker().postMessage({id,action:"compile"});
+  });
+}
+
+async function deployOneOfOneSepolia(){
+  if(!(state.chain==="sepolia" && state.purpose==="artwork" && state.type==="single")){
+    setStatus("Real deployment is currently limited to 1 of 1 on Ethereum Sepolia.","warn");return;
+  }
+  const name=$("nftName").value.trim(),collection=$("collectionName").value.trim(),symbol=$("symbol").value.trim();
+  const recipient=$("recipient").value.trim()||state.account||"";
+  const metadataUri=$("liveMetadataUri").value.trim();
+  if(!name||!collection||!symbol){setStatus("NFT name, collection name and symbol are required.","warn");return}
+  if(!/^0x[a-fA-F0-9]{40}$/.test(recipient)){setStatus("Connect a valid EVM wallet before deployment.","warn");return}
+  if(!metadataUri){setStatus("Upload metadata to IPFS or paste an existing metadata URI first.","warn");return}
+  if(!/^(ipfs:\/\/|https:\/\/)/i.test(metadataUri)){setStatus("Metadata URI must start with ipfs:// or https://.","warn");return}
+  if(!$("rightsCheck").checked){setStatus("Confirm artwork ownership/permission before deployment.","warn");return}
+  if(!window.ethereum){setStatus("Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.","warn");return}
+
+  const btn=$("deployOneOfOneBtn");
+  btn.disabled=true;
+  $("deployResult").classList.add("live-hidden");
+  try{
+    if(!state.account){await connectWallet();if(!state.account)throw new Error("Wallet is not connected.");}
+    await switchChain();
+    const actual=String(await ethereum.request({method:"eth_chainId"})).toLowerCase();
+    if(actual!=="0xaa36a7")throw new Error("Wallet is not on Ethereum Sepolia.");
+
+    $("deployProgress").textContent="Loading Solidity compiler and compiling the fixed-supply ERC-721 contract…";
+    const compiled=await compileOneOfOne();
+
+    $("deployProgress").textContent="Contract compiled. Preparing wallet deployment…";
+    const ethers=await import("https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm");
+    const provider=new ethers.BrowserProvider(window.ethereum);
+    const signer=await provider.getSigner();
+
+    const royaltyPct=Math.max(0,Math.min(10,Number($("royalty").value||0)));
+    const royaltyBps=Math.round(royaltyPct*100);
+    const factory=new ethers.ContractFactory(compiled.abi,compiled.bytecode,signer);
+
+    $("deployProgress").textContent="Wallet approval required. Review the Sepolia transaction before confirming.";
+    const contract=await factory.deploy(
+      collection,
+      symbol,
+      recipient,
+      metadataUri,
+      recipient,
+      royaltyBps
+    );
+    const tx=contract.deploymentTransaction();
+    const txHash=tx?.hash||"";
+    $("deployProgress").textContent="Transaction sent"+(txHash?" · "+txHash:"")+" · waiting for Sepolia confirmation…";
+    await contract.waitForDeployment();
+    const address=await contract.getAddress();
+
+    state.lastNftContract=address;
+    state.liveMetadataUri=metadataUri;
+    const explorer="https://sepolia.etherscan.io/address/"+address;
+    $("deployResult").classList.remove("live-hidden");
+    $("deployResult").innerHTML="<b>1 of 1 test NFT deployed ✅</b><br>Contract: "+address+"<br>Token ID: #1<br>Owner: "+recipient+(txHash?"<br>Transaction: "+txHash:"")+"<br>Metadata: "+metadataUri+"<br><a target=\"_blank\" rel=\"noopener\" href=\""+explorer+"\">Open contract on Sepolia explorer</a><br><small>Wallets and explorers may need time to index NFT artwork after deployment.</small>";
+    $("deployProgress").textContent="Confirmed on Ethereum Sepolia.";
+    setStatus("1 of 1 NFT deployed successfully on Ethereum Sepolia. Token ID #1 was minted to the recipient wallet.","good");
+  }catch(e){
+    $("deployProgress").textContent="Deployment stopped: "+(e.message||e);
+    setStatus("Sepolia deployment failed: "+(e.message||e),"warn");
+  }finally{btn.disabled=false}
+}
+
+function render(){
+  updateTicketAllocation();
+  $("previewName").textContent=$("nftName").value||"Untitled NFT";
+  $("previewCollection").textContent=($("collectionName").value||"Untitled Collection")+" · "+currentChain().name;
+  renderCollectionPreview();
+  $("metadataPreview").textContent=JSON.stringify(metadata(),null,2);
+  if(state.purpose==="collection"){renderBulkPanel();updateArtworkMode();}
+
+  const v=validateConfiguration();
+  const box=$("validationBox"),msg=$("validationMessages");
+  if(v.errors.length){
+    box.className="validation-box bad";
+    msg.innerHTML=v.errors.map(x=>"✕ "+x).join("<br>")+(v.warnings.length?"<br>"+v.warnings.map(x=>"⚠ "+x).join("<br>"):"");
+  }else if(v.warnings.length){
+    box.className="validation-box warn";
+    msg.innerHTML="✓ Core settings are valid.<br>"+v.warnings.map(x=>"⚠ "+x).join("<br>");
+  }else{
+    box.className="validation-box";
+    msg.innerHTML="✓ Settings look consistent.";
+  }
+
+  const purposeName=document.querySelector(".purpose.active b")?.textContent||state.purpose;
+  const structure=state.type==="edition"?"ERC-1155-style":state.type==="single"?"ERC-721 single":"ERC-721 collection";
+  const price=state.purpose==="certificate"?0:Number($("mintPrice").value||0);
+  const royalty=["certificate","tickets"].includes(state.purpose)?0:Number($("royalty").value||0);
+
+  let extra="";
+  if(state.purpose==="tickets"){
+    const transferText=$("ticketTransfer").value==="locked"?"Non-transferable":"Transferable";
+    const reserve=Number($("ticketReserve").value||0);
+    const publicSupply=Math.max(0,Number($("supply").value||0)-reserve);
+    const saleStartText=$("ticketSaleStart").value==="scheduled"
+      ? ($("ticketSaleStartAt").value||"Scheduled time not entered")
+      : "When public mint is opened after deployment";
+    const saleEndText=$("ticketSaleEnd").value==="event_start"
+      ? "At event start"
+      : $("ticketSaleEnd").value==="custom"
+        ? ($("ticketSaleEndAt").value||"Custom close not entered")
+        : "Manual close by organizer";
+
+    extra="<br>Organizer: <b>"+($("eventOrganizer").value||"Not entered")+"</b> · Event: <b>"+($("eventName").value||"Not entered")+"</b>."
+      +"<br>Date/time: "+($("eventDate").value||"No date")+" "+($("eventTime").value||"No time")+" "+($("eventTimezone").value||"(timezone not entered)")+"."
+      +"<br>Venue: <b>"+($("eventVenue").value||"Not entered")+"</b> · Category: "+($("ticketCategory").value||"Not entered")+"."
+      +"<br>Allocation: <b>"+$("supply").value+" total</b> · "+reserve+" organizer reserve · "+publicSupply+" public."
+      +"<br>Public mint limit: <b>"+$("maxWallet").value+" per wallet</b> · Transfer: <b>"+transferText+"</b>."
+      +"<br>Sale: <b>"+saleStartText+"</b> → <b>"+saleEndText+"</b>."
+      +"<br>Payout: <b>"+($("recipient").value||"wallet not entered")+"</b> · ANGRY fee: <b>not configured in beta</b>."
+      +"<br>Unsold public tickets: <b>remain unminted after sale close</b> · QR check-in: <b>Coming later</b>.";
+  }else if(state.purpose==="membership"){
+    extra="<br>Membership: <b>"+($("membershipName").value||"Not entered")+"</b> · Duration: "+$("membershipDuration").selectedOptions[0].text+".";
+  }else if(state.purpose==="certificate"){
+    extra="<br>Certificate: <b>"+($("certificateTitle").value||"Not entered")+"</b> · Recipient: "+($("certificateRecipient").value||"Not entered")+".";
+  }else if(state.purpose==="game"){
+    extra="<br>Item: <b>"+($("gameCategory").value||"Not entered")+"</b> · Rarity: "+$("gameRarity").selectedOptions[0].text+".";
+  }else if(state.purpose==="editions"){
+    extra="<br>One artwork will be used for <b>"+$("supply").value+"</b> copies of the same item.";
+  }else if(state.purpose==="collection"){
+    extra="<br>This prepares a collection where NFTs may have separate artwork/metadata. Artwork loaded: <b>"+state.collectionFiles.length+"/"+$("supply").value+"</b>.";
+  }
+
+  $("reviewSummary").innerHTML=
+    "<b>Plain-language review</b><br>"+
+    "You are preparing <b>"+purposeName+"</b> on <b>"+currentChain().name+"</b>.<br>"+
+    "Structure: "+structure+". Supply: <b>"+$("supply").value+"</b>. "+(state.purpose==="tickets"?"Max public mint per wallet":"Max per wallet")+": <b>"+$("maxWallet").value+"</b>.<br>"+
+    (state.purpose==="tickets"
+      ?"Ticket price: <b>"+price+" "+currentChain().native+"</b>. Revenue flow: <b>direct organizer payout minus disclosed ANGRY fee</b>."
+      :"Mint price: <b>"+price+" "+currentChain().native+"</b> per NFT. Royalty: <b>"+royalty+"%</b>.")+extra;
+
+  $("prepareBtn").disabled=v.errors.length>0 || !$("rightsCheck").checked;
+  updateLiveLab();
+}
+function loadImage(file){
+  if(!file||!isSupportedImageFile(file)){setStatus("Please choose a supported image file.","warn");return}
+  state.imageFile=file;
+  if(state.imageUrl)URL.revokeObjectURL(state.imageUrl);
+  state.imageUrl=URL.createObjectURL(file);
+  updateArtworkMode();
+  render();
+  setStatus(state.purpose==="artwork"&&state.chain==="sepolia"?"Artwork loaded. You can now use the Sepolia Testnet Deployment Lab to pin it to IPFS.":"Artwork loaded for local preview.","good");
+}
+function downloadMetadata(){
+  const blob=new Blob([JSON.stringify(metadata(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="nft-metadata.json";a.click();URL.revokeObjectURL(a.href);
+}
+$("artModalClose").addEventListener("click",closeCollectionArtwork);
+$("artModalBackdrop").addEventListener("click",closeCollectionArtwork);
+$("walletBtn").addEventListener("click",connectWallet);
+$("switchBtn").addEventListener("click",switchChain);
+document.querySelectorAll(".network-card").forEach(b=>b.addEventListener("click",()=>setChain(b.dataset.chain)));
+document.querySelectorAll(".purpose").forEach(b=>b.addEventListener("click",()=>{
+  setPurpose(b.dataset.purpose);
+}));
+document.querySelectorAll("#advancedPicker [data-type]").forEach(b=>b.addEventListener("click",()=>setType(b.dataset.type)));
+$("dropzone").addEventListener("click",()=>{
+  if(state.purpose==="collection") $("collectionSingleInput").click();
+  else $("artFile").click();
+});
+$("artPreview").addEventListener("error",()=>{
+  if(state.purpose==="collection"){
+    setBulkFeedback("The file was added, but this browser could not preview its image format. Try JPG, PNG or WEBP for the most reliable mobile preview.","warn");
+  }
+});
+$("artFile").addEventListener("change",e=>{
+  loadImage(e.target.files?.[0]);
+  e.target.value="";
+});
+
+$("collectionSingleInput").addEventListener("change",e=>{
+  const file=e.target.files?.[0];
+  if(file){
+    addCollectionFiles([file]);
+  }else{
+    setBulkFeedback("No image was selected.","warn");
+  }
+  e.target.value="";
+});
+
+$("addOneBtn").addEventListener("click",e=>{
+  e.stopPropagation();
+  $("collectionSingleInput").click();
+});
+
+$("collectionFileInput").addEventListener("change",e=>{
+  const files=e.target.files;
+  if(files && files.length){
+    addCollectionFiles(files);
+  }else{
+    setBulkFeedback("The collection picker closed without returning a file. Try Add images again.","warn");
+  }
+  e.target.value="";
+});
+
+$("dropzone").addEventListener("dragover",e=>{e.preventDefault()});
+$("dropzone").addEventListener("drop",e=>{
+  e.preventDefault();
+  if(state.purpose==="collection")addCollectionFiles(e.dataTransfer.files);
+  else loadImage(e.dataTransfer.files[0]);
+});
+$("nativeMultiInput").addEventListener("change",e=>{
+  const files=[...(e.target.files||[])];
+  if(!files.length){
+    setBulkFeedback("No images were selected.","warn");
+    return;
+  }
+
+  const batch=files.slice(0,10);
+  addCollectionFiles(batch);
+
+  if(files.length>10){
+    setBulkFeedback(
+      "You selected "+files.length+" images. ANGRY accepted the first 10 in this batch.",
+      "warn"
+    );
+  }
+
+  e.target.value="";
+});
+
+$("clearBulkBtn").addEventListener("click",e=>{
+  e.stopPropagation();
+  clearCollectionFiles();
+});
+["nftName","collectionName","description","symbol","supply","mintPrice","maxWallet","royalty",
+"collectionArtworkMode","collectionReveal","editionLabel","editionNumbering",
+"eventName","eventOrganizer","eventDate","eventTime","eventTimezone","eventVenue","eventSupport","ticketCategory","ticketTransfer","ticketRefundPolicy","ticketCheckin","ticketNote","ticketSaleStart","ticketSaleStartAt","ticketSaleEnd","ticketSaleEndAt",
+"membershipName","membershipAccess","membershipDuration","membershipTransfer",
+"certificateIssuer","certificateTitle","certificateRecipient","certificateCredential","certificateDate",
+"gameCategory","gameRarity","gameNote","gameTransfer"].forEach(id=>{
+  $(id)?.addEventListener("input",render);
+  $(id)?.addEventListener("change",render);
+});
+
+$("supply").addEventListener("change",()=>{
+  if(state.purpose==="collection"){
+    const n=Number($("supply").value||0);
+    if(n>100){
+      $("supply").value=100;
+      setStatus("NFT Collection beta limit is 100 unique NFTs. Supply was adjusted to 100.","warn");
+    }else if(n<2){
+      $("supply").value=2;
+      setStatus("NFT Collection needs at least 2 NFTs. Supply was adjusted to 2.","warn");
+    }
+  }else if(state.purpose==="editions"){
+    const n=Number($("supply").value||0);
+    if(n>10000){
+      $("supply").value=10000;
+      setStatus("Multiple Editions beta limit is 10,000 copies. Number of editions was adjusted to 10,000.","warn");
+    }else if(n<2){
+      $("supply").value=2;
+      setStatus("Multiple Editions needs at least 2 copies. Number of editions was adjusted to 2.","warn");
+    }
+  }else if(state.purpose==="tickets"){
+    const n=Number($("supply").value||0);
+    if(n<1){
+      $("supply").value=1;
+      setStatus("Event Tickets needs at least 1 ticket. Ticket supply was adjusted to 1.","warn");
+    }
+  }
+  render();
+});
+
+$("ticketReserve")?.addEventListener("input",()=>{
+  updateTicketAllocation();
+  render();
+});
+$("ticketReserve")?.addEventListener("change",()=>{
+  const total=Number($("supply").value||0);
+  const reserve=Number($("ticketReserve").value||0);
+  if(Number.isFinite(reserve)&&reserve<0){
+    $("ticketReserve").value=0;
+    setStatus("Organizer reserve cannot be negative. It was adjusted to 0.","warn");
+  }else if(Number.isFinite(total)&&Number.isFinite(reserve)&&reserve>total){
+    $("ticketReserve").value=total;
+    setStatus("Organizer reserve cannot exceed total ticket supply. It was adjusted to the total supply.","warn");
+  }
+  render();
+});
+
+$("ticketSaleStart")?.addEventListener("change",()=>{
+  updateTicketSaleControls();
+  render();
+});
+$("ticketSaleEnd")?.addEventListener("change",()=>{
+  updateTicketSaleControls();
+  render();
+});
+
+$("ticketTransfer")?.addEventListener("change",()=>{
+  $("ticketTransferHelp").textContent=$("ticketTransfer").value==="locked"
+    ?"Non-transferable is a contract-level rule that must be enforced in the final ticket smart contract."
+    :"Transferable tickets may be sent or resold by the holder.";
+  render();
+});
+$("recipient")?.addEventListener("input",render);
+$("ticketAuthorityCheck")?.addEventListener("change",render);
+$("rightsCheck").addEventListener("change",render);
+$("collectionArtworkMode")?.addEventListener("change",()=>{renderBulkPanel();render();});
+
+document.querySelectorAll(".future-option").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const key=btn.dataset.future;
+    const panel=document.querySelector('.future-panel[data-panel="'+key+'"]');
+    const opening=btn.getAttribute("aria-expanded")!=="true";
+
+    document.querySelectorAll(".future-option").forEach(other=>{
+      if(other!==btn) other.setAttribute("aria-expanded","false");
+    });
+    document.querySelectorAll(".future-panel").forEach(other=>{
+      if(other!==panel) other.classList.remove("open");
+    });
+
+    btn.setAttribute("aria-expanded",opening?"true":"false");
+    panel?.classList.toggle("open",opening);
+  });
+});
+
+$("prepareBtn").addEventListener("click",()=>{
+  const name=$("nftName").value.trim(),collection=$("collectionName").value.trim();
+  if(!name||!collection){setStatus("NFT name and collection name are required.","warn");return}
+  const v=validateConfiguration();
+  if(v.errors.length){setStatus("Fix the highlighted configuration problems before continuing.","warn");return}
+  if(!$("rightsCheck").checked){setStatus("Please confirm that you own the artwork or have permission to use it before continuing.","warn");return}
+  if(state.purpose==="tickets"){
+    setStatus("Event Ticket configuration prepared successfully. Allocation, sale rules and payout flow are ready for the next testnet contract stage. QR check-in and live deployment are not enabled yet.","good");
+  }else{
+    setStatus(state.purpose==="artwork"&&state.chain==="sepolia"?"Configuration prepared. Continue in the Ethereum Sepolia Testnet Deployment Lab to upload metadata and deploy the 1 of 1 test NFT.":"Configuration prepared successfully. Live deployment for this setup is not enabled yet.","good");
+  }
+});
+$("downloadBtn").addEventListener("click",downloadMetadata);
+$("uploadIpfsBtn")?.addEventListener("click",uploadOneOfOneToIpfs);
+$("deployOneOfOneBtn")?.addEventListener("click",deployOneOfOneSepolia);
+$("liveMetadataUri")?.addEventListener("input",()=>{
+  state.liveMetadataUri=$("liveMetadataUri").value.trim();
+});
+if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";render()})}
+setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
+</script>
+</body>
+</html>
