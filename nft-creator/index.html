@@ -2360,6 +2360,17 @@ function compileCollection(){
   });
 }
 
+function compileEditions(){
+  return new Promise((resolve,reject)=>{
+    const id=++compilerRequest;
+    compilerPending.set(id,{resolve,reject});
+    getCompilerWorker().postMessage({
+      id,
+      action:"compileEditions"
+    });
+  });
+}
+
 async function deployCollectionSepolia(){
   if(!(
     state.chain==="sepolia" &&
@@ -2552,6 +2563,211 @@ async function deployCollectionSepolia(){
     );
   }finally{
     btn.disabled=false;
+  }
+}
+
+
+async function deployEditionsSepolia(){
+  const name=$("nftName").value.trim();
+  const collection=$("collectionName").value.trim();
+  const symbol=$("symbol").value.trim();
+
+  const recipient=
+    $("recipient").value.trim() ||
+    state.account ||
+    "";
+
+  const metadataUri=$("liveMetadataUri").value.trim();
+  const supply=Number($("supply").value||0);
+
+  if(!name||!collection||!symbol){
+    setStatus(
+      "NFT name, collection name and symbol are required.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!/^0x[a-fA-F0-9]{40}$/.test(recipient)){
+    setStatus(
+      "Connect a valid EVM wallet before deployment.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!Number.isInteger(supply) || supply<2 || supply>10000){
+    setStatus(
+      "Multiple Editions supply must be between 2 and 10,000.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!metadataUri){
+    setStatus(
+      "Upload metadata to IPFS or paste an existing metadata URI first.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!/^(ipfs:\/\/|https:\/\/)/i.test(metadataUri)){
+    setStatus(
+      "Metadata URI must start with ipfs:// or https://.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!$("rightsCheck").checked){
+    setStatus(
+      "Confirm artwork ownership/permission before deployment.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!window.ethereum){
+    setStatus(
+      "Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.",
+      "warn"
+    );
+    return;
+  }
+
+  const btn=
+    $("deployOneOfOneBtn") ||
+    $("createNftBtn") ||
+    $("deployBtn");
+
+  if(btn) btn.disabled=true;
+
+  const result=$("deployResult");
+  if(result){
+    result.classList.add("live-hidden");
+    result.innerHTML="";
+  }
+
+  try{
+    if(!state.account){
+      await connectWallet();
+    }
+
+    if(!state.account){
+      throw new Error("Wallet is not connected.");
+    }
+
+    await switchChain();
+
+    const actual=String(
+      await ethereum.request({method:"eth_chainId"})
+    ).toLowerCase();
+
+    if(actual!=="0xaa36a7"){
+      throw new Error("Wallet is not on Ethereum Sepolia.");
+    }
+
+    $("deployProgress").textContent=
+      "Loading Solidity compiler and compiling the ERC-1155 Multiple Editions contract...";
+
+    const compiled=await compileEditions();
+
+    $("deployProgress").textContent=
+      "Multiple Editions contract compiled. Preparing wallet deployment...";
+
+    const ethers=await import(
+      "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm"
+    );
+
+    const provider=
+      new ethers.BrowserProvider(window.ethereum);
+
+    const signer=await provider.getSigner();
+
+    const royaltyPct=Math.max(
+      0,
+      Math.min(
+        10,
+        Number($("royalty").value||0)
+      )
+    );
+
+    const royaltyBps=Math.round(royaltyPct*100);
+
+    const factory=
+      new ethers.ContractFactory(
+        compiled.abi,
+        compiled.bytecode,
+        signer
+      );
+
+    $("deployProgress").textContent=
+      "Wallet approval required. Review the Sepolia transaction before confirming.";
+
+    const contract=await factory.deploy(
+      collection,
+      symbol,
+      recipient,
+      metadataUri,
+      supply,
+      recipient,
+      royaltyBps
+    );
+
+    const tx=contract.deploymentTransaction();
+    const txHash=tx?.hash||"";
+
+    $("deployProgress").textContent=
+      "Transaction sent"+
+      (txHash ? " ("+txHash+")" : "")+
+      ". Waiting for Sepolia confirmation...";
+
+    await contract.waitForDeployment();
+
+    const address=await contract.getAddress();
+
+    const explorer=
+      "https://sepolia.etherscan.io/address/"+address;
+
+    if(result){
+      result.classList.remove("live-hidden");
+      result.innerHTML=
+        "<b>Multiple Editions deployed ✅</b>"+
+        "<br>Contract: "+address+
+        "<br>Supply: "+supply+
+        "<br>Token ID: #1"+
+        "<br>Owner: "+recipient+
+        '<br><a target="_blank" rel="noopener" href="'+
+        explorer+
+        '">Open contract on Sepolia explorer</a>';
+    }
+
+    $("deployProgress").textContent=
+      "Multiple Editions confirmed on Ethereum Sepolia.";
+
+    setStatus(
+      supply+
+      " editions were deployed successfully on Ethereum Sepolia.",
+      "good"
+    );
+
+  }catch(e){
+
+    $("deployProgress").textContent=
+      "Multiple Editions deployment stopped: "+
+      (e.message||e);
+
+    setStatus(
+      "Sepolia Multiple Editions deployment failed: "+
+      (e.message||e),
+      "warn"
+    );
+
+  }finally{
+
+    if(btn) btn.disabled=false;
+
   }
 }
 
@@ -3558,7 +3774,12 @@ $("prepareBtn").addEventListener("click",()=>{
 });
 $("downloadBtn").addEventListener("click",downloadMetadata);
 $("uploadIpfsBtn")?.addEventListener("click",uploadOneOfOneToIpfs);
-$("deployOneOfOneBtn")?.addEventListener("click",deployOneOfOneSepolia);
+$("deployOneOfOneBtn")?.addEventListener("click",()=>{
+  if(state.purpose==="editions"){
+    return deployEditionsSepolia();
+  }
+  return deployOneOfOneSepolia();
+});
 $("liveMetadataUri")?.addEventListener("input",()=>{
   state.liveMetadataUri=$("liveMetadataUri").value.trim();
 });

@@ -161,7 +161,7 @@ async function getCompiler(){
 self.addEventListener("message",async(event)=>{
   const {id,action}=event.data||{};
 
-  if(action!=="compile" && action!=="compileCollection")return;
+  if(action!=="compile" && action!=="compileCollection" && action!=="compileEditions")return;
 
   try{
     const compiler=await getCompiler();
@@ -181,6 +181,17 @@ self.addEventListener("message",async(event)=>{
       sourceText=await response.text();
       sourceName="ANGRYCollection.sol";
       contractName="ANGRYCollection";
+    }else if(action==="compileEditions"){
+      const response=await fetch("./ANGRYEditions.sol",{cache:"no-store"});
+      if(!response.ok){
+        throw new Error(
+          "Could not load ANGRYEditions.sol ("+response.status+")."
+        );
+      }
+
+      sourceText=await response.text();
+      sourceName="ANGRYEditions.sol";
+      contractName="ANGRYEditions";
     }else{
       sourceText=CONTRACT_SOURCE;
       sourceName="ANGRYOneOfOne.sol";
