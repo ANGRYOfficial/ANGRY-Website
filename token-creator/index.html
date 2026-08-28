@@ -254,24 +254,142 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 }
 </style>
 
+
+<style id="angry-token-clean-header">
+.angry-globalbrand-mark{
+  width:46px;
+  height:46px;
+  min-width:46px;
+  border-radius:14px;
+  background:url("../assets/angry-logo-final.png") center/cover no-repeat !important;
+  color:transparent !important;
+  font-size:0 !important;
+  overflow:hidden;
+}
+
+.angry-globalbrand > span:last-child{
+  font-size:18px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.angry-globalbar > .wallet{
+  flex:0 0 auto;
+  margin-left:10px;
+}
+
+@media(max-width:760px){
+  .angry-globalbar > .wallet{
+    margin-left:auto;
+  }
+}
+</style>
+
+
+<style id="angry-token-network-cleanup">
+.network-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+
+.network-card{
+  min-height:58px !important;
+  padding:9px 10px !important;
+  border-radius:13px !important;
+}
+
+.network-icon{
+  width:30px !important;
+  height:30px !important;
+}
+
+.network-icon svg{
+  width:26px !important;
+  height:26px !important;
+}
+
+.network-card b{
+  font-size:11px !important;
+}
+
+.network-card span{
+  font-size:8px !important;
+}
+
+.network-badge{
+  font-size:6px !important;
+}
+
+.network-strip{
+  margin-top:8px !important;
+}
+
+.switch-btn{
+  margin-top:8px !important;
+}
+
+@media(max-width:640px){
+  .network-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+</style>
+
+<style id="angry-token-preview-cleanup">
+
+/* Keep legacy controls in DOM for JS, but remove them from public UI */
+.micro-actions{
+  display:none !important;
+}
+
+/* Cleaner deployment explanation */
+.deploy-note{
+  padding:12px 14px !important;
+  font-size:11px !important;
+  line-height:1.5 !important;
+}
+
+/* Main action should visually dominate */
+#deployBtn{
+  min-height:54px !important;
+  font-size:13px !important;
+  border-radius:14px !important;
+}
+
+/* Status remains visible but quieter */
+#status{
+  margin-top:12px !important;
+  font-size:11px !important;
+  line-height:1.5 !important;
+}
+
+</style>
 </head>
 <body>
 
 <div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+
   <a class="angry-globalbrand" href="../index.html">
-    <span class="angry-globalbrand-mark">😡</span>
-    <span>ANGRY <small>ECOSYSTEM</small></span>
+    <span class="angry-globalbrand-mark"></span>
+    <span>ANGRY</span>
   </a>
+
   <nav class="angry-globalnav">
-    <a href="../index.html">Home</a><a href="../tracker/index.html">Tracker</a><a class="active" href="../token-creator/index.html">Token Creator</a><a href="../nft-creator/index.html">NFT Creator</a><a href="../docs/index.html">Docs</a>
+    <a href="../index.html">Home</a>
+    <a href="../tracker/index.html">Tracker</a>
+    <a class="active" href="../token-creator/index.html">Token Creator</a>
+    <a href="../nft-creator/index.html">NFT Creator</a>
+    <a href="../docs/index.html">Docs</a>
   </nav>
+
+  <button class="wallet" id="walletBtn" type="button">
+    Connect Wallet
+  </button>
+
 </div>
 
 <div class="app">
-  <header class="topbar">
-    <div class="brand"><div class="brand-logo">😡</div><div class="brand-name">ANGRY Token Creator</div><span class="beta">BETA v0.6.3</span></div>
-    <div class="top-right"><div class="testnet-pill"><i></i> Testnet</div><button class="wallet" id="walletBtn">Connect wallet</button></div>
-  </header>
 
   <section class="hero">
     <div class="eyebrow">No-code token creation</div>
@@ -453,8 +571,8 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
       <div class="preview-head"><div class="preview-title"><span class="code-icon">&lt;/&gt;</span> Deployment Preview</div><div class="preview-sub">Review your settings before deployment.</div></div>
       <div class="preview-body">
         <div id="preview" class="preview-list"></div>
-        <div class="deploy-note"><b>Testnet deployment.</b> Standard Token is enabled on Ethereum Sepolia, Base Sepolia and Robinhood Chain Testnet. Solana is listed as Coming soon because it requires a separate SPL Token + Solana-wallet deployment path.</div>
-        <button class="btn primary" id="deployBtn" type="button">Deploy Standard Test Token</button>
+        <div class="deploy-note"><b>Testnet deployment.</b> Review the settings below, then confirm the deployment in your wallet.</div>
+        <button class="btn primary" id="deployBtn" type="button">Create Test Token</button>
         <div class="micro-actions"><button class="btn secondary" id="downloadBtn" type="button">Download config</button><button class="btn secondary" id="copyBtn" type="button">Copy summary</button></div>
         <div id="status" class="status">Ready. Connect an EVM wallet, select Ethereum Sepolia, Base Sepolia or Robinhood Chain Testnet, then deploy a Standard test token.</div>
       </div>
@@ -466,7 +584,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
     <div class="bottom-item"><i>⌁</i><div><b>Wallet controlled</b><span>The deployer wallet receives the Standard test supply.</span></div></div>
     <div class="bottom-item"><i>⚙</i><div><b>Built in stages</b><span>More networks and token mechanics can be added later.</span></div></div>
   </div>
-  <footer class="footer"><span>ANGRY Launch Beta v0.6.3 · Token creation prototype</span><span>Testnet only · Never send mainnet funds to this beta</span></footer>
+  <footer class="footer"><span>© 2026 ANGRY</span><span>Testnet environment · Do not use mainnet funds.</span></footer>
 </div>
 
 <script>
@@ -740,7 +858,11 @@ function setType(type){
   $("feeFields").classList.toggle("hidden",type==="standard");
   $("rewardFields").classList.toggle("hidden",type!=="reward");
   updateFeeModeUI();
-  const labels={standard:"Deploy Standard Test Token",liquidity:"Deploy Liquidity Core Test Token",reward:"Deploy Reward Core Test Token"};
+  const labels={
+  standard:"Create Test Token",
+  liquidity:"Create Test Token",
+  reward:"Create Test Token"
+};
   $("deployBtn").textContent=labels[type];
   renderPreview();
 }
