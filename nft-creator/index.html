@@ -510,11 +510,6 @@ textarea::placeholder{
 Keep these fields in the DOM for existing JS,
 but do not present unsupported sale controls to users.
 */
-#mintPriceField,
-#maxWalletField{
-  display:none !important;
-}
-
 /* 1 of 1 already explains itself through the selected NFT type */
 #artworkSettings{
   display:none !important;
@@ -960,7 +955,7 @@ Do not present individual numbering controls as if each copy were unique.
           </div>
           <div class="field" id="maxWalletField">
             <label id="maxWalletLabel">Max per wallet</label>
-            <input id="maxWallet" type="number" min="0" value="0">
+            <input id="maxWallet" type="number" min="1" step="1" value="1">
             <div class="help" id="maxWalletHelp">Single NFT is locked to 1.</div>
           </div>
           <div class="field" id="royaltyField">
@@ -1711,8 +1706,9 @@ function applyPurposeRules(){
     supply.removeAttribute("max");
   }
 
-  $("mintPriceField").classList.remove("hidden");
-  $("maxWalletField").classList.remove("hidden");
+  const editionsSaleControls=state.purpose==="editions";
+  $("mintPriceField").classList.toggle("hidden",!editionsSaleControls);
+  $("maxWalletField").classList.toggle("hidden",!editionsSaleControls);
   $("royaltyField").classList.remove("hidden");
   $("recipientField").classList.remove("hidden");
   $("maxWalletLabel").textContent="Max per wallet";
@@ -2923,6 +2919,9 @@ async function deployEditionsSepolia(){
 
   const metadataUri=$("liveMetadataUri").value.trim();
   const supply=Number($("supply").value||0);
+  const mintPriceRaw=String($("mintPrice").value||"0").trim()||"0";
+  const mintPriceNumber=Number(mintPriceRaw);
+  const maxWallet=Number($("maxWallet").value||0);
 
   if(!name||!collection||!symbol){
     setStatus(
@@ -2943,6 +2942,22 @@ async function deployEditionsSepolia(){
   if(!Number.isInteger(supply) || supply<2 || supply>10000){
     setStatus(
       "Multiple Editions supply must be between 2 and 10,000.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!Number.isFinite(mintPriceNumber) || mintPriceNumber<0){
+    setStatus(
+      "Mint price must be 0 or higher.",
+      "warn"
+    );
+    return;
+  }
+
+  if(!Number.isInteger(maxWallet) || maxWallet<1 || maxWallet>supply){
+    setStatus(
+      "Max per wallet must be at least 1 and cannot be higher than the edition supply.",
       "warn"
     );
     return;
@@ -3029,6 +3044,8 @@ async function deployEditionsSepolia(){
 
     const signer=await provider.getSigner();
 
+    const mintPriceWei=ethers.parseEther(mintPriceRaw);
+
     const royaltyPct=Math.max(
       0,
       Math.min(
@@ -3055,6 +3072,8 @@ async function deployEditionsSepolia(){
       recipient,
       metadataUri,
       supply,
+      mintPriceWei,
+      maxWallet,
       recipient,
       royaltyBps
     );
@@ -3079,7 +3098,10 @@ async function deployEditionsSepolia(){
       result.innerHTML=
         "<b>Multiple Editions deployed ✅</b>"+
         "<br>Contract: "+address+
-        "<br>Supply: "+supply+
+        "<br>Max supply: "+supply+
+        "<br>Minted at deployment: 0"+
+        "<br>Mint price: "+mintPriceRaw+" ETH"+
+        "<br>Max per wallet: "+maxWallet+
         "<br>Token ID: #1"+
         "<br>Owner: "+recipient+
         '<br><a target="_blank" rel="noopener" href="'+
@@ -3091,8 +3113,7 @@ async function deployEditionsSepolia(){
       "Multiple Editions confirmed on Ethereum Sepolia.";
 
     setStatus(
-      supply+
-      " editions were deployed successfully on Ethereum Sepolia.",
+      "Multiple Editions public-mint contract deployed successfully on Ethereum Sepolia.",
       "good"
     );
 
@@ -4183,69 +4204,5 @@ setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 
 })();
 </script>
-
-
-<script id="angry-editions-maxwallet-ui">
-(function(){
-
-  function updateMaxWalletUI(){
-    const field = document.getElementById("maxWalletField");
-    const input = document.getElementById("maxWallet");
-    const label = document.getElementById("maxWalletLabel");
-    const help = document.getElementById("maxWalletHelp");
-    const editions = document.getElementById("editionSettings");
-
-    if(!field || !input || !editions) return;
-
-    const editionsActive = !editions.classList.contains("hidden");
-
-    if(editionsActive){
-      field.style.display = "";
-
-      if(label){
-        label.textContent = "Max per wallet";
-      }
-
-      if(help){
-        help.textContent =
-          "Maximum number of copies one wallet can receive. Enter 0 for no limit, or a whole number up to the total number of editions.";
-      }
-
-      input.min = "0";
-      input.step = "1";
-
-      // If an older hidden state left this at zero,
-      // make the required field usable immediately.
-      if(!Number.isInteger(Number(input.value)) || Number(input.value) < 0){
-        input.value = "0";
-        input.dispatchEvent(new Event("input",{bubbles:true}));
-        input.dispatchEvent(new Event("change",{bubbles:true}));
-      }
-    }
-  }
-
-  window.addEventListener("DOMContentLoaded", function(){
-    updateMaxWalletUI();
-
-    document.querySelectorAll('[data-type="edition"]').forEach(function(btn){
-      btn.addEventListener("click", function(){
-        setTimeout(updateMaxWalletUI, 0);
-        setTimeout(updateMaxWalletUI, 50);
-      });
-    });
-
-    const editionSettings = document.getElementById("editionSettings");
-
-    if(editionSettings){
-      new MutationObserver(updateMaxWalletUI).observe(
-        editionSettings,
-        {attributes:true, attributeFilter:["class"]}
-      );
-    }
-  });
-
-})();
-</script>
-
 </body>
 </html>
