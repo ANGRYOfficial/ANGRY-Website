@@ -1,6 +1,8 @@
 const ALLOWED_ORIGINS = new Set([
   "https://angrytracker.com",
-  "https://www.angrytracker.com"
+  "https://www.angrytracker.com",
+  "http://127.0.0.1:8080",
+  "http://localhost:8080"
 ]);
 
 function corsHeaders(request) {

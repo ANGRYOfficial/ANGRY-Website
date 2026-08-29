@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ANGRY NFT · Mint</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#070707;
+  --bg2:#0d0d0d;
+  --panel:#121212;
+  --panel2:#171717;
+  --line:#262626;
+  --line2:#343434;
+  --text:#f6f6f6;
+  --muted:#a6a6a6;
+  --muted2:#7c7c7c;
+  --orange:#ff7a00;
+  --orange2:#ff9e2f;
+  --orange3:#ffb55e;
+  --green:#89f2a5;
+  --greenbg:rgba(46,121,67,.18);
+  --red:#ff8f8f;
+  --redbg:rgba(130,34,34,.18);
+  --shadow:0 20px 50px rgba(0,0,0,.35);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:radial-gradient(circle at 50% -10%, rgba(255,122,0,.18), transparent 26%), linear-gradient(180deg,#080808 0%,#050505 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100%}
+a{color:inherit}
+button,input{font:inherit}
+body{min-height:100vh}
+.wrap{width:min(1120px,100%);margin:0 auto;padding:18px 16px 110px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brandmark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(180deg,var(--orange2),var(--orange));box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 25px rgba(255,122,0,.2);font-size:25px;flex:0 0 auto}
+.brandtext{min-width:0}
+.brandtext b{display:block;font-size:15px;letter-spacing:.08em}
+.brandtext span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.chainpill{padding:8px 12px;border-radius:999px;border:1px solid #5a3310;background:rgba(36,20,5,.75);color:#ffcc93;font-size:12px;white-space:nowrap}
+.hero{display:grid;grid-template-columns:1.3fr .9fr;gap:14px;margin-bottom:14px}
+.heroMain,.heroSide,.galleryPanel{background:linear-gradient(180deg,rgba(18,18,18,.96),rgba(10,10,10,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.heroMain{padding:22px 22px 18px;position:relative;overflow:hidden}
+.heroMain:before{content:"";position:absolute;inset:auto -50px -50px auto;width:180px;height:180px;background:radial-gradient(circle,var(--orange) 0%, rgba(255,122,0,0) 70%);opacity:.08;pointer-events:none}
+.eyebrow{color:var(--orange3);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.hero h1{margin:8px 0 10px;font-size:clamp(28px,6vw,42px);line-height:1.05;letter-spacing:-.02em}
+.lead{color:#c9c9c9;max-width:700px;line-height:1.55;font-size:14px}
+.quickstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}
+.stat{background:linear-gradient(180deg,#111,#0a0a0a);border:1px solid var(--line2);border-radius:16px;padding:13px 12px}
+.stat small{display:block;color:var(--muted2);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+.stat strong{display:block;margin-top:6px;font-size:18px;line-height:1.15}
+.heroSide{padding:18px;display:flex;flex-direction:column;gap:12px}
+.sectionLabel{color:var(--muted2);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.walletCard{background:#0b0b0b;border:1px solid var(--line2);border-radius:18px;padding:14px}
+.walletRow{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.walletInfo{color:var(--muted);font-size:13px;line-height:1.45}
+.btn{appearance:none;border:none;border-radius:15px;padding:13px 16px;font-weight:800;cursor:pointer;transition:transform .12s ease, opacity .12s ease, border-color .12s ease, background .12s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.48;cursor:not-allowed;transform:none}
+.btn.ghost{background:#141414;border:1px solid var(--line2);color:#fff}
+.btn.primary{background:linear-gradient(180deg,var(--orange2),var(--orange));color:#1a0d00;border:1px solid #ef7a0a;box-shadow:0 12px 24px rgba(255,122,0,.18)}
+.status{padding:13px 14px;border-radius:16px;border:1px solid var(--line2);background:#0b0b0b;color:#d2d2d2;font-size:13px;line-height:1.5}
+.status.good{color:#b8f8c9;border-color:#295336;background:rgba(31,58,38,.45)}
+.status.bad{color:#ffc0c0;border-color:#5d2a2a;background:rgba(70,24,24,.45)}
+.infoList{display:grid;gap:10px}
+.infoItem{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;background:#0b0b0b;border:1px solid var(--line2);border-radius:16px;padding:12px 13px}
+.infoItem div:first-child{color:#d9d9d9;font-size:13px;font-weight:700}
+.infoItem small{display:block;color:var(--muted);font-size:12px;margin-top:3px;font-weight:500}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line2);background:#121212}
+.badge.open{color:#b9ffca;border-color:#335d3e;background:var(--greenbg)}
+.badge.closed{color:#ffc7c7;border-color:#633838;background:var(--redbg)}
+.galleryPanel{padding:18px}
+.galleryHead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:12px}
+.galleryHead h2{margin:0;font-size:22px;line-height:1.1}
+.galleryHint{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.45}
+.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.nft{position:relative;padding:0;background:linear-gradient(180deg,#121212,#0a0a0a);border:1px solid var(--line2);border-radius:20px;overflow:hidden;text-align:left;cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.nft:hover{border-color:#505050}
+.nft.selected{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,122,0,.2),0 16px 35px rgba(0,0,0,.28)}
+.nft.sold{opacity:.72;filter:saturate(.8);cursor:not-allowed}
+.imgbox{aspect-ratio:1/1;background:linear-gradient(180deg,#1a1a1a,#101010);display:grid;place-items:center;overflow:hidden}
+.imgbox img{width:100%;height:100%;display:block;object-fit:cover}
+.imgph{font-size:40px}
+.nftBody{padding:13px 13px 14px}
+.nftTitle{font-size:15px;font-weight:900;line-height:1.2}
+.nftSub{margin-top:5px;color:var(--muted);font-size:12px}
+.tagRow{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.stateTag,.numTag{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06)}
+.stateTag.available{color:#c7ffd3}
+.stateTag.sold{color:#ffcece}
+.numTag{color:#f1f1f1}
+.selectedRibbon{margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(255,122,0,.12);border:1px solid rgba(255,122,0,.35);color:#ffca94;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.loadmore{width:100%;margin-top:14px;background:#151515;border:1px solid var(--line2);color:#fff}
+.hidden{display:none!important}
+.mintbar{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(7,7,7,.15),rgba(7,7,7,.92) 30%,rgba(7,7,7,.98));backdrop-filter:blur(14px)}
+.mintbarInner{width:min(1120px,100%);margin:0 auto;background:linear-gradient(180deg,#121212,#0b0b0b);border:1px solid var(--line2);box-shadow:var(--shadow);border-radius:20px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.selectSummary{min-width:0}
+.selectSummary strong{display:block;font-size:15px;line-height:1.2}
+.selectSummary span{display:block;color:var(--muted);font-size:12px;line-height:1.45;margin-top:4px}
+.ctaWrap{display:flex;gap:10px;align-items:center;flex:0 0 auto}
+.ctaPrice{padding:10px 12px;border-radius:14px;background:#0f0f0f;border:1px solid var(--line2);font-size:13px;color:#ddd;white-space:nowrap}
+.ctaPrice b{color:#fff}
+.helper{margin-top:12px;color:var(--muted2);font-size:12px;line-height:1.45}
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr}
+  .gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .wrap{padding:12px 12px 124px}
+  .topbar{align-items:flex-start}
+  .chainpill{font-size:11px;padding:7px 10px}
+  .heroMain,.heroSide,.galleryPanel{border-radius:18px}
+  .heroMain{padding:18px}
+  .heroSide{padding:14px}
+  .quickstats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .galleryPanel{padding:14px}
+  .gallery{grid-template-columns:1fr 1fr;gap:12px}
+  .mintbarInner{display:grid;gap:10px}
+  .ctaWrap{display:grid;width:100%}
+  .ctaPrice{display:none}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandmark">😡</div>
+      <div class="brandtext">
+        <b>ANGRY NFT</b>
+        <span>Simple Public Mint</span>
+      </div>
+    </div>
+    <div class="chainpill">Ethereum Sepolia · Beta</div>
+  </header>
+
+  <section class="hero">
+    <div class="heroMain">
+      <div class="eyebrow">Mint Page</div>
+      <h1 id="collectionName">Loading collection…</h1>
+      <div class="lead" id="collectionHint">Connect your wallet, choose one available NFT, then mint. This page is only for buyers, so there are no creator or admin controls here.</div>
+      <div class="quickstats">
+        <div class="stat"><small>Minted</small><strong id="minted">—</strong></div>
+        <div class="stat"><small>Remaining</small><strong id="remaining">—</strong></div>
+        <div class="stat"><small>Mint price</small><strong id="price">—</strong></div>
+        <div class="stat"><small>Max / wallet</small><strong id="limit">—</strong></div>
+      </div>
+      <div class="helper">Gas fee is paid separately to Ethereum. Your NFT will go directly to the wallet you connect.</div>
+    </div>
+
+    <aside class="heroSide">
+      <div class="sectionLabel">Wallet</div>
+      <div class="walletCard">
+        <div class="walletRow">
+          <button class="btn ghost" id="connectBtn">Connect Wallet</button>
+          <div class="badge closed" id="publicState">Loading…</div>
+        </div>
+        <div class="walletInfo" id="walletText" style="margin-top:10px">Wallet not connected</div>
+      </div>
+
+      <div class="sectionLabel">How it works</div>
+      <div class="infoList">
+        <div class="infoItem">
+          <div>1. Connect your wallet<small>Use MetaMask or another compatible EVM wallet on Ethereum Sepolia.</small></div>
+        </div>
+        <div class="infoItem">
+          <div>2. Choose one available NFT<small>Sold NFTs are marked clearly. Tap the image you want to mint.</small></div>
+        </div>
+        <div class="infoItem">
+          <div>3. Confirm mint in your wallet<small>The NFT will be delivered to your connected wallet after confirmation.</small></div>
+        </div>
+      </div>
+
+      <div class="status" id="status">Loading collection information…</div>
+    </aside>
+  </section>
+
+  <section class="galleryPanel">
+    <div class="galleryHead">
+      <div>
+        <div class="sectionLabel">Collection Gallery</div>
+        <h2>Choose your NFT</h2>
+        <div class="galleryHint">Tap one <b>AVAILABLE</b> card below. If your wallet has reached the mint limit, the page will tell you clearly.</div>
+      </div>
+    </div>
+    <div class="gallery" id="gallery"></div>
+    <button class="btn loadmore hidden" id="loadMoreBtn">Show more NFTs</button>
+  </section>
+</main>
+
+<div class="mintbar">
+  <div class="mintbarInner">
+    <div class="selectSummary">
+      <strong>Ready to mint</strong>
+      <span id="selectedText">Choose an available NFT above.</span>
+    </div>
+    <div class="ctaWrap">
+      <div class="ctaPrice">Price: <b id="bottomPrice">—</b></div>
+      <button class="btn primary" id="mintBtn" disabled>Choose an NFT</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+import {BrowserProvider,Contract,JsonRpcProvider,formatEther} from "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm";
+const $=id=>document.getElementById(id);
+const ABI=["function name() view returns(string)","function maxSupply() view returns(uint256)","function maxPerWallet() view returns(uint256)","function metadataRoot() view returns(bytes32)","function manifestURI() view returns(string)","function publicMintEnabled() view returns(bool)","function totalSupply() view returns(uint256)","function remainingSupply() view returns(uint256)","function mintedByWallet(address) view returns(uint256)","function ownerOf(uint256) view returns(address)","function mintPrice() view returns(uint256)","function publicMint(uint256,string,bytes32[]) payable"];
+const PAGE_SIZE=12; let visibleCount=PAGE_SIZE; let data=null; let selected=null; let account=""; let readProvider=null;
+function setStatus(text,kind=""){const el=$("status");el.textContent=text;el.className="status"+(kind?" "+kind:"")}
+function short(a){return a?a.slice(0,6)+"…"+a.slice(-4):""}
+function contractFromUrl(){const q=new URLSearchParams(location.search).get("contract")||"";if(/^0x[a-fA-F0-9]{40}$/.test(q))return q;try{const d=JSON.parse(localStorage.getItem("angry:last-sepolia-collection-v1")||"null");if(/^0x[a-fA-F0-9]{40}$/.test(d?.address||""))return d.address}catch{}return ""}
+function ipfsCandidates(uri){const v=String(uri||"").trim();if(/^https:\/\//i.test(v))return[v];if(!/^ipfs:\/\//i.test(v))return[];const p=v.replace(/^ipfs:\/\//i,"").replace(/^ipfs\//i,"");return["https://gateway.pinata.cloud/ipfs/"+p,"https://ipfs.io/ipfs/"+p,"https://dweb.link/ipfs/"+p]}
+function imageUrl(uri){const c=ipfsCandidates(uri);return c[0]||(/^https:\/\//i.test(uri||"")?uri:"")}
+async function fetchJson(uri){let last;for(const url of ipfsCandidates(uri)){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),15000);const r=await fetch(url,{cache:"force-cache",signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}catch(e){last=e}}throw last||new Error("Unable to load IPFS metadata")}
+async function getReadProvider(){if(readProvider)return readProvider;for(const rpc of ["https://ethereum-sepolia-rpc.publicnode.com","https://rpc.sepolia.org"]){try{const p=new JsonRpcProvider(rpc,11155111,{staticNetwork:true});await p.getBlockNumber();readProvider=p;return p}catch{}}if(window.ethereum){readProvider=new BrowserProvider(window.ethereum);return readProvider}throw new Error("Ethereum Sepolia connection unavailable")}
+async function isMinted(contract,id){try{const owner=await contract.ownerOf(BigInt(id));return !!owner}catch{return false}}
+async function loadItem(item,contract){let meta={};try{meta=await fetchJson(item.metadata_uri)}catch{}const minted=await isMinted(contract,item.token_id);return{...item,meta,minted}}
+function cardNode(item){const d=document.createElement("button");d.type="button";d.className="nft"+(item.minted?" sold":"")+(selected?.token_id===item.token_id?" selected":"");d.disabled=item.minted;const box=document.createElement("div");box.className="imgbox";const url=imageUrl(item.meta?.image);if(url){const img=document.createElement("img");img.src=url;img.alt=item.meta?.name||("NFT #"+item.token_id);img.loading="lazy";img.onerror=()=>{img.remove();const ph=document.createElement("div");ph.className="imgph";ph.textContent="😡";box.appendChild(ph)};box.appendChild(img)}else{const p=document.createElement("div");p.className="imgph";p.textContent="😡";box.appendChild(p)}const tags=document.createElement("div");tags.className="tagRow";const state=document.createElement("span");state.className="stateTag "+(item.minted?"sold":"available");state.textContent=item.minted?"Sold":"Available";const num=document.createElement("span");num.className="numTag";num.textContent="#"+item.token_id;tags.append(state,num);const meta=document.createElement("div");meta.className="nftBody";const title=document.createElement("div");title.className="nftTitle";title.textContent=item.meta?.name||("NFT #"+item.token_id);const sub=document.createElement("div");sub.className="nftSub";sub.textContent=item.minted?"Already minted":"Tap to choose this NFT";meta.append(title,sub);if(selected?.token_id===item.token_id&&!item.minted){const r=document.createElement("div");r.className="selectedRibbon";r.textContent="Selected for mint";meta.appendChild(r)}d.append(box,tags,meta);if(!item.minted)d.addEventListener("click",()=>{selected=item;renderGallery();updateMintButton()});return d}
+async function renderGallery(){const g=$("gallery");g.innerHTML="";for(const item of data.items.slice(0,visibleCount))g.appendChild(cardNode(item));$("loadMoreBtn").classList.toggle("hidden",visibleCount>=data.items.length)}
+function updateMintButton(){const btn=$("mintBtn");if(!data){btn.disabled=true;btn.textContent="Loading…";return}if(!data.publicEnabled){btn.disabled=true;btn.textContent="Mint is currently closed";return}if(account&&data.maxPerWallet>0&&data.mintedByYou>=data.maxPerWallet){btn.disabled=true;btn.textContent="Wallet mint limit reached";$("selectedText").textContent="Your connected wallet already minted "+data.mintedByYou+" / "+data.maxPerWallet+" allowed NFTs in this collection.";return}if(!selected){btn.disabled=true;btn.textContent="Choose an NFT";$("selectedText").textContent="Choose an available NFT above.";return}$("selectedText").textContent="Selected: "+(selected.meta?.name||("NFT #"+selected.token_id))+" · NFT #"+selected.token_id+" will be minted to your connected wallet.";btn.disabled=false;btn.textContent=account?("Mint · "+formatEther(data.mintPrice)+" ETH + gas"):"Connect Wallet to Mint"}
+async function refreshStats(){const p=await getReadProvider();const c=new Contract(data.address,ABI,p);const [minted,remaining,enabled,price]=await Promise.all([c.totalSupply(),c.remainingSupply(),c.publicMintEnabled(),c.mintPrice()]);Object.assign(data,{minted:Number(minted),remaining:Number(remaining),publicEnabled:enabled,mintPrice:price});$("minted").textContent=data.minted+" / "+data.maxSupply;$("remaining").textContent=String(data.remaining);$("price").textContent=formatEther(price)+" ETH"; const bp=$("bottomPrice"); if(bp) bp.textContent=formatEther(price)+" ETH";const ps=$("publicState"); ps.textContent=enabled?"Mint Open":"Mint Closed"; ps.className="badge "+(enabled?"open":"closed");if(account){data.mintedByYou=Number(await c.mintedByWallet(account));$("walletText").textContent=short(account)+" · Minted by you: "+data.mintedByYou}else data.mintedByYou=0;updateMintButton()}
+async function loadCollection(){try{const address=contractFromUrl();if(!address)throw new Error("This mint link does not contain a Collection address.");const p=await getReadProvider();const c=new Contract(address,ABI,p);const [name,maxSupply,maxPerWallet,root,manifestUri]=await Promise.all([c.name(),c.maxSupply(),c.maxPerWallet(),c.metadataRoot(),c.manifestURI()]);const manifest=await fetchJson(manifestUri);if(String(manifest.metadata_root||"").toLowerCase()!==String(root).toLowerCase())throw new Error("Collection metadata verification failed.");if(Number(manifest.max_supply)!==Number(maxSupply))throw new Error("Collection supply verification failed.");data={address,name,maxSupply:Number(maxSupply),maxPerWallet:Number(maxPerWallet),manifest,items:[],mintedByYou:0};$("collectionName").textContent=name;$("limit").textContent=data.maxPerWallet===0?"No limit":String(data.maxPerWallet);setStatus("Loading NFT previews…");const first=manifest.items.slice(0,PAGE_SIZE);data.items=await Promise.all(first.map(i=>loadItem(i,c)));if(manifest.items.length>PAGE_SIZE){data.items.push(...manifest.items.slice(PAGE_SIZE).map(i=>({...i,meta:null,minted:null,_unloaded:true})))}selected=data.items.find(x=>x.minted===false)||null;await refreshStats();renderGallery();setStatus("Collection loaded. Connect your wallet, choose one available NFT, then mint.","good")}catch(e){setStatus(e?.message||String(e),"bad");$("collectionName").textContent="Collection unavailable"}}
+async function loadMore(){if(!data)return;const old=visibleCount;visibleCount=Math.min(data.items.length,visibleCount+PAGE_SIZE);const p=await getReadProvider();const c=new Contract(data.address,ABI,p);const jobs=[];for(let i=old;i<visibleCount;i++){if(data.items[i]?._unloaded)jobs.push((async idx=>{data.items[idx]=await loadItem(data.items[idx],c)})(i))}await Promise.all(jobs);if(!selected)selected=data.items.slice(0,visibleCount).find(x=>x.minted===false)||null;renderGallery();updateMintButton()}
+async function ensureSepolia(){const chain=String(await ethereum.request({method:"eth_chainId"})).toLowerCase();if(chain==="0xaa36a7")return;try{await ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0xaa36a7"}]})}catch(e){if(e?.code===4902){await ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:"0xaa36a7",chainName:"Ethereum Sepolia",nativeCurrency:{name:"Sepolia ETH",symbol:"ETH",decimals:18},rpcUrls:["https://rpc.sepolia.org"],blockExplorerUrls:["https://sepolia.etherscan.io"]}]})}else throw e}}
+async function connect(){if(!window.ethereum){setStatus("Open this page inside MetaMask or another compatible EVM wallet.","bad");return}try{await ensureSepolia();const accts=await ethereum.request({method:"eth_requestAccounts"});account=accts?.[0]||"";$("connectBtn").textContent=short(account);await refreshStats();setStatus("Wallet connected. Choose an NFT and mint.","good")}catch(e){setStatus("Wallet connection stopped: "+(e?.shortMessage||e?.message||e),"bad")}}
+async function mint(){if(!data||!selected)return;if(!account){await connect();return}const btn=$("mintBtn");btn.disabled=true;try{await ensureSepolia();const bp=new BrowserProvider(window.ethereum);const signer=await bp.getSigner();account=await signer.getAddress();const c=new Contract(data.address,ABI,signer);const [enabled,price,mintedBy]=await Promise.all([c.publicMintEnabled(),c.mintPrice(),c.mintedByWallet(account)]);if(!enabled)throw new Error("Public mint is currently closed.");if(data.maxPerWallet>0&&Number(mintedBy)>=data.maxPerWallet)throw new Error("Your wallet has reached the collection mint limit.");if(await isMinted(c,selected.token_id))throw new Error("This NFT was just minted by another collector. Choose another available NFT.");setStatus("Confirm the mint in MetaMask. Price: "+formatEther(price)+" ETH + network gas.");const tx=await c.publicMint(BigInt(selected.token_id),selected.metadata_uri,selected.proof,{value:price});setStatus("Mint sent. Waiting for Ethereum Sepolia confirmation…");await tx.wait();selected.minted=true;selected=null;const p=await getReadProvider();const rc=new Contract(data.address,ABI,p);for(const item of data.items.slice(0,visibleCount)){if(item.minted===false) {item.minted=await isMinted(rc,item.token_id)}}selected=data.items.slice(0,visibleCount).find(x=>x.minted===false)||null;await refreshStats();renderGallery();setStatus("NFT minted successfully. It now belongs to your connected wallet.","good")}catch(e){let m=e?.shortMessage||e?.reason||e?.message||String(e);if(String(m).includes("MAX_PER_WALLET"))m="Your wallet has reached the collection mint limit.";if(String(m).includes("ALREADY_MINTED"))m="That NFT is already sold. Choose another image.";if(String(m).includes("user rejected"))m="Transaction cancelled in MetaMask.";setStatus(m,"bad")}finally{updateMintButton()}}
+$("connectBtn").addEventListener("click",connect);$("mintBtn").addEventListener("click",mint);$("loadMoreBtn").addEventListener("click",loadMore);if(window.ethereum){ethereum.on?.("accountsChanged",a=>{account=a?.[0]||"";$("connectBtn").textContent=account?short(account):"Connect Wallet";refreshStats().catch(()=>{})});ethereum.on?.("chainChanged",()=>location.reload())}loadCollection();
+</script></body></html>

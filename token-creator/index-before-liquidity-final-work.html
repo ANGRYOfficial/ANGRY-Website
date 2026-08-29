@@ -1,0 +1,2357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<title>ANGRY Token Creator | Testnet Beta</title>
+<style>
+:root{
+  --bg:#050607;--surface:#0b0d0f;--surface2:#101316;--surface3:#15181c;
+  --line:#252a2f;--line2:#30363d;--text:#f5f7f8;--muted:#8e969d;--muted2:#697179;
+  --orange:#ff541c;--orange2:#ff6a27;--green:#4bd374;--amber:#f2b84b;--red:#ff7168;
+  --radius:18px;--shadow:0 24px 70px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 8% -12%,rgba(255,84,28,.11),transparent 28rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{display:none!important}
+.app{max-width:1220px;margin:0 auto;padding:0 22px 42px}
+.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}.brand-logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#ff692a,#f04712);font-size:21px;box-shadow:0 12px 30px rgba(255,84,28,.19)}
+.brand-name{font-size:18px;font-weight:850;letter-spacing:-.025em;white-space:nowrap}.beta{border:1px solid rgba(255,84,28,.42);background:rgba(255,84,28,.07);color:#ff8c61;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:850;letter-spacing:.08em}
+.top-right{display:flex;align-items:center;gap:10px}.testnet-pill{display:flex;align-items:center;gap:7px;color:#adb3b8;border:1px solid var(--line);border-radius:999px;padding:9px 11px;background:#0a0c0e;font-size:11px;font-weight:700}.testnet-pill i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(75,211,116,.07)}
+.wallet{border:1px solid rgba(255,84,28,.58);background:#0d0f11;color:#ff8d62;border-radius:11px;padding:10px 14px;min-height:42px;font-size:12px;font-weight:820;transition:.15s}.wallet:hover{background:rgba(255,84,28,.06)}
+.hero{padding:34px 1px 22px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#ff875d;font-weight:850;margin-bottom:10px}.hero h1{margin:0;font-size:clamp(30px,4.2vw,47px);line-height:1.06;letter-spacing:-.045em;font-weight:880}.hero p{margin:12px 0 0;color:#969da3;line-height:1.55;font-size:14px;max-width:720px}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.72fr);gap:16px;align-items:start}.left{display:grid;gap:12px}.card{background:linear-gradient(180deg,rgba(16,19,22,.98),rgba(9,11,13,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.section{padding:17px}.section-head{display:grid;grid-template-columns:33px 175px 1fr;gap:12px;align-items:start;margin-bottom:14px}.step{width:33px;height:33px;border-radius:9px;display:grid;place-items:center;background:#181c20;border:1px solid #2a3036;font-size:11px;font-weight:900;color:#d8dcdf}.section-title{font-size:14px;font-weight:820;letter-spacing:-.015em;margin-top:1px}.section-sub{font-size:10.5px;color:#7e878e;line-height:1.42;margin-top:4px}
+.network-grid{grid-column:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.network-card{min-height:67px;display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid #30363d;background:#0b0d0f;color:#d9dde0;transition:.16s}.network-card:hover{border-color:#454c54}.network-card.active{border-color:var(--orange);background:linear-gradient(135deg,rgba(255,84,28,.12),rgba(255,84,28,.035));box-shadow:inset 0 0 0 1px rgba(255,84,28,.10),0 0 24px rgba(255,84,28,.06)}.network-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto}.network-icon svg,.network-icon img{width:30px;height:30px;display:block;object-fit:contain}.network-card b{font-size:12px;display:block}.network-card span{display:block;color:#8e969d;font-size:10px;margin-top:2px}
+.network-strip{grid-column:3;margin-top:1px;border:1px solid #252b31;border-radius:11px;background:#090b0d;min-height:42px;padding:9px 11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#858e95;font-size:10.5px}.network-strip b{color:#c9ced2}.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+.switch-btn{grid-column:3;margin-top:0;width:100%;border:1px solid #292f35;background:#111417;color:#cbd0d4;border-radius:11px;min-height:43px;font-size:11.5px;font-weight:800}.switch-btn:hover{background:#15191d}
+.type-grid{grid-column:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.type{min-height:118px;border:1px solid #2d3339;background:#0a0c0e;color:var(--text);border-radius:13px;padding:12px;position:relative;transition:.16s}.type:hover{border-color:#414850}.type.active{border-color:var(--orange);background:linear-gradient(150deg,rgba(255,84,28,.11),rgba(255,84,28,.025));box-shadow:inset 0 0 0 1px rgba(255,84,28,.09)}.type-top{display:flex;align-items:center;gap:9px}.type-icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#171a1e;color:#dadddf;font-weight:900;font-size:13px}.type.active .type-icon{background:linear-gradient(145deg,#ff6a27,#ff4d12);color:#fff}.type.active b{color:#fff}.type b{font-size:12.5px;color:#f5f7f8;font-weight:850}.type p{margin:9px 0 0;color:#8f979e;font-size:10.5px;line-height:1.48}.status-badge{display:inline-flex;margin-top:9px;border-radius:999px;padding:4px 7px;border:1px solid #30363c;background:#15181c;color:#9ba2a8;font-size:8.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.type.active .ready{border-color:rgba(75,211,116,.25);background:rgba(75,211,116,.06);color:#75dc90}
+.form-grid{grid-column:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}.field label{display:block;margin:0 0 6px;color:#afb5ba;font-size:10.5px;font-weight:720}.field input,.field select{width:100%;height:45px;border:1px solid #30363d;border-radius:11px;background:#090b0d;color:#f2f4f5;padding:10px 11px;outline:none;font-size:12px}.field input:focus,.field select:focus{border-color:rgba(255,84,28,.75);box-shadow:0 0 0 3px rgba(255,84,28,.07)}.field-help{grid-column:1/-1;color:#747d84;font-size:10px;line-height:1.45;margin-top:-2px}
+.fee-grid{grid-column:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mini-help{margin-top:5px;color:#707981;font-size:8.8px;line-height:1.4}
+.reward-builder{grid-column:1/-1;margin-top:2px;padding:12px;border:1px solid #2b3137;background:#090b0d;border-radius:12px}
+.reward-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.reward-title{font-size:11px;font-weight:820;color:#e7eaec}
+.reward-sub{font-size:9px;color:#757e85;margin-top:3px}
+.planner-chip{border:1px solid #30363c;background:#15181c;color:#969ea5;border-radius:999px;padding:4px 7px;font-size:7.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.reward-assets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.reward-asset{display:flex;align-items:center;gap:8px;min-height:58px;padding:9px;border:1px solid #2e343a;background:#0d1012;color:#e8eaec;border-radius:11px;text-align:left;transition:.15s}
+.reward-asset:hover{border-color:#444b52}
+.reward-asset.active{border-color:var(--orange);background:linear-gradient(145deg,rgba(255,84,28,.12),rgba(255,84,28,.025));box-shadow:inset 0 0 0 1px rgba(255,84,28,.08)}
+.reward-asset>span:last-child{min-width:0}
+.reward-asset b{display:block;font-size:10.5px;color:#eef0f1;white-space:nowrap}
+.reward-asset small{display:block;margin-top:2px;color:#7e878e;font-size:7.8px;line-height:1.2;white-space:nowrap}
+.asset-dot{width:29px;height:29px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;font-weight:900;font-size:12px;border:1px solid #30363c;background:#171a1e}
+.usdt-dot{color:#62d4b5}.usdc-dot{color:#62a7ff}.wrapped-dot{color:#c8ccd0}.custom-dot{color:#ff8b60}
+.reward-asset.active .asset-dot{border-color:rgba(255,84,28,.35);background:rgba(255,84,28,.10)}
+.reward-explain{margin-top:9px;padding:9px 10px;border:1px solid #252b31;border-radius:9px;background:#0b0d0f;color:#8f979e;font-size:9px;line-height:1.45}
+.reward-builder>.field{margin-top:10px}
+.token-check-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.token-check-btn{min-height:42px;padding:0 13px;border-radius:9px;border:1px solid #343b42;background:#171b1f;color:#e9ebed;font-size:9px;font-weight:850;white-space:nowrap;transition:.15s}
+.token-check-btn:hover{border-color:#4a525a;background:#1c2126}
+.token-check-btn:disabled{opacity:.48;cursor:not-allowed}
+.token-validation{display:flex;align-items:flex-start;gap:9px;margin-top:9px;padding:10px 11px;border-radius:10px;border:1px solid #293037;background:#0b0e10}
+.token-validation .validation-icon{width:20px;height:20px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;border:1px solid #343b42;color:#8a939a}
+.token-validation b{display:block;color:#c9ced2;font-size:9.5px}
+.token-validation small{display:block;margin-top:3px;color:#747d84;font-size:8.3px;line-height:1.4}
+.token-validation.checking{border-color:rgba(255,185,70,.24);background:rgba(255,185,70,.035)}
+.token-validation.checking .validation-icon{border-color:rgba(255,185,70,.42);color:#ffbf47}
+.token-validation.good{border-color:rgba(74,207,111,.25);background:rgba(74,207,111,.04)}
+.token-validation.good .validation-icon{border-color:rgba(74,207,111,.4);background:rgba(74,207,111,.08);color:#61d881}
+.token-validation.bad{border-color:rgba(255,103,95,.28);background:rgba(255,103,95,.04)}
+.token-validation.bad .validation-icon{border-color:rgba(255,103,95,.45);background:rgba(255,103,95,.07);color:#ff8179}
+.verified-token{margin-top:9px;padding:11px;border:1px solid rgba(74,207,111,.18);background:#0a0d0b;border-radius:10px}
+.verified-token-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;color:#737d77;font-size:7.8px}
+.verified-badge{display:inline-flex;padding:4px 7px;border-radius:999px;background:rgba(74,207,111,.08);border:1px solid rgba(74,207,111,.20);color:#82d895;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.verified-token-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.verified-token-grid>div{border:1px solid #242b27;background:#0d100e;border-radius:8px;padding:7px 8px;min-width:0}
+.verified-token-grid span{display:block;color:#68716c;font-size:7.4px;margin-bottom:3px}
+.verified-token-grid b{display:block;color:#e4e9e5;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.verified-note{margin-top:8px;color:#747e77;font-size:7.8px;line-height:1.42}
+
+.feeBox{grid-column:3;border:1px solid #2b3137;background:#090b0d;border-radius:11px;padding:11px;margin-top:10px}.feeLine{display:flex;align-items:center;justify-content:space-between;gap:12px}.total{font-size:18px;font-weight:850}.total.good{color:var(--green)}.total.warn{color:var(--amber)}.total.bad{color:var(--red)}.hint{color:#8d959c;font-size:10px}.wallet-hidden{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
+.preview-card{position:sticky;top:14px;overflow:hidden}.preview-head{padding:17px;border-bottom:1px solid #22282e}.preview-title{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:840}.code-icon{color:var(--orange);font-size:20px}.preview-sub{font-size:10.5px;color:#828a91;margin-top:4px}.preview-body{padding:14px 17px 17px}.preview-list{border:1px solid #252b31;border-radius:12px;background:#090b0d;overflow:hidden}.preview-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #20252a;font-size:10.5px}.preview-row:last-child{border-bottom:0}.preview-row>span{color:#858e95}.preview-row strong{color:#e4e7e9;font-size:10.5px;font-weight:760;text-align:right;max-width:62%;word-break:break-word}.preview-network{display:inline-flex;align-items:center;gap:6px}.mini-chain-dot{width:8px;height:8px;border-radius:50%;background:#89919a}.mini-chain-dot.sepolia{background:#9da6b0}.mini-chain-dot.bscTestnet{background:#f1c40f}.mini-chain-dot.baseSepolia{background:#3685ff}.mini-chain-dot.arbSepolia{background:#45a7ff}.mini-chain-dot.polygonAmoy{background:#9a5cff}.contract-value{color:#ff966e}
+.deploy-note{margin-top:12px;border:1px solid rgba(255,84,28,.36);background:linear-gradient(110deg,rgba(255,84,28,.12),rgba(255,84,28,.035));border-radius:11px;padding:10px 11px;color:#e7b09c;font-size:10.5px;line-height:1.45}.deploy-note b{color:#ff986f}.btn{width:100%;border-radius:11px;min-height:46px;padding:10px 13px;font-weight:830;font-size:12px;transition:.15s}.primary{margin-top:11px;border:0;background:linear-gradient(180deg,#ff6425,#ff4d12);color:#fff;box-shadow:0 12px 28px rgba(255,84,28,.16)}.primary:hover{filter:brightness(1.04)}.secondary{margin-top:8px;border:1px solid #2b3137;background:#121519;color:#c4c9cd}.secondary:hover{background:#171b1f}.btn:disabled{opacity:.48;cursor:not-allowed}.status{margin-top:10px;border:1px solid #252b31;border-radius:10px;background:#090b0d;padding:10px;color:#808990;font-size:10px;line-height:1.48;word-break:break-word}.status.good{border-color:rgba(75,211,116,.25);color:#9ad9aa;background:rgba(75,211,116,.035)}.status.warn{border-color:rgba(242,184,75,.24);color:#d6bc85;background:rgba(242,184,75,.035)}.status.bad{border-color:rgba(255,113,104,.24);color:#efa19b;background:rgba(255,113,104,.035)}.link{color:#ff8d62;text-decoration:none;font-weight:800}.micro-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bottom-strip{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #22282e;background:#0a0c0e;border-radius:14px;overflow:hidden}.bottom-item{padding:13px 15px;display:flex;gap:9px;align-items:center;border-right:1px solid #22282e}.bottom-item:last-child{border-right:0}.bottom-item i{font-style:normal;color:#ff8458}.bottom-item b{display:block;font-size:10.5px}.bottom-item span{display:block;color:#727b82;font-size:9.5px;margin-top:2px}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 2px 0;color:#60686f;font-size:9.5px}
+#chain,#nativeCoinInput{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.preview-card{position:static}.section-head{grid-template-columns:33px 150px 1fr}.network-grid{grid-template-columns:repeat(3,1fr)}.bottom-strip{grid-template-columns:1fr}}
+@media(max-width:640px){.app{padding:0 12px 28px}.topbar{height:64px}.brand-logo{width:37px;height:37px;font-size:19px}.brand-name{font-size:16px}.beta{font-size:8.5px;padding:4px 6px}.testnet-pill{display:none}.wallet{padding:8px 10px;font-size:10.5px;max-width:142px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hero{padding:26px 4px 18px}.eyebrow{font-size:9.5px}.hero h1{font-size:31px;max-width:520px}.hero p{font-size:12px;line-height:1.5}.section{padding:12px}.section-head{grid-template-columns:31px 1fr;gap:9px;margin-bottom:10px}.step{width:31px;height:31px}.section-title{font-size:13px}.section-sub{font-size:9.5px}.network-grid,.type-grid,.form-grid,.fee-grid,.network-strip,.switch-btn,.feeBox{grid-column:1/-1}.network-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.network-card{min-height:59px;padding:8px;gap:7px}.network-icon{width:27px;height:27px}.network-icon svg,.network-icon img{width:25px;height:25px}.network-card b{font-size:10.5px}.network-card span{font-size:8.5px}.network-strip{font-size:9.5px;min-height:38px}.switch-btn{min-height:40px;font-size:10.5px}.type-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.type{min-height:96px;padding:9px}.type-top{gap:6px}.type-icon{width:29px;height:29px;font-size:11px}.type b{font-size:11px}.type p{font-size:8.8px;line-height:1.38;margin-top:7px}.status-badge{font-size:7.2px;padding:3px 5px;margin-top:7px}.form-grid{grid-template-columns:1fr 1fr;gap:8px}.field label{font-size:9.5px}.field input,.field select{height:42px;font-size:11px;padding:9px}.field-help{font-size:9px}.fee-grid{grid-template-columns:1fr 1fr}.fee-grid>.field:nth-child(3){grid-column:auto}.reward-assets{grid-template-columns:1fr 1fr}.reward-asset{min-height:54px}.reward-asset b{font-size:9.5px}.reward-asset small{font-size:7.2px}.mini-help{font-size:8px}.preview-head{padding:13px}.preview-body{padding:11px 13px 13px}.preview-row{padding:9px 10px;font-size:9.5px}.preview-row strong{font-size:9.5px}.deploy-note{font-size:9.5px}.btn{min-height:44px;font-size:11px}.bottom-strip{display:none}.footer{font-size:8.7px}}
+@media(max-width:390px){.token-check-row{grid-template-columns:1fr}.token-check-btn{width:100%}.verified-token-grid{grid-template-columns:1fr 1fr}.reward-assets{grid-template-columns:1fr 1fr}.network-grid{grid-template-columns:repeat(2,1fr)}.type-grid{grid-template-columns:1fr 1fr}.type:last-child{grid-column:1/-1}.hero h1{font-size:28px}}
+
+.letter-network{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:950;font-size:13px;color:#fff}
+.robinhood-letter{background:#ccff00;color:#000;font-size:15px}
+.solana-letter{background:linear-gradient(145deg,#8a4dff,#20d69a)}
+.network-card.planned-network{position:relative;opacity:.68;border-style:dashed}
+.network-card.planned-network:hover{border-color:#30363d}
+.network-badge{position:absolute;top:5px;right:5px;border:1px solid rgba(242,184,75,.28);background:rgba(242,184,75,.06);color:#d7b873;border-radius:999px;padding:2px 5px;font-size:6px!important;font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:.03em}
+.mini-chain-dot.robinhoodTestnet{background:#2a8d62}.mini-chain-dot.solanaDevnet{background:#8a4dff}
+
+</style>
+<link rel="stylesheet" href="../assets/ecosystem.css">
+
+<style id="angry-unified-mobile-header-v4">
+
+@media(max-width:760px){
+
+  .angry-globalbar{
+    position:sticky !important;
+    top:0 !important;
+    z-index:9999 !important;
+    min-height:68px !important;
+    padding:10px 14px !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    background:rgba(7,8,9,.98) !important;
+    border-bottom:1px solid #24272b !important;
+  }
+
+  .angry-globalbrand{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    margin-right:auto !important;
+    min-width:0 !important;
+  }
+
+  .angry-globalbrand-mark{
+    width:44px !important;
+    height:44px !important;
+    min-width:44px !important;
+    border-radius:12px !important;
+    background:url("../assets/angry-logo-final.png") center/cover no-repeat !important;
+    color:transparent !important;
+    font-size:0 !important;
+    overflow:hidden !important;
+  }
+
+  .angry-globalbrand > span:last-child{
+    font-size:14px !important;
+    font-weight:900 !important;
+    white-space:nowrap !important;
+  }
+
+  .angry-globalnav{
+    display:none !important;
+    position:absolute !important;
+    top:calc(100% + 6px) !important;
+    left:12px !important;
+    right:12px !important;
+    padding:8px !important;
+    border:1px solid #2b2f34 !important;
+    border-radius:14px !important;
+    background:#0b0d0f !important;
+    box-shadow:0 18px 45px rgba(0,0,0,.55) !important;
+  }
+
+  .angry-globalbar.angry-menu-open .angry-globalnav{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+  }
+
+  .angry-globalnav a{
+    padding:12px !important;
+    text-align:left !important;
+    width:100% !important;
+    border-radius:9px !important;
+  }
+
+  .angry-mobile-menu-btn{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:46px !important;
+    height:46px !important;
+    min-width:46px !important;
+    padding:0 !important;
+    border:1px solid #30343a !important;
+    border-radius:13px !important;
+    background:#121518 !important;
+    color:#fff !important;
+    font-size:25px !important;
+    line-height:1 !important;
+  }
+
+  .angry-globalbar #walletBtn{
+    position:static !important;
+    width:auto !important;
+    max-width:140px !important;
+    min-height:44px !important;
+    margin:0 !important;
+    padding:0 11px !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    border-radius:12px !important;
+    font-size:11px !important;
+    white-space:nowrap !important;
+  }
+
+  .angry-mobile-duplicate-header{
+    display:none !important;
+  }
+}
+
+@media(min-width:761px){
+  .angry-mobile-menu-btn{
+    display:none !important;
+  }
+}
+
+</style>
+
+
+<style id="angry-token-pricing-v1">
+.angry-token-create-fee{
+  display:block;
+  margin-top:10px;
+  color:#ff7a1a;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.35;
+}
+</style>
+
+<script src="../assets/angry-treasury.js"></script>
+
+<style id="angry-two-mode-burn">
+  .type[data-type="reward"],
+  #rewardFields {
+    display:none !important;
+  }
+
+  .type-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+
+  .type-grid .type {
+    flex:1 1 0 !important;
+  }
+</style>
+
+
+<style id="wallet-state-colors">
+#walletBtn{
+  color:#f2f2f2 !important;
+  border-color:#777 !important;
+}
+#walletBtn.wallet-connected{
+  color:#ff6a2a !important;
+  border-color:#ff6a2a !important;
+}
+</style>
+
+
+<style id="angry-wallet-status-colors">
+#walletBtn{
+  color:#f2f2f2 !important;
+  border-color:#777 !important;
+}
+#walletBtn.wallet-connected{
+  color:#ff6a2a !important;
+  border-color:#ff6a2a !important;
+}
+</style>
+
+
+<style id="angry-token-clean-header">
+.angry-globalbrand-mark{
+  width:46px;
+  height:46px;
+  min-width:46px;
+  border-radius:14px;
+  background:url("../assets/angry-logo-final.png") center/cover no-repeat !important;
+  color:transparent !important;
+  font-size:0 !important;
+  overflow:hidden;
+}
+
+.angry-globalbrand > span:last-child{
+  font-size:18px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.angry-globalbar > .wallet{
+  flex:0 0 auto;
+  margin-left:10px;
+}
+
+@media(max-width:760px){
+  .angry-globalbar > .wallet{
+    margin-left:auto;
+  }
+}
+</style>
+
+
+<style id="angry-token-network-cleanup">
+.network-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+
+.network-card{
+  min-height:58px !important;
+  padding:9px 10px !important;
+  border-radius:13px !important;
+}
+
+.network-icon{
+  width:30px !important;
+  height:30px !important;
+}
+
+.network-icon svg{
+  width:26px !important;
+  height:26px !important;
+}
+
+.network-card b{
+  font-size:11px !important;
+}
+
+.network-card span{
+  font-size:8px !important;
+}
+
+.network-badge{
+  font-size:6px !important;
+}
+
+.network-strip{
+  margin-top:8px !important;
+}
+
+.switch-btn{
+  margin-top:8px !important;
+}
+
+@media(max-width:640px){
+  .network-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+</style>
+
+<style id="angry-token-preview-cleanup">
+
+/* Keep legacy controls in DOM for JS, but remove them from public UI */
+.micro-actions{
+  display:none !important;
+}
+
+/* Cleaner deployment explanation */
+.deploy-note{
+  padding:12px 14px !important;
+  font-size:11px !important;
+  line-height:1.5 !important;
+}
+
+/* Main action should visually dominate */
+#deployBtn{
+  min-height:54px !important;
+  font-size:13px !important;
+  border-radius:14px !important;
+}
+
+/* Status remains visible but quieter */
+#status{
+  margin-top:12px !important;
+  font-size:11px !important;
+  line-height:1.5 !important;
+}
+
+</style>
+<style>
+/* Official network logo visibility on ANGRY dark UI */
+.network-icon,
+.public-chain-logo{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#f3f4f6!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-radius:10px!important;
+  overflow:hidden!important;
+}
+
+.network-icon img,
+.network-icon svg,
+.public-chain-logo img,
+.public-chain-logo svg{
+  width:25px!important;
+  height:25px!important;
+  max-width:25px!important;
+  max-height:25px!important;
+  object-fit:contain!important;
+  display:block!important;
+}
+
+.network-icon img[src*="robinhood"],
+.public-chain-logo img[src*="robinhood"]{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:cover!important;
+}
+</style>
+<style>
+/* Fine tune Base + Arbitrum visibility */
+.network-icon img[src*="base.svg"],
+.public-chain-logo img[src*="base.svg"],
+.angry-network-logo[src*="base.svg"]{
+  width:29px!important;
+  height:29px!important;
+  max-width:29px!important;
+  max-height:29px!important;
+}
+
+.network-icon img[src*="arbitrum"],
+.public-chain-logo img[src*="arbitrum"],
+.angry-network-logo[src*="arbitrum"]{
+  width:29px!important;
+  height:29px!important;
+  max-width:29px!important;
+  max-height:29px!important;
+}
+</style>
+
+<style id="angry-final-official-logo-style">
+
+/* =====================================================
+   FINAL OFFICIAL NETWORK LOGO STYLE
+   Keep official assets unchanged.
+   ===================================================== */
+
+/* Token Creator + NFT Creator:
+   remove generic white plates */
+.network-icon,
+.public-chain-logo{
+  background:transparent!important;
+  border:none!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+/* Default official logo size */
+.network-icon img,
+.public-chain-logo img{
+  width:30px!important;
+  height:30px!important;
+  max-width:30px!important;
+  max-height:30px!important;
+
+  padding:0!important;
+  background:transparent!important;
+  border:none!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+
+  object-fit:contain!important;
+  display:block!important;
+}
+
+/* Ethereum:
+   only ETH gets a light plate for contrast */
+.network-icon img[src*="ethereum.svg"],
+.public-chain-logo img[src*="ethereum.svg"]{
+  width:36px!important;
+  height:36px!important;
+  max-width:36px!important;
+  max-height:36px!important;
+
+  box-sizing:border-box!important;
+  padding:6px!important;
+
+  background:#f3f4f6!important;
+  border-radius:10px!important;
+}
+
+/* BSC: official yellow mark, no white plate */
+.network-icon img[src*="bsc.svg"],
+.public-chain-logo img[src*="bsc.svg"]{
+  width:31px!important;
+  height:31px!important;
+  max-width:31px!important;
+  max-height:31px!important;
+}
+
+/* Solana: official gradient on dark ANGRY background */
+.network-icon img[src*="solana.svg"],
+.public-chain-logo img[src*="solana.svg"]{
+  width:32px!important;
+  height:32px!important;
+  max-width:32px!important;
+  max-height:32px!important;
+}
+
+/* Base Square stays exactly as the official blue square */
+.network-icon img[src*="base.svg"],
+.public-chain-logo img[src*="base.svg"]{
+  width:32px!important;
+  height:32px!important;
+  max-width:32px!important;
+  max-height:32px!important;
+}
+
+/* Robinhood asset already contains its official background */
+.network-icon img[src*="robinhood"],
+.public-chain-logo img[src*="robinhood"]{
+  width:34px!important;
+  height:34px!important;
+  max-width:34px!important;
+  max-height:34px!important;
+
+  object-fit:cover!important;
+  border-radius:8px!important;
+}
+
+/* Arbitrum full-color icon */
+.network-icon img[src*="arbitrum"],
+.public-chain-logo img[src*="arbitrum"]{
+  width:31px!important;
+  height:31px!important;
+  max-width:31px!important;
+  max-height:31px!important;
+}
+
+/* Polygon official mark */
+.network-icon img[src*="polygon.svg"],
+.public-chain-logo img[src*="polygon.svg"]{
+  width:31px!important;
+  height:31px!important;
+  max-width:31px!important;
+  max-height:31px!important;
+}
+
+
+/* =====================================================
+   TRACKER
+   Tracker already looks good.
+   Only Ethereum needs contrast.
+   ===================================================== */
+
+.angry-network-logo{
+  object-fit:contain!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+.angry-network-logo[src*="ethereum.svg"]{
+  width:26px!important;
+  height:26px!important;
+  box-sizing:border-box!important;
+
+  padding:4px!important;
+  background:#f3f4f6!important;
+  border-radius:7px!important;
+}
+
+</style>
+
+
+<style id="angry-token-profile-style">
+.token-profile-box{
+  grid-column:1/-1;
+  margin-top:5px;
+  padding:13px;
+  border:1px solid #2b3137;
+  border-radius:13px;
+  background:#090b0d;
+}
+
+.token-profile-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.token-profile-head b{
+  display:block;
+  color:#f1f3f4;
+  font-size:12px;
+}
+
+.token-profile-head span:not(.token-profile-badge){
+  display:block;
+  margin-top:3px;
+  color:#7d858c;
+  font-size:9px;
+}
+
+.token-profile-badge{
+  padding:4px 7px;
+  border:1px solid #30363c;
+  border-radius:999px;
+  color:#90989f;
+  font-size:7.5px;
+  font-weight:900;
+  letter-spacing:.05em;
+}
+
+.token-profile-layout{
+  display:grid;
+  grid-template-columns:180px 1fr;
+  gap:12px;
+  align-items:start;
+}
+
+.token-logo-btn{
+  width:100%;
+  min-height:154px;
+  padding:12px;
+  border:1px dashed #343b42;
+  border-radius:12px;
+  background:#0d1012;
+  color:#e9ebed;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  text-align:center;
+}
+
+.token-logo-btn:hover{
+  border-color:#ff6a27;
+}
+
+.token-logo-preview{
+  width:70px;
+  height:70px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#15191d;
+  border:1px solid #30363d;
+  color:#ff7543;
+  font-size:27px;
+  font-weight:700;
+}
+
+.token-logo-preview img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+
+.token-logo-btn b{
+  display:block;
+  font-size:10px;
+}
+
+.token-logo-btn small{
+  display:block;
+  margin-top:3px;
+  color:#777f86;
+  font-size:8px;
+}
+
+.token-profile-fields{
+  display:grid;
+  gap:8px;
+}
+
+.token-description-field{
+  margin-top:10px;
+}
+
+.token-description-field textarea{
+  width:100%;
+  min-height:82px;
+  resize:vertical;
+  border:1px solid #30363d;
+  border-radius:11px;
+  background:#090b0d;
+  color:#f2f4f5;
+  padding:10px 11px;
+  outline:none;
+  font:inherit;
+  font-size:11px;
+  line-height:1.45;
+}
+
+.token-description-field textarea:focus{
+  border-color:rgba(255,84,28,.75);
+  box-shadow:0 0 0 3px rgba(255,84,28,.07);
+}
+
+.token-profile-upload-btn{
+  width:100%;
+  min-height:42px;
+  margin-top:10px;
+  border:1px solid rgba(255,84,28,.45);
+  border-radius:10px;
+  background:rgba(255,84,28,.08);
+  color:#ff8d62;
+  font-size:10px;
+  font-weight:850;
+}
+
+.token-profile-upload-btn:disabled{
+  opacity:.5;
+}
+
+.token-profile-status{
+  margin-top:8px;
+  padding:9px 10px;
+  border:1px solid #252b31;
+  border-radius:9px;
+  background:#0b0d0f;
+  color:#7d868d;
+  font-size:8.8px;
+  line-height:1.45;
+  word-break:break-word;
+}
+
+.token-profile-status.good{
+  border-color:rgba(75,211,116,.25);
+  color:#98d8a9;
+}
+
+.token-profile-status.bad{
+  border-color:rgba(255,113,104,.25);
+  color:#efa19b;
+}
+
+@media(max-width:640px){
+  .token-profile-layout{
+    grid-template-columns:1fr;
+  }
+
+  .token-logo-btn{
+    min-height:116px;
+    flex-direction:row;
+    justify-content:flex-start;
+    text-align:left;
+  }
+
+  .token-logo-preview{
+    width:58px;
+    height:58px;
+    min-width:58px;
+  }
+}
+</style>
+
+
+<style id="angry-liquidity-reserve-clarity">
+.liquidity-reserve-notice{
+  grid-column:3;
+  margin-top:10px;
+  padding:11px;
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  border:1px solid rgba(242,184,75,.25);
+  border-radius:11px;
+  background:rgba(242,184,75,.035);
+}
+.liquidity-reserve-icon{
+  width:28px;
+  height:28px;
+  min-width:28px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:rgba(242,184,75,.09);
+  border:1px solid rgba(242,184,75,.24);
+  color:#f2b84b;
+  font-size:11px;
+  font-weight:900;
+}
+.liquidity-reserve-notice b{
+  display:block;
+  color:#e8d4aa;
+  font-size:10px;
+}
+.liquidity-reserve-notice span{
+  display:block;
+  margin-top:3px;
+  color:#978c76;
+  font-size:8.8px;
+  line-height:1.45;
+}
+@media(max-width:640px){
+  .liquidity-reserve-notice{
+    grid-column:1/-1;
+  }
+}
+</style>
+
+</head>
+<body>
+
+<div class="angry-globalbar" aria-label="ANGRY ecosystem navigation">
+
+  <a class="angry-globalbrand" href="../index.html">
+    <span class="angry-globalbrand-mark"></span>
+    <span>ANGRY</span>
+  </a>
+
+  <nav class="angry-globalnav">
+    <a href="../index.html">Home</a>
+    <a href="../tracker/index.html">Tracker</a>
+    <a class="active" href="../token-creator/index.html">Token Creator</a>
+    <a href="../nft-creator/index.html">NFT Creator</a>
+    <a href="../docs/index.html">Docs</a>
+  </nav>
+
+  <button class="wallet" id="walletBtn" type="button">
+    Connect Wallet
+  </button>
+
+</div>
+
+<div class="app">
+
+  <section class="hero">
+    <div class="eyebrow">No-code token creation</div>
+    <h1>Create a token with rules people can verify.</h1>
+    <p>Choose a network, set the contract type and token details, then review everything before approving the deployment in your wallet.</p>
+  </section>
+
+  <main class="layout">
+    <div class="left">
+      <section class="card section">
+        <div class="section-head">
+          <div class="step">01</div>
+          <div><div class="section-title">Choose network</div><div class="section-sub">Select the test network.</div></div>
+          <div class="network-grid">
+            <button class="network-card active" type="button" data-chain="sepolia">
+  <div class="network-icon"><img src="../assets/networks/ethereum.svg" alt="" aria-hidden="true"></div>
+  <div><b>Ethereum</b><span>Sepolia</span></div>
+</button>
+            <button class="network-card" type="button" data-chain="bscTestnet">
+  <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
+  <div><b>BSC</b><span>Testnet</span></div>
+</button>
+            <button class="network-card" type="button" data-chain="baseSepolia">
+  <div class="network-icon"><img src="../assets/networks/base.svg" alt="" aria-hidden="true"></div>
+  <div><b>Base</b><span>Sepolia</span></div>
+</button>
+            <button class="network-card" type="button" data-chain="robinhoodTestnet">
+  <div class="network-icon"><img src="../assets/networks/robinhood.jpg" alt="" aria-hidden="true"></div>
+  <div><b>Robinhood Chain</b><span>Testnet</span></div>
+</button>
+            <button class="network-card" type="button" data-chain="arbSepolia">
+  <div class="network-icon"><img src="../assets/networks/arbitrum.png" alt="" aria-hidden="true"></div>
+  <div><b>Arbitrum</b><span>Sepolia</span></div>
+</button>
+            <button class="network-card" type="button" data-chain="polygonAmoy">
+  <div class="network-icon"><img src="../assets/networks/polygon.svg" alt="" aria-hidden="true"></div>
+  <div><b>Polygon</b><span>Amoy</span></div>
+</button>
+
+            <button class="network-card planned-network" type="button" data-chain="solanaDevnet" aria-disabled="true">
+  <span class="network-badge">Coming soon</span>
+  <div class="network-icon"><img src="../assets/networks/solana.svg" alt="" aria-hidden="true"></div>
+  <div><b>Solana</b><span>Devnet</span></div>
+</button></div>
+          <div class="network-strip" id="networkHint"></div>
+          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected testnet</button>
+        </div>
+        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Sepolia</option><option value="bscTestnet">BSC Testnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
+        <input id="nativeCoinInput" value="SepoliaETH" readonly aria-hidden="true">
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div class="step">02</div>
+          <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
+          <div class="type-grid">
+            <button class="type active" type="button" data-type="standard" data-fee-usd="5.99"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="status-badge ready">Deploy ready</span></button>
+            <button class="type" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, liquidity reserve and creator fee rules.</p><span class="status-badge">TESTNET</span></button>
+            <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="status-badge">TESTNET</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head">
+          <div class="step">03</div>
+          <div><div class="section-title">Token details</div><div class="section-sub">Set the basic token information.</div></div>
+          <div class="form-grid">
+            <div class="field"><label for="name">Token name</label><input id="name" value="" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="" maxlength="10" autocomplete="off"></div>
+            <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="0" min="1" step="1"></div>
+            <div class="field"><label>Decimals</label><input value="18" readonly></div>
+            <div class="field-help">The Standard beta mints the full supply once to the deployer wallet.</div>
+
+<div class="token-profile-box">
+  <div class="token-profile-head">
+    <div>
+      <b>Token profile</b>
+      <span>Add branding and social links for your token.</span>
+    </div>
+    <span class="token-profile-badge">OPTIONAL</span>
+  </div>
+
+  <div class="token-profile-layout">
+    <div class="token-logo-upload">
+      <input
+        id="tokenLogo"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        hidden
+      >
+
+      <button id="tokenLogoBtn" type="button" class="token-logo-btn">
+        <span id="tokenLogoPreview" class="token-logo-preview">+</span>
+        <span>
+          <b>Upload token image</b>
+          <small>PNG, JPG, WebP or GIF</small>
+        </span>
+      </button>
+    </div>
+
+    <div class="token-profile-fields">
+      <div class="field">
+        <label for="tokenWebsite">Website</label>
+        <input id="tokenWebsite" type="url"
+          placeholder="https://yourproject.com"
+          autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="tokenX">X / Twitter</label>
+        <input id="tokenX" type="url"
+          placeholder="https://x.com/yourproject"
+          autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="tokenTelegram">Telegram</label>
+        <input id="tokenTelegram" type="url"
+          placeholder="https://t.me/yourcommunity"
+          autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <div class="field token-description-field">
+    <label for="tokenDescription">Description</label>
+    <textarea
+      id="tokenDescription"
+      maxlength="500"
+      placeholder="Short description of the token or project."
+    ></textarea>
+  </div>
+
+  <button id="uploadTokenProfileBtn"
+    type="button"
+    class="token-profile-upload-btn">
+    Upload profile to IPFS
+  </button>
+
+  <div id="tokenProfileStatus" class="token-profile-status">
+    No token profile uploaded yet.
+  </div>
+
+  <input id="tokenImageUri" type="hidden">
+  <input id="tokenMetadataUri" type="hidden">
+</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section hidden" id="feeFields">
+        <div class="section-head">
+          <div class="step">04</div>
+          <div>
+            <div class="section-title" id="feeSectionTitle">Fee rules</div>
+            <div class="section-sub" id="feeSectionSub">Sepolia test deployment is available for Liquidity Core.</div>
+          </div>
+
+          <div class="fee-grid">
+            <div class="field">
+              <label for="holderFee" id="holderFeeLabel">Holder Reflection (%)</label>
+              <input id="holderFee" type="number" value="0.3" min="0" max="5" step="0.1">
+              <div class="mini-help" id="holderFeeHelp">Distributed to eligible holders in the token itself.</div>
+            </div>
+
+            <div class="field">
+              <label for="lpFee">Liquidity Reserve (%)</label>
+              <input id="lpFee" type="number" value="0.4" min="0" max="5" step="0.1">
+              <div class="mini-help">Collected inside the token contract. A supported DEX and active liquidity pool must be configured before automatic liquidity can operate.</div>
+            </div>
+
+            <div class="field">
+              <label for="projectFee">Project / Creator (%)</label>
+              <input id="projectFee" type="number" value="0.3" min="0" max="5" step="0.1">
+              <div class="mini-help">Allocated to the creator/project fee wallet.</div>
+            </div>
+
+            <div class="field">
+              <label for="burnFee">Burn (%)</label>
+              <input id="burnFee" type="number" value="0.0"
+                     min="0" max="5" step="0.1"
+                     oninput="renderPreview()">
+              <div class="mini-help">
+                Permanently removes this portion of each transaction
+                from total supply.
+              </div>
+            </div>
+
+            <div id="rewardFields" class="reward-builder hidden">
+              <div class="reward-head">
+                <div>
+                  <div class="reward-title">Reward asset</div>
+                  <div class="reward-sub">Choose what eligible holders receive.</div>
+                </div>
+                <span class="planner-chip">TESTNET</span>
+              </div>
+
+              <div class="reward-assets" id="rewardAssets">
+                <button class="reward-asset active" type="button" data-reward="usdt">
+                  <span class="asset-dot usdt-dot">₮</span>
+                  <span><b>USDT</b><small>Stablecoin reward</small></span>
+                </button>
+                <button class="reward-asset" type="button" data-reward="usdc">
+                  <span class="asset-dot usdc-dot">$</span>
+                  <span><b>USDC</b><small>Stablecoin reward</small></span>
+                </button>
+                <button class="reward-asset" type="button" data-reward="wrapped">
+                  <span class="asset-dot wrapped-dot">W</span>
+                  <span><b id="wrappedAssetName">WETH</b><small>Wrapped network coin</small></span>
+                </button>
+                <button class="reward-asset" type="button" data-reward="custom">
+                  <span class="asset-dot custom-dot">+</span>
+                  <span><b>Custom</b><small>Use another ERC-20</small></span>
+                </button>
+              </div>
+
+              <div class="reward-explain" id="rewardExplain">
+                Holders receive rewards in USDT generated from the configured reward fee.
+              </div>
+
+              <div class="field hidden" id="customRewardField">
+                <label for="rewardToken">Custom reward token contract</label>
+                <div class="token-check-row">
+                  <input id="rewardToken" placeholder="0x..." autocomplete="off" inputmode="text" spellcheck="false">
+                  <button class="token-check-btn" id="validateRewardBtn" type="button">Check token</button>
+                </div>
+                <div class="mini-help">The address is checked on the network selected above. A token from another network will not be accepted.</div>
+
+                <div class="token-validation idle" id="rewardValidation">
+                  <span class="validation-icon">○</span>
+                  <div>
+                    <b>Not checked yet</b>
+                    <small>Enter a custom ERC-20 contract address, then tap Check token.</small>
+                  </div>
+                </div>
+
+                <div class="verified-token hidden" id="verifiedRewardToken">
+                  <div class="verified-token-head">
+                    <span class="verified-badge">Verified on selected network</span>
+                    <span id="verifiedRewardNetwork">—</span>
+                  </div>
+                  <div class="verified-token-grid">
+                    <div><span>Name</span><b id="verifiedRewardName">—</b></div>
+                    <div><span>Symbol</span><b id="verifiedRewardSymbol">—</b></div>
+                    <div><span>Decimals</span><b id="verifiedRewardDecimals">—</b></div>
+                    <div><span>Contract</span><b id="verifiedRewardAddress">—</b></div>
+                  </div>
+                  <div class="verified-note">Basic ERC-20 compatibility is confirmed. DEX liquidity/path checking will be required before Reward deployment is enabled.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+<div id="liquidityReserveNotice" class="liquidity-reserve-notice">
+  <div class="liquidity-reserve-icon">L</div>
+  <div>
+    <b>Liquidity reserve only</b>
+    <span>
+      The liquidity fee is currently held by the token contract.
+      It is not sent to Uniswap, PancakeSwap or another DEX automatically.
+      DEX routing will be enabled only after a supported destination and active pool are configured.
+    </span>
+  </div>
+</div>
+
+          <div class="feeBox">
+            <div class="feeLine">
+              <span class="hint">Total planned token tax</span>
+              <span id="totalFee" class="total good">1%</span>
+            </div>
+            <div class="hint" id="feeMessage"></div>
+          </div>
+        </div>
+      </section>
+      <input id="projectWallet" class="wallet-hidden" readonly aria-hidden="true">
+    </div>
+
+    <aside class="card preview-card">
+      <div class="preview-head"><div class="preview-title"><span class="code-icon">&lt;/&gt;</span> Deployment Preview</div><div class="preview-sub">Review your settings before deployment.</div></div>
+      <div class="preview-body">
+        <div id="preview" class="preview-list"></div>
+        <div class="deploy-note"><b>Testnet deployment.</b> Review the settings below, then confirm the deployment in your wallet.</div>
+        <button class="btn primary" id="deployBtn" type="button">Create Test Token</button>
+        <div class="micro-actions"><button class="btn secondary" id="downloadBtn" type="button">Download config</button><button class="btn secondary" id="copyBtn" type="button">Copy summary</button></div>
+        <div id="status" class="status">Ready. Connect an EVM wallet, select Ethereum Sepolia, Base Sepolia or Robinhood Chain Testnet, then deploy a Standard test token.</div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="bottom-strip">
+    <div class="bottom-item"><i>✓</i><div><b>Clear configuration</b><span>Review important token settings before approval.</span></div></div>
+    <div class="bottom-item"><i>⌁</i><div><b>Wallet controlled</b><span>The deployer wallet receives the Standard test supply.</span></div></div>
+    <div class="bottom-item"><i>⚙</i><div><b>Built in stages</b><span>More networks and token mechanics can be added later.</span></div></div>
+  </div>
+  <footer class="footer"><span>© 2026 ANGRY</span><span>Testnet environment · Do not use mainnet funds.</span></footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const CHAINS = {
+  sepolia:{name:"Ethereum Sepolia",family:"evm",chainId:"0xaa36a7",chainIdDec:11155111,native:"SepoliaETH",nativeSymbol:"ETH",rpc:"https://rpc.sepolia.org",explorer:"https://sepolia.etherscan.io",deploy:true},
+  bscTestnet:{name:"BSC Testnet",family:"evm",chainId:"0x61",chainIdDec:97,native:"tBNB",nativeSymbol:"tBNB",rpc:"https://bsc-testnet-dataseed.bnbchain.org",explorer:"https://testnet.bscscan.com",deploy:false},
+  baseSepolia:{name:"Base Sepolia",family:"evm",chainId:"0x14a34",chainIdDec:84532,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia.base.org",explorer:"https://sepolia.basescan.org",deploy:true},
+  robinhoodTestnet:{name:"Robinhood Chain Testnet",family:"evm",chainId:"0xb626",chainIdDec:46630,native:"ETH",nativeSymbol:"ETH",rpc:"https://rpc.testnet.chain.robinhood.com",explorer:"https://explorer.testnet.chain.robinhood.com",deploy:true},
+  arbSepolia:{name:"Arbitrum Sepolia",family:"evm",chainId:"0x66eee",chainIdDec:421614,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia-rollup.arbitrum.io/rpc",explorer:"https://sepolia.arbiscan.io",deploy:false},
+  polygonAmoy:{name:"Polygon Amoy",family:"evm",chainId:"0x13882",chainIdDec:80002,native:"POL",nativeSymbol:"POL",rpc:"https://rpc-amoy.polygon.technology",explorer:"https://amoy.polygonscan.com",deploy:false},
+  solanaDevnet:{name:"Solana Devnet",family:"solana",chainId:null,chainIdDec:null,native:"SOL",nativeSymbol:"SOL",rpc:"https://api.devnet.solana.com",explorer:"https://explorer.solana.com/?cluster=devnet",deploy:false}
+};
+const state={type:"standard",rewardAsset:"usdt",customReward:{status:"idle",address:"",chainKey:"",meta:null,message:""},account:null,lastContract:null};
+
+function setStatus(text,kind=""){
+  const s=$("status"); s.className="status"+(kind?" "+kind:""); s.innerHTML=text;
+}
+function n(id){const v=parseFloat($(id)?.value||"0");return Number.isFinite(v)?v:0}
+function calcFees(){if(state.type==="standard")return 0;return n("holderFee")+n("lpFee")+n("projectFee")+n("burnFee")}
+function feeStatus(){const t=calcFees();$("totalFee").textContent=(Math.round(t*100)/100)+"%";$("totalFee").className="total "+(t<=1?"good":t<=2?"warn":"bad");$("feeMessage").textContent=t<=1?"Low-fee target.":t<=2?"Moderate fee.":"High fee — review before future deployment."}
+function selectedChain(){return CHAINS[$("chain").value]}
+function isEvmAddress(value){
+  return /^0x[a-fA-F0-9]{40}$/.test(String(value||"").trim());
+}
+function shortAddress(value){
+  const v=String(value||"");
+  return v.length>14?v.slice(0,8)+"…"+v.slice(-6):v;
+}
+function resetCustomRewardValidation(message="Enter a custom ERC-20 contract address, then tap Check token."){
+  state.customReward={status:"idle",address:"",chainKey:"",meta:null,message};
+  renderRewardValidation();
+}
+function renderRewardValidation(){
+  const box=$("rewardValidation");
+  const verified=$("verifiedRewardToken");
+  if(!box||!verified)return;
+
+  const v=state.customReward;
+  box.className="token-validation "+(v.status||"idle");
+  const icon=box.querySelector(".validation-icon");
+  const title=box.querySelector("b");
+  const small=box.querySelector("small");
+
+  if(v.status==="checking"){
+    icon.textContent="…";
+    title.textContent="Checking selected network";
+    small.textContent=v.message||"Reading contract code and ERC-20 metadata.";
+    verified.classList.add("hidden");
+  }else if(v.status==="good"){
+    icon.textContent="✓";
+    title.textContent="Compatible reward token";
+    small.textContent=v.message||"Token contract verified on the selected network.";
+    verified.classList.remove("hidden");
+
+    $("verifiedRewardNetwork").textContent=selectedChain().name;
+    $("verifiedRewardName").textContent=v.meta?.name||"Metadata unavailable";
+    $("verifiedRewardSymbol").textContent=v.meta?.symbol||"—";
+    $("verifiedRewardDecimals").textContent=String(v.meta?.decimals ?? "—");
+    $("verifiedRewardAddress").textContent=shortAddress(v.address);
+    $("verifiedRewardAddress").title=v.address;
+  }else if(v.status==="bad"){
+    icon.textContent="!";
+    title.textContent="Reward token rejected";
+    small.textContent=v.message||"This address cannot be used on the selected network.";
+    verified.classList.add("hidden");
+  }else{
+    icon.textContent="○";
+    title.textContent="Not checked yet";
+    small.textContent=v.message||"Enter a custom ERC-20 contract address, then tap Check token.";
+    verified.classList.add("hidden");
+  }
+}
+async function rpcRequest(chain,method,params=[]){
+  const body={jsonrpc:"2.0",id:Date.now(),method,params};
+  const response=await fetch(chain.rpc,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  });
+  if(!response.ok)throw new Error("RPC returned HTTP "+response.status);
+  const data=await response.json();
+  if(data.error)throw new Error(data.error.message||"RPC error");
+  return data.result;
+}
+function hexToUtf8(hex){
+  const clean=String(hex||"").replace(/^0x/,"");
+  if(!clean)return "";
+  const bytes=new Uint8Array(clean.match(/.{1,2}/g).map(x=>parseInt(x,16)));
+  return new TextDecoder().decode(bytes).replace(/\u0000+$/g,"").trim();
+}
+function decodeAbiString(data){
+  if(!data||data==="0x")return "";
+  const hex=data.replace(/^0x/,"");
+  try{
+    if(hex.length>=128){
+      const offset=Number(BigInt("0x"+hex.slice(0,64)));
+      const lenPos=offset*2;
+      if(Number.isFinite(offset)&&hex.length>=lenPos+64){
+        const len=Number(BigInt("0x"+hex.slice(lenPos,lenPos+64)));
+        const start=lenPos+64;
+        if(Number.isFinite(len)&&len>=0&&hex.length>=start+(len*2)){
+          return hexToUtf8(hex.slice(start,start+(len*2)));
+        }
+      }
+    }
+    if(hex.length===64)return hexToUtf8(hex);
+  }catch(_){}
+  return "";
+}
+async function ethCall(chain,address,data){
+  return rpcRequest(chain,"eth_call",[{to:address,data},"latest"]);
+}
+async function detectAddressOnOtherNetworks(address,currentKey){
+  const checks=Object.entries(CHAINS)
+    .filter(([key,chain])=>key!==currentKey && chain.family==="evm")
+    .map(async([key,chain])=>{
+      try{
+        const code=await rpcRequest(chain,"eth_getCode",[address,"latest"]);
+        return code&&code!=="0x"&&code!=="0x0"?{key,chain}:null;
+      }catch(_){return null}
+    });
+  const found=(await Promise.all(checks)).filter(Boolean);
+  return found;
+}
+async function validateCustomRewardToken(){
+  const address=$("rewardToken").value.trim();
+  const chainKey=$("chain").value;
+  const chain=selectedChain();
+  const btn=$("validateRewardBtn");
+
+  resetCustomRewardValidation();
+
+  if(!isEvmAddress(address)){
+    state.customReward={status:"bad",address,chainKey,meta:null,message:"Enter a complete EVM contract address beginning with 0x followed by 40 hexadecimal characters."};
+    renderRewardValidation();renderPreview();return false;
+  }
+
+  state.customReward={status:"checking",address,chainKey,meta:null,message:`Checking ${chain.name}…`};
+  renderRewardValidation();
+  if(btn){btn.disabled=true;btn.textContent="Checking…";}
+
+  try{
+    const code=await rpcRequest(chain,"eth_getCode",[address,"latest"]);
+    if(!code||code==="0x"||code==="0x0"){
+      const elsewhere=await detectAddressOnOtherNetworks(address,chainKey);
+      const otherNames=elsewhere.map(x=>x.chain.name);
+      const suffix=otherNames.length
+        ? ` Contract code was found on ${otherNames.join(", ")}, not on ${chain.name}.`
+        : ` No contract exists at this address on ${chain.name}. It may be from another network.`;
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"Wrong network or invalid contract."+suffix};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    let totalSupplyRaw, balanceRaw, decimalsRaw, symbolRaw="", nameRaw="";
+    try{
+      [totalSupplyRaw,balanceRaw,decimalsRaw,symbolRaw,nameRaw]=await Promise.all([
+        ethCall(chain,address,"0x18160ddd"),
+        ethCall(chain,address,"0x70a082310000000000000000000000000000000000000000000000000000000000000000"),
+        ethCall(chain,address,"0x313ce567"),
+        ethCall(chain,address,"0x95d89b41").catch(()=> "0x"),
+        ethCall(chain,address,"0x06fdde03").catch(()=> "0x")
+      ]);
+    }catch(e){
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"A contract exists here, but it did not respond like a compatible ERC-20 token."};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    if(!totalSupplyRaw||totalSupplyRaw==="0x"||!balanceRaw||balanceRaw==="0x"||!decimalsRaw||decimalsRaw==="0x"){
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"Contract found, but required ERC-20 functions could not be verified."};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    let decimals;
+    try{decimals=Number(BigInt(decimalsRaw));}catch(_){decimals=NaN}
+    if(!Number.isFinite(decimals)||decimals<0||decimals>255){
+      state.customReward={status:"bad",address,chainKey,meta:null,message:"Contract found, but token decimals returned an invalid value."};
+      renderRewardValidation();renderPreview();return false;
+    }
+
+    const symbol=decodeAbiString(symbolRaw);
+    const name=decodeAbiString(nameRaw);
+    state.customReward={
+      status:"good",
+      address,
+      chainKey,
+      meta:{name,symbol,decimals},
+      message:`Verified on ${chain.name}. This address passed the basic ERC-20 compatibility checks.`
+    };
+    renderRewardValidation();renderPreview();return true;
+  }catch(e){
+    state.customReward={status:"bad",address,chainKey,meta:null,message:"Could not verify this token on "+chain.name+": "+(e.message||e)};
+    renderRewardValidation();renderPreview();return false;
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="Check token";}
+  }
+}
+function wrappedRewardName(){
+  const key=$("chain").value;
+  if(key==="bscTestnet")return "WBNB";
+  if(key==="polygonAmoy")return "WPOL";
+  return "WETH";
+}
+function rewardAssetLabel(){
+  if(state.rewardAsset==="usdt")return "USDT";
+  if(state.rewardAsset==="usdc")return "USDC";
+  if(state.rewardAsset==="wrapped")return wrappedRewardName();
+  return "Custom Token";
+}
+function updateRewardUI(){
+  const wrapped=wrappedRewardName();
+  const wrappedName=$("wrappedAssetName");
+  if(wrappedName)wrappedName.textContent=wrapped;
+
+  document.querySelectorAll(".reward-asset").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.reward===state.rewardAsset);
+  });
+
+  const custom=$("customRewardField");
+  if(custom)custom.classList.toggle("hidden",state.rewardAsset!=="custom");
+  if(state.rewardAsset!=="custom" && state.customReward.status!=="idle"){
+    state.customReward={status:"idle",address:"",chainKey:"",meta:null,message:""};
+  }
+  renderRewardValidation();
+
+  const explain=$("rewardExplain");
+  if(explain){
+    const messages={
+      usdt:"Holders receive rewards in USDT generated from the configured reward fee.",
+      usdc:"Holders receive rewards in USDC generated from the configured reward fee.",
+      wrapped:`Holders receive rewards in ${wrapped}, the wrapped native asset for the selected network.`,
+      custom:"Holders receive rewards in the custom ERC-20 token contract supplied below."
+    };
+    explain.textContent=messages[state.rewardAsset];
+  }
+}
+function updateFeeModeUI(){
+  const label=$("holderFeeLabel");
+  const help=$("holderFeeHelp");
+  const title=$("feeSectionTitle");
+  const sub=$("feeSectionSub");
+  if(state.type==="liquidity"){
+    if(label)label.textContent="Holder Reflection (%)";
+    if(help)help.textContent="Distributed to eligible holders in the token itself.";
+    if(title)title.textContent="Liquidity reserve rules";
+    if(sub)sub.textContent="Plan reflection, liquidity reserve, true burn and creator allocation."
+  }else if(state.type==="reward"){
+    if(label)label.textContent="Reward Distribution (%)";
+    if(help)help.textContent="Used to generate the selected reward asset for eligible holders.";
+    if(title)title.textContent="Reward fee rules";
+    if(sub)sub.textContent="Choose the reward asset and how transaction fees are allocated.";
+  }
+  updateRewardUI();
+}
+function updateChain(){
+  const c=selectedChain();
+  if(state.rewardAsset==="custom" && state.customReward.status!=="idle"){
+    state.customReward={status:"idle",address:"",chainKey:"",meta:null,message:"Network changed. Check the custom reward token again on "+c.name+"."};
+  }
+  $("nativeCoinInput").value=c.native;
+  const idText=c.family==="evm"?`Chain ID ${c.chainIdDec}`:"SPL Token architecture";
+  const availability=c.deploy?"Standard deploy enabled":(c.family==="solana"?"Coming soon":"Coming next");
+  $("networkHint").innerHTML=`<span class="live-dot"></span><b>${c.name}</b><span>•</span><span>${idText}</span><span>•</span><span>${availability}</span>`;
+  document.querySelectorAll(".network-card").forEach(x=>x.classList.toggle("active",x.dataset.chain===$("chain").value));
+  updateRewardUI();
+  renderPreview();
+}
+function setType(type){
+  state.type=type;
+  document.querySelectorAll(".type").forEach(x=>x.classList.toggle("active",x.dataset.type===type));
+  $("feeFields").classList.toggle("hidden",type==="standard");
+  $("rewardFields").classList.toggle("hidden",type!=="reward");
+  updateFeeModeUI();
+  const labels={
+  standard:"Create Test Token",
+  liquidity:"Create Test Token",
+  reward:"Create Test Token"
+};
+  $("deployBtn").textContent=labels[type];
+  renderPreview();
+}
+function validateBasic(){const issues=[];const name=$("name").value.trim(),symbol=$("symbol").value.trim(),supply=$("supply").value.trim();if(!name)issues.push("Token name is empty.");if(!symbol)issues.push("Symbol is empty.");if(!/^[A-Za-z0-9_$.-]{1,10}$/.test(symbol))issues.push("Symbol: use 1-10 simple characters.");if(!/^\d+$/.test(supply)||BigInt(supply)<1n)issues.push("Supply must be a whole number above 0.");if(/^\d+$/.test(supply)&&BigInt(supply)>1000000000000000000n)issues.push("Supply is too large for this beta.");return issues}
+function renderPreview(){
+  feeStatus();
+  const c=selectedChain();
+  const typeNames={standard:"Standard Token",liquidity:"Liquidity Fee Token",reward:"Reward Token"};
+  const name=$("name").value||"—", symbol=$("symbol").value||"—", supply=$("supply").value||"—";
+  const shortOwner=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Not connected";
+  let rows=[
+    ["Network",`<span class="preview-network"><span class="mini-chain-dot ${$("chain").value}"></span>${c.name}</span>`],
+    [c.family==="evm"?"Chain ID":"Token program",c.family==="evm"?c.chainIdDec:"SPL Token (Coming soon)"],
+    ["Contract type",typeNames[state.type]],
+    ["Token name",name],
+    ["Symbol",symbol.toUpperCase()],
+    ["Total supply",supply],
+    ["Decimals","18"],
+    ["Owner",shortOwner]
+  ];
+  if(state.type==="standard"){
+    rows.push(["Mintable","No"],["Token tax","0%"],["Admin controls","No"]);
+  }else{
+    if(state.type==="liquidity"){
+      rows.push(["Holder Reflection",n("holderFee")+"%"],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Burn",n("burnFee")+"%"],["Planned tax",calcFees()+"%"]);
+    }else{
+      rows.push(["Reward Distribution",n("holderFee")+"%"],["Reward asset",rewardAssetLabel()],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
+      if(state.rewardAsset==="custom"){
+        const customAddress=$("rewardToken").value.trim();
+        rows.push(["Custom reward contract",customAddress||"Not entered"]);
+        const validationLabel=state.customReward.status==="good"
+          ?"✓ Verified on "+c.name
+          :state.customReward.status==="checking"
+          ?"Checking…"
+          :state.customReward.status==="bad"
+          ?"✕ Rejected"
+          :"Not verified";
+        rows.push(["Reward validation",validationLabel]);
+      }
+    }
+  }
+  if(state.lastContract) rows.push(["Last contract",`<span class="contract-value">${state.lastContract.slice(0,8)}…${state.lastContract.slice(-6)}</span>`]);
+  $("preview").innerHTML=rows.map(([k,v])=>`<div class="preview-row"><span>${k}</span><strong>${v}</strong></div>`).join("");
+}
+
+async function connectWallet(){
+  const c=selectedChain();
+  if(c.family!=="evm"){setStatus("Solana wallet support is Coming soon. The current Token Creator uses an EVM wallet for Ethereum, Base and Robinhood Chain test deployments.","warn");return}
+  if(!window.ethereum){setStatus("EVM wallet provider not detected. Open the hosted ANGRY Launch page inside MetaMask or another compatible EVM wallet browser.","warn");return}
+  try{const accounts=await ethereum.request({method:"eth_requestAccounts"});state.account=accounts[0];$("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("walletBtn").classList.add("wallet-connected");$("walletBtn").classList.add("wallet-connected");$("projectWallet").value=state.account;renderPreview();setStatus("EVM wallet connected. Switch to "+c.name+" before deployment.","good")}catch(e){setStatus("Wallet connection cancelled: "+(e.message||e),"bad")}
+}
+
+async function ensureNetwork(){
+  const c=selectedChain();
+  if(c.family!=="evm")throw new Error("Solana needs a separate Solana wallet + SPL Token deployment path.");
+  if(!window.ethereum)throw new Error("EVM wallet provider not detected.");
+  try{await ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:c.chainId}]});return true}
+  catch(e){
+    if(e.code===4902 || String(e.message||"").toLowerCase().includes("unrecognized")){
+      await ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:c.chainId,chainName:c.name,nativeCurrency:{name:c.nativeSymbol||c.native,symbol:c.nativeSymbol||c.native,decimals:18},rpcUrls:[c.rpc],blockExplorerUrls:[c.explorer]}]});return true
+    }
+    throw e;
+  }
+}
+
+// Precompiled Consensys-style EIP20 reference creation bytecode (Solidity 0.4.21).
+// Constructor: (uint256 initialAmount, string tokenName, uint8 decimals, string tokenSymbol)
+// This beta intentionally has no owner/admin function and no mint function.
+const EIP20_CREATION_BYTECODE = "0x6060604052341561000f57600080fd5b604051610dd1380380610dd18339810160405280805190602001909190805182019190602001805190602001909190805182019190505083600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508360008190555082600390805190602001906100a79291906100e3565b5081600460006101000a81548160ff021916908360ff16021790555080600590805190602001906100d99291906100e3565b5050505050610188565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061012457805160ff1916838001178555610152565b82800160010185558215610152579182015b82811115610151578251825591602001919060010190610136565b5b50905061015f9190610163565b5090565b61018591905b80821115610181576000816000905550600101610169565b5090565b90565b610c3a806101976000396000f3006060604052600436106100af576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806306fdde03146100b4578063095ea7b31461014257806318160ddd1461019c57806323b872dd146101c557806327e235e31461023e578063313ce5671461028b5780635c658165146102ba57806370a082311461032657806395d89b4114610373578063a9059cbb14610401578063dd62ed3e1461045b575b600080fd5b34156100bf57600080fd5b6100c76104c7565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156101075780820151818401526020810190506100ec565b50505050905090810190601f1680156101345780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561014d57600080fd5b610182600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610565565b604051808215151515815260200191505060405180910390f35b34156101a757600080fd5b6101af610657565b6040518082815260200191505060405180910390f35b34156101d057600080fd5b610224600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803590602001909190505061065d565b604051808215151515815260200191505060405180910390f35b341561024957600080fd5b610275600480803573ffffffffffffffffffffffffffffffffffffffff169060200190919050506108f7565b6040518082815260200191505060405180910390f35b341561029657600080fd5b61029e61090f565b604051808260ff1660ff16815260200191505060405180910390f35b34156102c557600080fd5b610310600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610922565b6040518082815260200191505060405180910390f35b341561033157600080fd5b61035d600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610947565b6040518082815260200191505060405180910390f35b341561037e57600080fd5b610386610990565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156103c65780820151818401526020810190506103ab565b50505050905090810190601f1680156103f35780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b341561040c57600080fd5b610441600480803573ffffffffffffffffffffffffffffffffffffffff16906020019091908035906020019091905050610a2e565b604051808215151515815260200191505060405180910390f35b341561046657600080fd5b6104b1600480803573ffffffffffffffffffffffffffffffffffffffff1690602001909190803573ffffffffffffffffffffffffffffffffffffffff16906020019091905050610b87565b6040518082815260200191505060405180910390f35b60038054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020018280546001816001161561010002031660029004801561055d5780601f106105325761010080835404028352916020019161055d565b820191906000526020600020905b81548152906001019060200180831161054057829003601f168201915b505050505081565b600081600260003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925846040518082815260200191505060405180910390a36001905092915050565b60005481565b600080600260008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905082600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020541015801561072e5750828110155b151561073957600080fd5b82600160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254019250508190555082600160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8110156108865782600260008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825403925050819055505b8373ffffffffffffffffffffffffffffffffffffffff168573ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef856040518082815260200191505060405180910390a360019150509392505050565b60016020528060005260406000206000915090505481565b600460009054906101000a900460ff1681565b6002602052816000526040600020602052806000526040600020600091509150505481565b6000600160008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050919050565b60058054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610a265780601f106109fb57610100808354040283529160200191610a26565b820191906000526020600020905b815481529060010190602001808311610a0957829003601f168201915b505050505081565b600081600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205410151515610a7e57600080fd5b81600160003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000828254039250508190555081600160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055508273ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef846040518082815260200191505060405180910390a36001905092915050565b6000600260008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050929150505600a165627a7a72305820bc008488cf4a9a65094e07ebf8bdcbd666557ad5f822dc59f9ed5328fc2cb1cc0029";
+
+function wordHex(value){
+  let h=BigInt(value).toString(16);
+  if(h.length>64)throw new Error("Value is too large for uint256.");
+  return h.padStart(64,"0");
+}
+function utf8Hex(value){
+  return Array.from(new TextEncoder().encode(String(value)),b=>b.toString(16).padStart(2,"0")).join("");
+}
+function encodeDynamicString(value){
+  const h=utf8Hex(value), byteLen=h.length/2;
+  const padded=h.padEnd(Math.ceil(h.length/64)*64,"0");
+  return wordHex(byteLen)+padded;
+}
+function encodeEIP20Constructor(initialAmount,name,decimals,symbol){
+  const nameTail=encodeDynamicString(name);
+  const symbolTail=encodeDynamicString(symbol);
+  const headBytes=32*4;
+  const symbolOffset=headBytes+(nameTail.length/2);
+  return wordHex(initialAmount)+wordHex(headBytes)+wordHex(decimals)+wordHex(symbolOffset)+nameTail+symbolTail;
+}
+function buildStandardDeploymentData(){
+  const humanSupply=BigInt($("supply").value.trim());
+  const initialAmount=humanSupply*(10n**18n);
+  const args=encodeEIP20Constructor(initialAmount,$("name").value.trim(),18,$("symbol").value.trim().toUpperCase());
+  return EIP20_CREATION_BYTECODE+args;
+}
+
+async function waitReceipt(hash){
+  for(let i=0;i<90;i++){
+    const r=await ethereum.request({method:"eth_getTransactionReceipt",params:[hash]});
+    if(r)return r;
+    await new Promise(res=>setTimeout(res,2500));
+  }
+  throw new Error("Transaction was sent but the receipt is taking too long. Check the selected network explorer with the transaction hash.");
+}
+
+
+const LIQUIDITY_CREATION_BYTECODE = "0x610120604052348015610010575f5ffd5b506040516116b23803806116b283398101604081905261002f9161047a565b5f8851116100745760405162461bcd60e51b815260206004820152600d60248201526c13985b59481c995c5d5a5c9959609a1b60448201526064015b60405180910390fd5b5f8751116100b65760405162461bcd60e51b815260206004820152600f60248201526e14de5b589bdb081c995c5d5a5c9959608a1b604482015260640161006b565b5f86116100f75760405162461bcd60e51b815260206004820152600f60248201526e14dd5c1c1b1e481c995c5d5a5c9959608a1b604482015260640161006b565b6001600160a01b03851661014d5760405162461bcd60e51b815260206004820152601760248201527f50726f6a6563742077616c6c6574207265717569726564000000000000000000604482015260640161006b565b6101f48461ffff1611156101975760405162461bcd60e51b8152602060048201526011602482015270486f6c64657220666565206d617820352560781b604482015260640161006b565b6101f48361ffff1611156101ed5760405162461bcd60e51b815260206004820152601460248201527f4c697175696469747920666565206d6178203525000000000000000000000000604482015260640161006b565b6101f48261ffff1611156102385760405162461bcd60e51b815260206004820152601260248201527150726f6a65637420666565206d617820352560701b604482015260640161006b565b6101f48161ffff1611156102805760405162461bcd60e51b815260206004820152600f60248201526e4275726e20666565206d617820352560881b604482015260640161006b565b6103e88161ffff168361ffff168561ffff168761ffff166102a1919061055c565b6102ab919061055c565b6102b5919061055c565b11156102f75760405162461bcd60e51b8152602060048201526011602482015270546f74616c20666565206d61782031302560781b604482015260640161006b565b5f6103028982610604565b50600161030f8882610604565b506001600160a01b03851660805261ffff80851660a05283811660c05282811660e0528116610100526103446012600a6107a5565b61034e90876107b7565b600281905561035e905f196107ce565b610369905f196107ed565b6003819055335f818152600460209081526040808320949094556002549351938452919290917fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef910160405180910390a35050505050505050610800565b634e487b7160e01b5f52604160045260245ffd5b5f82601f8301126103ea575f5ffd5b81516001600160401b03811115610403576104036103c7565b604051601f8201601f19908116603f011681016001600160401b0381118282101715610431576104316103c7565b604052818152838201602001851015610448575f5ffd5b8160208501602083015e5f918101602001919091529392505050565b805161ffff81168114610475575f5ffd5b919050565b5f5f5f5f5f5f5f5f610100898b031215610492575f5ffd5b88516001600160401b038111156104a7575f5ffd5b6104b38b828c016103db565b60208b015190995090506001600160401b038111156104d0575f5ffd5b6104dc8b828c016103db565b60408b015160608c0151919950975090506001600160a01b0381168114610501575f5ffd5b945061050f60808a01610464565b935061051d60a08a01610464565b925061052b60c08a01610464565b915061053960e08a01610464565b90509295985092959890939650565b634e487b7160e01b5f52601160045260245ffd5b8082018082111561056f5761056f610548565b92915050565b600181811c9082168061058957607f821691505b6020821081036105a757634e487b7160e01b5f52602260045260245ffd5b50919050565b601f8211156105ff57828211156105ff57805f5260205f20601f840160051c60208510156105d857505f5b90810190601f840160051c035f5b818110156105fb575f838201556001016105e6565b5050505b505050565b81516001600160401b0381111561061d5761061d6103c7565b6106318161062b8454610575565b846105ad565b6020601f821160018114610663575f831561064c5750848201515b5f19600385901b1c1916600184901b1784556106bb565b5f84815260208120601f198516915b828110156106925787850151825560209485019460019092019101610672565b50848210156106af57868401515f19600387901b60f8161c191681555b505060018360011b0184555b5050505050565b6001815b60018411156106fd578085048111156106e1576106e1610548565b60018416156106ef57908102905b60019390931c9280026106c6565b935093915050565b5f826107135750600161056f565b8161071f57505f61056f565b8160018114610735576002811461073f5761075b565b600191505061056f565b60ff84111561075057610750610548565b50506001821b61056f565b5060208310610133831016604e8410600b841016171561077e575081810a61056f565b61078a5f1984846106c2565b805f190482111561079d5761079d610548565b029392505050565b5f6107b08383610705565b9392505050565b808202811582820484141761056f5761056f610548565b5f826107e857634e487b7160e01b5f52601260045260245ffd5b500690565b8181038181111561056f5761056f610548565b60805160a05160c05160e05161010051610e3661087c5f395f818161025301526108a301525f818161032f01528181610641015261086501525f818161022401528181610666015261082701525f81816101ce0152818161068b01526107e901525f818161029501528181610a1e0152610a7c0152610e365ff3fe608060405234801561000f575f5ffd5b5060043610610132575f3560e01c806395d89b41116100b4578063c56f84cf11610079578063c56f84cf146102cf578063c62556d3146102d7578063d89135cd146102e0578063dd62ed3e146102e9578063e233be4914610321578063fd9a465d1461032a575f5ffd5b806395d89b4114610246578063a51898101461024e578063a9059cbb14610275578063bea8e46b14610288578063beb08ab914610290575f5ffd5b8063313ce567116100fa578063313ce567146101af5780635b95edf5146101c957806370a08231146102035780637c31efb1146102165780637e5689a31461021f575f5ffd5b806306fdde0314610136578063095ea7b31461015457806318160ddd1461017757806323b872dd146101895780632d8381191461019c575b5f5ffd5b61013e610351565b60405161014b9190610c25565b60405180910390f35b610167610162366004610c75565b6103dc565b604051901515815260200161014b565b6002545b60405190815260200161014b565b610167610197366004610c9d565b61048b565b61017b6101aa366004610cd7565b610575565b6101b7601281565b60405160ff909116815260200161014b565b6101f07f000000000000000000000000000000000000000000000000000000000000000081565b60405161ffff909116815260200161014b565b61017b610211366004610cee565b6105ec565b61017b60065481565b6101f07f000000000000000000000000000000000000000000000000000000000000000081565b61013e61060d565b6101f07f000000000000000000000000000000000000000000000000000000000000000081565b610167610283366004610c75565b61061a565b61017b61062f565b6102b77f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b03909116815260200161014b565b61017b61063e565b61017b60085481565b61017b60095481565b61017b6102f7366004610d07565b6001600160a01b039182165f90815260056020908152604080832093909416825291909152205490565b61017b60075481565b6101f07f000000000000000000000000000000000000000000000000000000000000000081565b5f805461035d90610d38565b80601f016020809104026020016040519081016040528092919081815260200182805461038990610d38565b80156103d45780601f106103ab576101008083540402835291602001916103d4565b820191905f5260205f20905b8154815290600101906020018083116103b757829003601f168201915b505050505081565b5f6001600160a01b0383166104275760405162461bcd60e51b815260206004820152600c60248201526b2d32b9379039b832b73232b960a11b60448201526064015b60405180910390fd5b335f8181526005602090815260408083206001600160a01b03881680855290835292819020869055518581529192917f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925910160405180910390a35060015b92915050565b6001600160a01b0383165f908152600560209081526040808320338452909152812054828110156104f35760405162461bcd60e51b8152602060048201526012602482015271105b1b1bddd85b98d948195e18d95959195960721b604482015260640161041e565b5f19811461055f576105058382610d84565b6001600160a01b0386165f81815260056020908152604080832033808552908352928190208590555193845290927f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925910160405180910390a35b61056a8585856106c2565b506001949350505050565b5f6003548211156105c85760405162461bcd60e51b815260206004820152601b60248201527f5265666c656374696f6e20616d6f756e7420746f6f206c617267650000000000604482015260640161041e565b5f6002546003546105d99190610d97565b90506105e58184610d97565b9392505050565b6001600160a01b0381165f9081526004602052604081205461048590610575565b6001805461035d90610d38565b5f6106263384846106c2565b50600192915050565b5f610639306105ec565b905090565b5f7f000000000000000000000000000000000000000000000000000000000000000061ffff167f000000000000000000000000000000000000000000000000000000000000000061ffff167f000000000000000000000000000000000000000000000000000000000000000061ffff166106b89190610db6565b6106399190610db6565b6001600160a01b0383166107065760405162461bcd60e51b815260206004820152600b60248201526a2d32b9379039b2b73232b960a91b604482015260640161041e565b6001600160a01b03821661074d5760405162461bcd60e51b815260206004820152600e60248201526d16995c9bc81c9958da5c1a595b9d60921b604482015260640161041e565b5f811161078e5760405162461bcd60e51b815260206004820152600f60248201526e105b5bdd5b9d081c995c5d5a5c9959608a1b604482015260640161041e565b80610798846105ec565b10156107dd5760405162461bcd60e51b8152602060048201526014602482015273496e73756666696369656e742062616c616e636560601b604482015260640161041e565b5f61271061080f61ffff7f00000000000000000000000000000000000000000000000000000000000000001684610dc9565b6108199190610d97565b90505f61271061084d61ffff7f00000000000000000000000000000000000000000000000000000000000000001685610dc9565b6108579190610d97565b90505f61271061088b61ffff7f00000000000000000000000000000000000000000000000000000000000000001686610dc9565b6108959190610d97565b90505f6127106108c961ffff7f00000000000000000000000000000000000000000000000000000000000000001687610dc9565b6108d39190610d97565b90505f8183856108e3888a610d84565b6108ed9190610d84565b6108f79190610d84565b6109019190610d84565b90505f6002546003546109149190610d97565b90505f6109218289610dc9565b90505f61092e8385610dc9565b6001600160a01b038c165f9081526004602052604081208054929350849290919061095a908490610d84565b90915550506001600160a01b038a165f9081526004602052604081208054839290610986908490610db6565b90915550508615610a045761099b8388610dc9565b305f90815260046020526040812080549091906109b9908490610db6565b925050819055508660075f8282546109d19190610db6565b909155505060405187815230906001600160a01b038d16905f516020610de15f395f51905f529060200160405180910390a35b8515610ad557610a148387610dc9565b6001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000165f9081526004602052604081208054909190610a5b908490610db6565b925050819055508560085f828254610a739190610db6565b925050819055507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168b6001600160a01b03165f516020610de15f395f51905f5288604051610acc91815260200190565b60405180910390a35b8415610b5857610ae58386610dc9565b60035f828254610af59190610d84565b925050819055508460025f828254610b0d9190610d84565b925050819055508460095f828254610b259190610db6565b90915550506040518581525f906001600160a01b038d16905f516020610de15f395f51905f529060200160405180910390a35b8715610b9657610b688389610dc9565b60035f828254610b789190610d84565b925050819055508760065f828254610b909190610db6565b90915550505b896001600160a01b03168b6001600160a01b03165f516020610de15f395f51905f5286604051610bc891815260200190565b60405180910390a36040805189815260208101899052908101879052606081018690527f1439b7288b9250c2bdafa321a45d08e57c0808947ff3d0ff001e56033c6387419060800160405180910390a15050505050505050505050565b602081525f82518060208401528060208501604085015e5f604082850101526040601f19601f83011684010191505092915050565b80356001600160a01b0381168114610c70575f5ffd5b919050565b5f5f60408385031215610c86575f5ffd5b610c8f83610c5a565b946020939093013593505050565b5f5f5f60608486031215610caf575f5ffd5b610cb884610c5a565b9250610cc660208501610c5a565b929592945050506040919091013590565b5f60208284031215610ce7575f5ffd5b5035919050565b5f60208284031215610cfe575f5ffd5b6105e582610c5a565b5f5f60408385031215610d18575f5ffd5b610d2183610c5a565b9150610d2f60208401610c5a565b90509250929050565b600181811c90821680610d4c57607f821691505b602082108103610d6a57634e487b7160e01b5f52602260045260245ffd5b50919050565b634e487b7160e01b5f52601160045260245ffd5b8181038181111561048557610485610d70565b5f82610db157634e487b7160e01b5f52601260045260245ffd5b500490565b8082018082111561048557610485610d70565b808202811582820484141761048557610485610d7056feddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3efa26469706673582212207240dafdd461e723db030e8d01355632456048d68d8399c874a4051558b3707c64736f6c63430008240033";
+
+function liquidityAddressWord(value){
+  const h=String(value||"")
+    .replace(/^0x/,"")
+    .toLowerCase();
+
+  if(!/^[0-9a-f]{40}$/.test(h)){
+    throw new Error("Invalid project wallet address.");
+  }
+
+  return h.padStart(64,"0");
+}
+
+function liquidityFeeBps(id){
+  const value=Number($(id).value);
+
+  if(!Number.isFinite(value) || value<0 || value>5){
+    throw new Error(id+" must be between 0% and 5%.");
+  }
+
+  return BigInt(Math.round(value*100));
+}
+
+function encodeLiquidityConstructor(
+  name,
+  symbol,
+  supply,
+  projectWallet,
+  holderBps,
+  liquidityBps,
+  projectBps
+){
+  const nameTail=encodeDynamicString(name);
+  const symbolTail=encodeDynamicString(symbol);
+
+  const headBytes=32*7;
+  const nameOffset=headBytes;
+  const symbolOffset=headBytes+(nameTail.length/2);
+
+  return (
+    wordHex(nameOffset)+
+    wordHex(symbolOffset)+
+    wordHex(supply)+
+    liquidityAddressWord(projectWallet)+
+    wordHex(holderBps)+
+    wordHex(liquidityBps)+
+    wordHex(projectBps)+
+    nameTail+
+    symbolTail
+  );
+}
+
+function buildLiquidityDeploymentData(){
+  const supplyText=$("supply").value.trim();
+
+  if(!/^\d+$/.test(supplyText)){
+    throw new Error(
+      "Total supply must be a positive whole number."
+    );
+  }
+
+  const supply=BigInt(supplyText);
+
+  if(supply<=0n){
+    throw new Error(
+      "Total supply must be greater than zero."
+    );
+  }
+
+  if(!state.account){
+    throw new Error(
+      "Connect the creator wallet first."
+    );
+  }
+
+  if(!/^0x[0-9a-fA-F]{40}$/.test(state.account)){
+    throw new Error(
+      "Creator wallet address is invalid."
+    );
+  }
+
+  const holderBps=liquidityFeeBps("holderFee");
+  const liquidityBps=liquidityFeeBps("lpFee");
+  const projectBps=liquidityFeeBps("projectFee");
+  const burnBps=liquidityFeeBps("burnFee");
+
+  if(
+    holderBps +
+    liquidityBps +
+    projectBps +
+    burnBps > 1000n
+  ){
+    throw new Error(
+      "Combined token tax cannot exceed 10%."
+    );
+  }
+
+  const name=$("name").value.trim();
+  const symbol=$("symbol").value.trim().toUpperCase();
+
+  const nameTail=encodeDynamicString(name);
+  const symbolTail=encodeDynamicString(symbol);
+
+  // Constructor:
+  // string name,
+  // string symbol,
+  // uint256 supply,
+  // address projectWallet,
+  // uint16 holderFeeBps,
+  // uint16 liquidityFeeBps,
+  // uint16 projectFeeBps,
+  // uint16 burnFeeBps
+
+  const headBytes=32*8;
+  const nameOffset=headBytes;
+  const symbolOffset=headBytes+(nameTail.length/2);
+
+  const projectWalletWord=
+    state.account.slice(2).padStart(64,"0");
+
+  const args=
+    wordHex(nameOffset)+
+    wordHex(symbolOffset)+
+    wordHex(supply)+
+    projectWalletWord+
+    wordHex(holderBps)+
+    wordHex(liquidityBps)+
+    wordHex(projectBps)+
+    wordHex(burnBps)+
+    nameTail+
+    symbolTail;
+
+  return LIQUIDITY_CREATION_BYTECODE+args;
+}
+
+const REWARD_CREATION_BYTECODE="0x610120604052348015610010575f5ffd5b50604051611db0380380611db083398101604081905261002f916104c8565b5f8851116100745760405162461bcd60e51b815260206004820152600d60248201526c13985b59481c995c5d5a5c9959609a1b60448201526064015b60405180910390fd5b5f8751116100b65760405162461bcd60e51b815260206004820152600f60248201526e14de5b589bdb081c995c5d5a5c9959608a1b604482015260640161006b565b5f86116100f75760405162461bcd60e51b815260206004820152600f60248201526e14dd5c1c1b1e481c995c5d5a5c9959608a1b604482015260640161006b565b6001600160a01b03851661014d5760405162461bcd60e51b815260206004820152601760248201527f50726f6a6563742077616c6c6574207265717569726564000000000000000000604482015260640161006b565b6001600160a01b0384166101a35760405162461bcd60e51b815260206004820152601560248201527f52657761726420746f6b656e2072657175697265640000000000000000000000604482015260640161006b565b5f846001600160a01b03163b116101fc5760405162461bcd60e51b815260206004820152601d60248201527f52657761726420746f6b656e206d75737420626520636f6e7472616374000000604482015260640161006b565b6101f48361ffff1611156102465760405162461bcd60e51b815260206004820152601160248201527052657761726420666565206d617820352560781b604482015260640161006b565b6101f48261ffff16111561029c5760405162461bcd60e51b815260206004820152601460248201527f4c697175696469747920666565206d6178203525000000000000000000000000604482015260640161006b565b6101f48161ffff1611156102e75760405162461bcd60e51b815260206004820152601260248201527150726f6a65637420666565206d617820352560701b604482015260640161006b565b6103e88161ffff168361ffff168561ffff16610303919061059b565b61030d919061059b565b111561034f5760405162461bcd60e51b8152602060048201526011602482015270546f74616c20666565206d61782031302560781b604482015260640161006b565b5f61035a8982610643565b5060016103678882610643565b506001600160a01b03808616608052841660a05261ffff80841660c05282811660e05281166101005261039c6012600a6107e4565b6103a690876107f6565b6002819055335f81815260036020908152604080832085905551938452919290917fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef910160405180910390a3505050505050505061080d565b634e487b7160e01b5f52604160045260245ffd5b5f82601f830112610422575f5ffd5b81516001600160401b0381111561043b5761043b6103ff565b604051601f8201601f19908116603f011681016001600160401b0381118282101715610469576104696103ff565b604052818152838201602001851015610480575f5ffd5b8160208501602083015e5f918101602001919091529392505050565b80516001600160a01b03811681146104b2575f5ffd5b919050565b805161ffff811681146104b2575f5ffd5b5f5f5f5f5f5f5f5f610100898b0312156104e0575f5ffd5b88516001600160401b038111156104f5575f5ffd5b6105018b828c01610413565b60208b015190995090506001600160401b0381111561051e575f5ffd5b61052a8b828c01610413565b9750506040890151955061054060608a0161049c565b945061054e60808a0161049c565b935061055c60a08a016104b7565b925061056a60c08a016104b7565b915061057860e08a016104b7565b90509295985092959890939650565b634e487b7160e01b5f52601160045260245ffd5b808201808211156105ae576105ae610587565b92915050565b600181811c908216806105c857607f821691505b6020821081036105e657634e487b7160e01b5f52602260045260245ffd5b50919050565b601f82111561063e578282111561063e57805f5260205f20601f840160051c602085101561061757505f5b90810190601f840160051c035f5b8181101561063a575f83820155600101610625565b5050505b505050565b81516001600160401b0381111561065c5761065c6103ff565b6106708161066a84546105b4565b846105ec565b6020601f8211600181146106a2575f831561068b5750848201515b5f19600385901b1c1916600184901b1784556106fa565b5f84815260208120601f198516915b828110156106d157878501518255602094850194600190920191016106b1565b50848210156106ee57868401515f19600387901b60f8161c191681555b505060018360011b0184555b5050505050565b6001815b600184111561073c5780850481111561072057610720610587565b600184161561072e57908102905b60019390931c928002610705565b935093915050565b5f82610752575060016105ae565b8161075e57505f6105ae565b8160018114610774576002811461077e5761079a565b60019150506105ae565b60ff84111561078f5761078f610587565b50506001821b6105ae565b5060208310610133831016604e8410600b84101617156107bd575081810a6105ae565b6107c95f198484610701565b805f19048211156107dc576107dc610587565b029392505050565b5f6107ef8383610744565b9392505050565b80820281158282048414176105ae576105ae610587565b60805160a05160c05160e051610100516115196108975f395f818161046801528181610bab0152610dde01525f818161030c01528181610bd00152610da001525f818161029a01528181610bf50152610d6201525f8181610441015281816108510152818161098a01528181610a020152610a4001525f81816103910152610e9701526115195ff3fe608060405234801561000f575f5ffd5b50600436106101d1575f3560e01c806393707a19116100fe578063beb08ab91161009e578063dd6624e41161006e578063dd6624e414610414578063e4472c3e14610433578063f7c618c11461043c578063fd9a465d14610463575f5ffd5b8063beb08ab91461038c578063c56f84cf146103cb578063c62556d3146103d3578063dd62ed3e146103dc575f5ffd5b80639e9aed62116100d95780639e9aed6214610354578063a3a417af14610368578063a9059cbb14610371578063bea8e46b14610384575f5ffd5b806393707a191461032e57806395d89b4114610343578063994a53301461034b575f5ffd5b806323b872dd11610174578063584d193b11610144578063584d193b146102cf57806366285e86146102d757806370a08231146102df5780637e5689a314610307575f5ffd5b806323b872dd14610260578063313ce56714610273578063372500ab1461028d5780633d8f538614610295575f5ffd5b80630c70754e116101af5780630c70754e1461023357806318160ddd146102465780631b02b06d1461024e57806320756cf714610257575f5ffd5b806305b3ccb4146101d557806306fdde03146101fb578063095ea7b314610210575b5f5ffd5b6101e86101e33660046112aa565b61048a565b6040519081526020015b60405180910390f35b610203610502565b6040516101f291906112c3565b61022361021e3660046112f8565b61058d565b60405190151581526020016101f2565b6101e86102413660046112aa565b61063c565b6002546101e8565b6101e8600a5481565b6101e860055481565b61022361026e366004611320565b610684565b61027b601281565b60405160ff90911681526020016101f2565b6101e861076e565b6102bc7f000000000000000000000000000000000000000000000000000000000000000081565b60405161ffff90911681526020016101f2565b6005546101e8565b6101e86108bb565b6101e86102ed3660046112aa565b6001600160a01b03165f9081526003602052604090205490565b6102bc7f000000000000000000000000000000000000000000000000000000000000000081565b61034161033c36600461135a565b6108dc565b005b610203610b86565b6101e860095481565b305f908152600360205260409020546101e8565b6101e860065481565b61022361037f3660046112f8565b610b93565b6006546101e8565b6103b37f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016101f2565b6101e8610ba8565b6101e860075481565b6101e86103ea366004611371565b6001600160a01b039182165f90815260046020908152604080832093909416825291909152205490565b6101e86104223660046112aa565b600c6020525f908152604090205481565b6101e860085481565b6103b37f000000000000000000000000000000000000000000000000000000000000000081565b6102bc7f000000000000000000000000000000000000000000000000000000000000000081565b5f306001600160a01b038316036104a257505f919050565b6001600160a01b0382165f908152600b602090815260408083205460039092528220546008546104d291906113b6565b6104dc91906113cd565b90505f81136104ed57505f92915050565b6104fb600160801b826113f4565b9392505050565b5f805461050e90611413565b80601f016020809104026020016040519081016040528092919081815260200182805461053a90611413565b80156105855780601f1061055c57610100808354040283529160200191610585565b820191905f5260205f20905b81548152906001019060200180831161056857829003601f168201915b505050505081565b5f6001600160a01b0383166105d85760405162461bcd60e51b815260206004820152600c60248201526b2d32b9379039b832b73232b960a11b60448201526064015b60405180910390fd5b335f8181526004602090815260408083206001600160a01b03881680855290835292819020869055518581529192917f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925910160405180910390a35060015b92915050565b5f5f6106478361048a565b6001600160a01b0384165f908152600c602052604090205490915080821161067257505f9392505050565b61067c818361144b565b949350505050565b6001600160a01b0383165f908152600460209081526040808320338452909152812054828110156106ec5760405162461bcd60e51b8152602060048201526012602482015271105b1b1bddd85b98d948195e18d95959195960721b60448201526064016105cf565b5f198114610758576106fe838261144b565b6001600160a01b0386165f81815260046020908152604080832033808552908352928190208590555193845290927f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925910160405180910390a35b610763858585610c2c565b506001949350505050565b600d545f9060ff16156107b25760405162461bcd60e51b815260206004820152600c60248201526b10db185a5b481b1bd8dad95960a21b60448201526064016105cf565b600d805460ff191660011790555f6107c93361063c565b90505f81116108105760405162461bcd60e51b81526020600482015260136024820152724e6f2072657761726420617661696c61626c6560681b60448201526064016105cf565b335f908152600c60205260408120805483929061082e90849061145e565b9250508190555080600a5f828254610846919061145e565b9091555061087790507f00000000000000000000000000000000000000000000000000000000000000003383610f1e565b60405181815233907f106f923f993c2149d49b4255ff723acafa1f2d94393f561d3eda32ae348f72419060200160405180910390a2600d805460ff19169055919050565b305f908152600360205260408120546002546108d7919061144b565b905090565b5f81116109245760405162461bcd60e51b815260206004820152601660248201527514995dd85c9908185b5bdd5b9d081c995c5d5a5c995960521b60448201526064016105cf565b5f61092d6108bb565b90505f81116109735760405162461bcd60e51b81526020600482015260126024820152714e6f20656c696769626c6520737570706c7960701b60448201526064016105cf565b6040516370a0823160e01b81523060048201525f907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906370a0823190602401602060405180830381865afa1580156109d7573d5f5f3e3d5ffd5b505050506040513d601f19601f820116820180604052508101906109fb9190611471565b9050610a297f000000000000000000000000000000000000000000000000000000000000000033308661102d565b6040516370a0823160e01b81523060048201525f907f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906370a0823190602401602060405180830381865afa158015610a8d573d5f5f3e3d5ffd5b505050506040513d601f19601f82011682018060405250810190610ab19190611471565b90505f610abe838361144b565b90505f8111610b045760405162461bcd60e51b8152602060048201526012602482015271139bc81c995dd85c99081c9958d95a5d995960721b60448201526064016105cf565b83610b13600160801b836113b6565b610b1d91906113f4565b60085f828254610b2d919061145e565b925050819055508060095f828254610b45919061145e565b909155505060405181815233907fd53214ca07be5520e229c395f05a3e5c0697ec6279184ffbe2758d304fd322cc9060200160405180910390a25050505050565b6001805461050e90611413565b5f610b9f338484610c2c565b50600192915050565b5f7f000000000000000000000000000000000000000000000000000000000000000061ffff167f000000000000000000000000000000000000000000000000000000000000000061ffff167f000000000000000000000000000000000000000000000000000000000000000061ffff16610c22919061145e565b6108d7919061145e565b6001600160a01b038316610c705760405162461bcd60e51b815260206004820152600b60248201526a2d32b9379039b2b73232b960a91b60448201526064016105cf565b6001600160a01b038216610cb75760405162461bcd60e51b815260206004820152600e60248201526d16995c9bc81c9958da5c1a595b9d60921b60448201526064016105cf565b5f8111610cf85760405162461bcd60e51b815260206004820152600f60248201526e105b5bdd5b9d081c995c5d5a5c9959608a1b60448201526064016105cf565b6001600160a01b0383165f90815260036020526040902054811115610d565760405162461bcd60e51b8152602060048201526014602482015273496e73756666696369656e742062616c616e636560601b60448201526064016105cf565b5f612710610d8861ffff7f000000000000000000000000000000000000000000000000000000000000000016846113b6565b610d9291906113f4565b90505f612710610dc661ffff7f000000000000000000000000000000000000000000000000000000000000000016856113b6565b610dd091906113f4565b90505f612710610e0461ffff7f000000000000000000000000000000000000000000000000000000000000000016866113b6565b610e0e91906113f4565b90505f8183610e1d868861144b565b610e27919061144b565b610e31919061144b565b9050610e3e87878361114c565b5f610e49848661145e565b90508015610e8b57610e5c88308361114c565b8460055f828254610e6d919061145e565b925050819055508360065f828254610e85919061145e565b90915550505b8215610ed357610ebc887f00000000000000000000000000000000000000000000000000000000000000008561114c565b8260075f828254610ecd919061145e565b90915550505b60408051868152602081018690529081018490527f26092d07f0187f928cdea6737c0e6d7496aea7e4d4fb32daf1ccd48793ce0b8e9060600160405180910390a15050505050505050565b604080516001600160a01b038481166024830152604480830185905283518084039091018152606490920183526020820180516001600160e01b031663a9059cbb60e01b17905291515f92839290871691610f799190611488565b5f604051808303815f865af19150503d805f8114610fb2576040519150601f19603f3d011682016040523d82523d5f602084013e610fb7565b606091505b5091509150818015610fe1575080511580610fe1575080806020019051810190610fe1919061149e565b6110265760405162461bcd60e51b815260206004820152601660248201527514995dd85c99081d1c985b9cd9995c8819985a5b195960521b60448201526064016105cf565b5050505050565b604080516001600160a01b0385811660248301528481166044830152606480830185905283518084039091018152608490920183526020820180516001600160e01b03166323b872dd60e01b17905291515f928392908816916110909190611488565b5f604051808303815f865af19150503d805f81146110c9576040519150601f19603f3d011682016040523d82523d5f602084013e6110ce565b606091505b50915091508180156110f85750805115806110f85750808060200190518101906110f8919061149e565b6111445760405162461bcd60e51b815260206004820152601a60248201527f526577617264207472616e7366657246726f6d206661696c656400000000000060448201526064016105cf565b505050505050565b805f0361115857505050565b6001600160a01b0383165f908152600360205260408120805483929061117f90849061144b565b90915550506001600160a01b0382165f90815260036020526040812080548392906111ab90849061145e565b90915550506008545f906111c09083906113b6565b90506001600160a01b03841630146111ff576001600160a01b0384165f908152600b6020526040812080548392906111f99084906113cd565b90915550505b6001600160a01b038316301461123c576001600160a01b0383165f908152600b6020526040812080548392906112369084906114bd565b90915550505b826001600160a01b0316846001600160a01b03167fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef8460405161128191815260200190565b60405180910390a350505050565b80356001600160a01b03811681146112a5575f5ffd5b919050565b5f602082840312156112ba575f5ffd5b6104fb8261128f565b602081525f82518060208401528060208501604085015e5f604082850101526040601f19601f83011684010191505092915050565b5f5f60408385031215611309575f5ffd5b6113128361128f565b946020939093013593505050565b5f5f5f60608486031215611332575f5ffd5b61133b8461128f565b92506113496020850161128f565b929592945050506040919091013590565b5f6020828403121561136a575f5ffd5b5035919050565b5f5f60408385031215611382575f5ffd5b61138b8361128f565b91506113996020840161128f565b90509250929050565b634e487b7160e01b5f52601160045260245ffd5b8082028115828204841417610636576106366113a2565b8082018281125f8312801582168215821617156113ec576113ec6113a2565b505092915050565b5f8261140e57634e487b7160e01b5f52601260045260245ffd5b500490565b600181811c9082168061142757607f821691505b60208210810361144557634e487b7160e01b5f52602260045260245ffd5b50919050565b81810381811115610636576106366113a2565b80820180821115610636576106366113a2565b5f60208284031215611481575f5ffd5b5051919050565b5f82518060208501845e5f920191825250919050565b5f602082840312156114ae575f5ffd5b815180151581146104fb575f5ffd5b8181035f8312801583831316838312821617156114dc576114dc6113a2565b509291505056fea2646970667358221220399107451dd469a4a85a7c23fa6963eb3b07aefa67917f520b0a17979e4b551364736f6c63430008240033";
+
+function encodeRewardConstructor(
+  name,
+  symbol,
+  supply,
+  projectWallet,
+  rewardToken,
+  rewardBps,
+  liquidityBps,
+  projectBps
+){
+  const nameTail=encodeDynamicString(name);
+  const symbolTail=encodeDynamicString(symbol);
+
+  const headBytes=32*8;
+  const nameOffset=headBytes;
+  const symbolOffset=
+    headBytes+(nameTail.length/2);
+
+  return (
+    wordHex(nameOffset)+
+    wordHex(symbolOffset)+
+    wordHex(supply)+
+    liquidityAddressWord(projectWallet)+
+    liquidityAddressWord(rewardToken)+
+    wordHex(rewardBps)+
+    wordHex(liquidityBps)+
+    wordHex(projectBps)+
+    nameTail+
+    symbolTail
+  );
+}
+
+function buildRewardDeploymentData(){
+  const name=$("name").value.trim();
+  const symbol=$("symbol").value.trim().toUpperCase();
+  const supplyText=$("supply").value.trim();
+
+  if(!name){
+    throw new Error("Token name is required.");
+  }
+
+  if(!symbol){
+    throw new Error("Token symbol is required.");
+  }
+
+  if(!/^\d+$/.test(supplyText)){
+    throw new Error(
+      "Total supply must be a positive whole number."
+    );
+  }
+
+  const supply=BigInt(supplyText);
+
+  if(supply<=0n){
+    throw new Error(
+      "Total supply must be greater than zero."
+    );
+  }
+
+  if(!state.account){
+    throw new Error(
+      "Connect the creator wallet first."
+    );
+  }
+
+  /*
+   * First real Reward test:
+   * Custom ERC-20 only.
+   *
+   * USDT / USDC / wrapped-native presets are enabled
+   * later after their network addresses and DEX paths
+   * are configured correctly.
+   */
+  if(state.rewardAsset!=="custom"){
+    throw new Error(
+      "For the current Sepolia Reward Core test, choose Custom ERC-20."
+    );
+  }
+
+  const rewardToken=$("rewardToken").value.trim();
+
+  if(!/^0x[0-9a-fA-F]{40}$/.test(rewardToken)){
+    throw new Error(
+      "Enter a valid custom ERC-20 reward contract address."
+    );
+  }
+
+  if(
+    state.customReward &&
+    state.customReward.status!=="good"
+  ){
+    throw new Error(
+      "Check and verify the custom reward token first."
+    );
+  }
+
+  const rewardBps=
+    liquidityFeeBps("holderFee");
+
+  const liquidityBps=
+    liquidityFeeBps("lpFee");
+
+  const projectBps=
+    liquidityFeeBps("projectFee");
+
+  if(
+    rewardBps+
+    liquidityBps+
+    projectBps > 1000n
+  ){
+    throw new Error(
+      "Combined Reward token tax cannot exceed 10%."
+    );
+  }
+
+  const args=encodeRewardConstructor(
+    name,
+    symbol,
+    supply,
+    state.account,
+    rewardToken,
+    rewardBps,
+    liquidityBps,
+    projectBps
+  );
+
+  return REWARD_CREATION_BYTECODE+args;
+}
+
+function buildDeploymentData(){
+  if(state.type==="standard"){
+    return buildStandardDeploymentData();
+  }
+
+  if(state.type==="liquidity"){
+    return buildLiquidityDeploymentData();
+  }
+
+  if(state.type==="reward"){
+    return buildRewardDeploymentData();
+  }
+
+  throw new Error("Unknown token type.");
+}
+
+async function deployToken(){
+  const issues=validateBasic();if(issues.length){setStatus(issues.join("<br>"),"bad");return}
+
+
+  const c=selectedChain();
+  if(c.family!=="evm"){
+    setStatus("Solana Standard Token deployment is Coming soon. Solana uses SPL Token rather than the EVM ERC-20 bytecode used by this build.","warn");
+    return;
+  }
+  if(!c.deploy){
+    setStatus(c.name+" is visible for interface testing but Standard deployment is not enabled there yet.","warn");
+    return;
+  }
+
+  if(!state.account){await connectWallet();if(!state.account)return}
+  const btn=$("deployBtn");btn.disabled=true;
+  try{
+    await ensureNetwork();
+    const chainId=await ethereum.request({method:"eth_chainId"});
+    if(chainId.toLowerCase()!==c.chainId.toLowerCase())throw new Error("Wallet is not on "+c.name+".");
+    const data=buildDeploymentData();
+    setStatus("Preparing Standard token deployment and estimating gas on "+c.name+"…","warn");
+    let gas;
+    try{gas=await ethereum.request({method:"eth_estimateGas",params:[{from:state.account,data}]})}catch(e){throw new Error("Gas estimate failed before approval: "+(e.message||e))}
+    const gasDec=parseInt(gas,16);
+    const paddedGas="0x"+Math.ceil(gasDec*1.20).toString(16);
+    setStatus(`Ready to deploy. Estimated gas: ${gasDec.toLocaleString()} units. Your wallet will now ask you to approve a ${c.name} TESTNET transaction.`,"warn");
+    const txHash=await ethereum.request({method:"eth_sendTransaction",params:[{from:state.account,data,gas:paddedGas}]});
+    setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
+    const receipt=await waitReceipt(txHash);
+    if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
+    state.lastContract=receipt.contractAddress;renderPreview();
+    setStatus(`✅ Test token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
+  }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
+  finally{btn.disabled=false}
+}
+
+function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
+function downloadConfig(){const blob=new Blob([JSON.stringify(makeConfig(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${$("symbol").value||"token"}-angry-launch-testnet.json`;a.click();URL.revokeObjectURL(a.href)}
+function copyPlan(){navigator.clipboard?.writeText($("preview").textContent).then(()=>setStatus("Deployment summary copied.","good"))}
+
+document.querySelectorAll(".network-card").forEach(card=>card.addEventListener("click",()=>{
+  const key=card.dataset.chain;
+  const next=CHAINS[key];
+  if(next?.family==="solana"){
+    setStatus("Solana Devnet has been added to the ANGRY Launch network roadmap, but it is not active yet. A professional Solana token creator needs SPL Token instructions and a Solana wallet connector, so it is not routed through the current ERC-20/MetaMask deployment code.","warn");
+    return;
+  }
+  $("chain").value=key;
+  updateChain();
+}));
+document.querySelectorAll(".reward-asset").forEach(btn=>btn.addEventListener("click",()=>{
+  state.rewardAsset=btn.dataset.reward;
+  if(state.rewardAsset==="custom"){
+    state.customReward={status:"idle",address:"",chainKey:"",meta:null,message:"Enter a custom ERC-20 contract address, then tap Check token."};
+  }
+  updateRewardUI();
+  renderPreview();
+}));
+$("validateRewardBtn")?.addEventListener("click",validateCustomRewardToken);
+$("rewardToken")?.addEventListener("blur",()=>{
+  if(state.rewardAsset==="custom" && isEvmAddress($("rewardToken").value.trim())) validateCustomRewardToken();
+});
+$("walletBtn").addEventListener("click",connectWallet);$("switchBtn").addEventListener("click",async()=>{try{await ensureNetwork();setStatus("Wallet switched to "+selectedChain().name+".","good")}catch(e){setStatus("Network switch failed: "+(e.message||e),"bad")}});$("deployBtn").addEventListener("click",deployToken);$("downloadBtn").addEventListener("click",downloadConfig);$("copyBtn").addEventListener("click",copyPlan);$("chain").addEventListener("change",updateChain);document.querySelectorAll(".type").forEach(x=>x.addEventListener("click",()=>setType(x.dataset.type)));document.addEventListener("input",renderPreview);
+if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect Wallet";$("projectWallet").value=state.account||"";renderPreview()});ethereum.on?.("chainChanged",()=>setStatus("Wallet network changed.","warn"))}
+updateChain();setType("standard");renderPreview();
+</script>
+
+
+<script id="angry-token-profile-script">
+(function(){
+
+  const PROFILE_WORKER =
+    "https://angry-nft-storage.demiandemian147.workers.dev";
+
+  let tokenLogoFile = null;
+
+  const logoInput = document.getElementById("tokenLogo");
+  const logoBtn = document.getElementById("tokenLogoBtn");
+  const logoPreview = document.getElementById("tokenLogoPreview");
+  const uploadBtn = document.getElementById("uploadTokenProfileBtn");
+  const profileStatus = document.getElementById("tokenProfileStatus");
+
+  if(!logoInput || !logoBtn || !uploadBtn) return;
+
+  function clean(value){
+    return String(value || "").trim();
+  }
+
+  function profileData(imageUri=""){
+    return {
+      name: clean(document.getElementById("name")?.value),
+      symbol: clean(document.getElementById("symbol")?.value).toUpperCase(),
+      description: clean(document.getElementById("tokenDescription")?.value),
+      image: imageUri || clean(document.getElementById("tokenImageUri")?.value),
+      website: clean(document.getElementById("tokenWebsite")?.value),
+      twitter: clean(document.getElementById("tokenX")?.value),
+      telegram: clean(document.getElementById("tokenTelegram")?.value),
+      links: {
+        website: clean(document.getElementById("tokenWebsite")?.value),
+        twitter: clean(document.getElementById("tokenX")?.value),
+        telegram: clean(document.getElementById("tokenTelegram")?.value)
+      },
+      creator: "ANGRY Token Creator",
+      network: document.getElementById("chain")?.value || ""
+    };
+  }
+
+  function validOptionalUrl(value, allowed){
+    if(!value) return true;
+
+    try{
+      const url = new URL(value);
+      if(url.protocol !== "https:" && url.protocol !== "http:"){
+        return false;
+      }
+
+      if(!allowed || !allowed.length) return true;
+
+      const host = url.hostname.toLowerCase();
+
+      return allowed.some(domain =>
+        host === domain || host.endsWith("." + domain)
+      );
+
+    }catch{
+      return false;
+    }
+  }
+
+  async function fetchRetry(url, options){
+    let last;
+
+    for(let attempt=1; attempt<=3; attempt++){
+      try{
+        const res = await fetch(url, options);
+
+        if(res.ok || (res.status < 500 && res.status !== 429)){
+          return res;
+        }
+
+        last = new Error("HTTP " + res.status);
+
+      }catch(e){
+        last = e;
+      }
+
+      if(attempt < 3){
+        profileStatus.textContent =
+          "Upload interrupted. Retrying " + (attempt+1) + "/3…";
+
+        await new Promise(r => setTimeout(r, attempt * 1000));
+      }
+    }
+
+    throw last || new Error("Upload failed.");
+  }
+
+  logoBtn.addEventListener("click", () => logoInput.click());
+
+  logoInput.addEventListener("change", () => {
+    const file = logoInput.files?.[0] || null;
+    if(!file) return;
+
+    if(!/^image\/(png|jpeg|webp|gif)$/i.test(file.type)){
+      tokenLogoFile = null;
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Use PNG, JPG, WebP or GIF.";
+      return;
+    }
+
+    /* Show preview immediately */
+    const url = URL.createObjectURL(file);
+
+    logoPreview.innerHTML = "";
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "Token logo preview";
+
+    img.onload = () => URL.revokeObjectURL(url);
+
+    logoPreview.appendChild(img);
+
+    document.getElementById("tokenImageUri").value = "";
+    document.getElementById("tokenMetadataUri").value = "";
+
+    /* Keep upload limit, but still show preview */
+    if(file.size > 5 * 1024 * 1024){
+      tokenLogoFile = null;
+
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Preview loaded, but the image is larger than 5 MB. Choose a smaller image before uploading to IPFS.";
+
+      return;
+    }
+
+    tokenLogoFile = file;
+
+    profileStatus.className = "token-profile-status good";
+    profileStatus.textContent =
+      "Image selected and ready to upload.";
+  });
+
+  uploadBtn.addEventListener("click", async () => {
+
+    const website =
+      clean(document.getElementById("tokenWebsite")?.value);
+
+    const twitter =
+      clean(document.getElementById("tokenX")?.value);
+
+    const telegram =
+      clean(document.getElementById("tokenTelegram")?.value);
+
+    if(!tokenLogoFile){
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Choose a token image first.";
+      return;
+    }
+
+    if(!validOptionalUrl(website)){
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Website URL is not valid.";
+      return;
+    }
+
+    if(!validOptionalUrl(twitter, ["x.com","twitter.com"])){
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "X link should use x.com or twitter.com.";
+      return;
+    }
+
+    if(!validOptionalUrl(telegram, ["t.me","telegram.me"])){
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Telegram link should use t.me.";
+      return;
+    }
+
+    uploadBtn.disabled = true;
+    profileStatus.className = "token-profile-status";
+    profileStatus.textContent = "Uploading token image to IPFS…";
+
+    try{
+      const fd = new FormData();
+
+      fd.append(
+        "file",
+        tokenLogoFile,
+        tokenLogoFile.name || "token-logo"
+      );
+
+      fd.append(
+        "pinataMetadata",
+        JSON.stringify({
+          name:
+            (clean(document.getElementById("symbol")?.value) ||
+             "TOKEN") + "-logo"
+        })
+      );
+
+      fd.append(
+        "pinataOptions",
+        JSON.stringify({cidVersion:1})
+      );
+
+      const imageRes = await fetchRetry(
+        PROFILE_WORKER + "/pinFileToIPFS",
+        {
+          method:"POST",
+          body:fd
+        }
+      );
+
+      const imageData =
+        await imageRes.json().catch(() => ({}));
+
+      if(!imageRes.ok || !imageData.IpfsHash){
+        throw new Error(
+          imageData.error?.details ||
+          imageData.error ||
+          imageData.message ||
+          "Token image upload failed."
+        );
+      }
+
+      const imageUri =
+        "ipfs://" + imageData.IpfsHash;
+
+      document.getElementById("tokenImageUri").value =
+        imageUri;
+
+      profileStatus.textContent =
+        "Image uploaded. Uploading token metadata…";
+
+      const content = profileData(imageUri);
+
+      const metadataBody = {
+        pinataOptions:{cidVersion:1},
+        pinataMetadata:{
+          name:
+            (
+              content.symbol ||
+              content.name ||
+              "token"
+            )
+            .replace(/[^a-z0-9._-]+/gi,"-")
+            + "-token-metadata.json"
+        },
+        pinataContent:content
+      };
+
+      const metadataRes = await fetchRetry(
+        PROFILE_WORKER + "/pinJSONToIPFS",
+        {
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify(metadataBody)
+        }
+      );
+
+      const metadataData =
+        await metadataRes.json().catch(() => ({}));
+
+      if(!metadataRes.ok || !metadataData.IpfsHash){
+        throw new Error(
+          metadataData.error?.details ||
+          metadataData.error ||
+          metadataData.message ||
+          "Token metadata upload failed."
+        );
+      }
+
+      const metadataUri =
+        "ipfs://" + metadataData.IpfsHash;
+
+      document.getElementById("tokenMetadataUri").value =
+        metadataUri;
+
+      profileStatus.className =
+        "token-profile-status good";
+
+      profileStatus.innerHTML =
+        "✓ Token profile ready on IPFS.<br>" +
+        "Image: " + imageUri + "<br>" +
+        "Metadata: " + metadataUri;
+
+      if(typeof setStatus === "function"){
+        setStatus(
+          "Token image and profile metadata uploaded to IPFS successfully.",
+          "good"
+        );
+      }
+
+    }catch(e){
+      profileStatus.className =
+        "token-profile-status bad";
+
+      profileStatus.textContent =
+        "Profile upload failed: " +
+        (e.message || e);
+
+    }finally{
+      uploadBtn.disabled = false;
+    }
+  });
+
+
+  /* --------------------------------------------------
+     Add profile information to downloaded ANGRY config
+     without changing token deployment bytecode.
+  --------------------------------------------------- */
+
+  if(typeof makeConfig === "function"){
+    const oldMakeConfig = makeConfig;
+
+    makeConfig = function(){
+      const config = oldMakeConfig();
+
+      config.profile = {
+        description:
+          clean(document.getElementById("tokenDescription")?.value),
+
+        website:
+          clean(document.getElementById("tokenWebsite")?.value),
+
+        twitter:
+          clean(document.getElementById("tokenX")?.value),
+
+        telegram:
+          clean(document.getElementById("tokenTelegram")?.value),
+
+        imageUri:
+          clean(document.getElementById("tokenImageUri")?.value),
+
+        metadataUri:
+          clean(document.getElementById("tokenMetadataUri")?.value)
+      };
+
+      return config;
+    };
+  }
+
+})();
+</script>
+
+<script id="angry-unified-mobile-header-script-v4">
+(function(){
+
+  const bar=document.querySelector(".angry-globalbar");
+  if(!bar) return;
+
+  const nav=bar.querySelector(".angry-globalnav");
+
+  let menu=bar.querySelector(".angry-mobile-menu-btn");
+
+  if(!menu){
+    menu=document.createElement("button");
+    menu.type="button";
+    menu.className="angry-mobile-menu-btn";
+    menu.textContent="☰";
+    menu.setAttribute("aria-label","Menu");
+    menu.setAttribute("aria-expanded","false");
+    bar.appendChild(menu);
+  }
+
+  const wallet=document.getElementById("walletBtn");
+
+  const walletHome=wallet ? {
+    parent:wallet.parentNode,
+    next:wallet.nextSibling
+  } : null;
+
+
+  /* Tandai header kedua, jangan hapus */
+  document.querySelectorAll(".topbar").forEach(el=>{
+    if(el !== bar && !bar.contains(el)){
+      el.classList.add("angry-mobile-duplicate-header");
+    }
+  });
+
+
+  /* Tracker duplicate header */
+  document.querySelectorAll("header,nav,section,div").forEach(el=>{
+    if(el===bar || bar.contains(el)) return;
+
+    const txt=(el.textContent||"")
+      .replace(/\s+/g," ")
+      .trim()
+      .toUpperCase();
+
+    if(
+      txt.includes("ANGRY TRACKER") &&
+      el.querySelector("button") &&
+      txt.length < 100
+    ){
+      el.classList.add("angry-mobile-duplicate-header");
+    }
+  });
+
+
+  menu.addEventListener("click",()=>{
+    const open=bar.classList.toggle("angry-menu-open");
+
+    menu.textContent=open ? "×" : "☰";
+
+    menu.setAttribute(
+      "aria-expanded",
+      open ? "true" : "false"
+    );
+  });
+
+
+  if(nav){
+    nav.querySelectorAll("a").forEach(a=>{
+      a.addEventListener("click",()=>{
+        bar.classList.remove("angry-menu-open");
+        menu.textContent="☰";
+        menu.setAttribute("aria-expanded","false");
+      });
+    });
+  }
+
+
+  function apply(){
+
+    const mobile=window.matchMedia("(max-width:760px)").matches;
+
+    if(mobile){
+
+      if(wallet && wallet.parentNode !== bar){
+        bar.insertBefore(wallet,menu);
+      }
+
+    }else{
+
+      bar.classList.remove("angry-menu-open");
+      menu.textContent="☰";
+
+      if(wallet && walletHome && walletHome.parent){
+
+        if(
+          walletHome.next &&
+          walletHome.next.parentNode===walletHome.parent
+        ){
+          walletHome.parent.insertBefore(wallet,walletHome.next);
+        }else{
+          walletHome.parent.appendChild(wallet);
+        }
+      }
+    }
+  }
+
+  apply();
+  window.addEventListener("resize",apply);
+
+})();
+</script>
+
+
+<script id="angry-zero-liquidity-defaults">
+(function(){
+
+  function resetLiquidityDefaults(){
+    const defaults = {
+      holderFee: "0",
+      lpFee: "0",
+      projectFee: "0",
+      burnFee: "0"
+    };
+
+    Object.entries(defaults).forEach(([id,value])=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+
+      el.value = value;
+      el.dispatchEvent(new Event("input", {bubbles:true}));
+      el.dispatchEvent(new Event("change", {bubbles:true}));
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", ()=>{
+    resetLiquidityDefaults();
+
+    document.querySelectorAll(
+      '[data-type="liquidity"],[data-contract="liquidity"],[data-token-type="liquidity"]'
+    ).forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        setTimeout(resetLiquidityDefaults, 0);
+        setTimeout(resetLiquidityDefaults, 50);
+      });
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
