@@ -87,6 +87,52 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 .network-badge{position:absolute;top:5px;right:5px;border:1px solid rgba(242,184,75,.28);background:rgba(242,184,75,.06);color:#d7b873;border-radius:999px;padding:2px 5px;font-size:6px!important;font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:.03em}
 .mini-chain-dot.robinhoodTestnet{background:#2a8d62}.mini-chain-dot.solanaDevnet{background:#8a4dff}
 
+
+/* ANGRY Liquidity Setup */
+.liquidity-setup{
+  margin-top:12px;
+  border:1px solid #2b3137;
+  border-radius:12px;
+  background:#0b0d0f;
+  overflow:hidden;
+}
+.liquidity-setup[hidden]{display:none!important}
+.liquidity-setup-head{
+  padding:12px;
+  border-bottom:1px solid #22282e;
+}
+.liquidity-setup-head b{
+  display:block;
+  font-size:12px;
+  color:#f2f4f5;
+}
+.liquidity-setup-head span{
+  display:block;
+  margin-top:4px;
+  font-size:9px;
+  line-height:1.45;
+  color:#7f888f;
+}
+.liquidity-setup-body{padding:11px}
+.liquidity-setup-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:8px 0;
+  border-bottom:1px solid #1d2227;
+  font-size:9.5px;
+}
+.liquidity-setup-row:last-of-type{border-bottom:0}
+.liquidity-setup-row span{color:#7f888f}
+.liquidity-setup-row strong{
+  color:#e6e9eb;
+  text-align:right;
+  word-break:break-word;
+}
+.liquidity-pool-good{color:#80d898!important}
+.liquidity-pool-missing{color:#d7b97e!important}
+
 </style>
 <link rel="stylesheet" href="../assets/ecosystem.css">
 
@@ -1108,6 +1154,41 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
         <div id="preview" class="preview-list"></div>
         <div class="deploy-note"><b>Testnet deployment.</b> Review the settings below, then confirm the deployment in your wallet.</div>
         <button class="btn primary" id="deployBtn" type="button">Create Test Token</button>
+
+        <div class="liquidity-setup" id="liquiditySetupPanel" hidden>
+          <div class="liquidity-setup-head">
+            <b>Liquidity Setup</b>
+            <span>Liquidity fee remains OFF until a valid DEX pool is found, configured and activated.</span>
+          </div>
+
+          <div class="liquidity-setup-body">
+            <div class="liquidity-setup-row">
+              <span>DEX</span>
+              <strong id="liquidityDexName">—</strong>
+            </div>
+
+            <div class="liquidity-setup-row">
+              <span>Token</span>
+              <strong id="liquidityTokenAddress">—</strong>
+            </div>
+
+            <div class="liquidity-setup-row">
+              <span>Pool</span>
+              <strong id="liquidityPoolAddress">Not detected</strong>
+            </div>
+
+            <button
+              class="btn secondary"
+              id="checkLiquidityPoolBtn"
+              type="button"
+            >Check Pool</button>
+
+            <div class="status" id="liquiditySetupStatus">
+              Ready to check the DEX pool.
+            </div>
+          </div>
+        </div>
+
         <div class="micro-actions"><button class="btn secondary" id="downloadBtn" type="button">Download config</button><button class="btn secondary" id="copyBtn" type="button">Copy summary</button></div>
         <div id="status" class="status">Ready. Connect an EVM wallet, select Ethereum Sepolia, Base Sepolia or Robinhood Chain Testnet, then deploy a Standard test token.</div>
       </div>
@@ -1133,7 +1214,7 @@ const CHAINS = {
   polygonAmoy:{name:"Polygon Amoy",family:"evm",chainId:"0x13882",chainIdDec:80002,native:"POL",nativeSymbol:"POL",rpc:"https://rpc-amoy.polygon.technology",explorer:"https://amoy.polygonscan.com",deploy:false},
   solanaDevnet:{name:"Solana Devnet",family:"solana",chainId:null,chainIdDec:null,native:"SOL",nativeSymbol:"SOL",rpc:"https://api.devnet.solana.com",explorer:"https://explorer.solana.com/?cluster=devnet",deploy:false}
 };
-const state={type:"standard",rewardAsset:"usdt",customReward:{status:"idle",address:"",chainKey:"",meta:null,message:""},account:null,lastContract:null};
+const state={type:"standard",rewardAsset:"usdt",customReward:{status:"idle",address:"",chainKey:"",meta:null,message:""},account:null,lastContract:null,lastContractChain:null,lastContractType:null,liquiditySetup:{pair:null,status:"idle"}};
 
 function setStatus(text,kind=""){
   const s=$("status"); s.className="status"+(kind?" "+kind:""); s.innerHTML=text;
@@ -1142,6 +1223,314 @@ function n(id){const v=parseFloat($(id)?.value||"0");return Number.isFinite(v)?v
 function calcFees(){if(state.type==="standard")return 0;return n("holderFee")+n("lpFee")+n("projectFee")+n("burnFee")}
 function feeStatus(){const t=calcFees();$("totalFee").textContent=(Math.round(t*100)/100)+"%";$("totalFee").className="total "+(t<=1?"good":t<=2?"warn":"bad");$("feeMessage").textContent=t<=1?"Low-fee target.":t<=2?"Moderate fee.":"High fee — review before future deployment."}
 function selectedChain(){return CHAINS[$("chain").value]}
+
+const LIQUIDITY_DEX_CONFIG = {
+  sepolia:{
+    name:"Uniswap V2",
+    router:"0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3",
+    factory:"0xF62c03E08ada871A0bEb309762E260a7a6a880E6",
+    wrappedNative:"0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+    wrappedSymbol:"WETH"
+  }
+};
+
+function liquidityDexConfig(){
+  return LIQUIDITY_DEX_CONFIG[$("chain").value] || null;
+}
+
+function setLiquiditySetupStatus(text,kind=""){
+  const box=$("liquiditySetupStatus");
+  if(!box)return;
+  box.className="status"+(kind?" "+kind:"");
+  box.textContent=text;
+}
+
+function renderLiquiditySetup(){
+  const panel=$("liquiditySetupPanel");
+  if(!panel)return;
+
+  const sameDeployment =
+    state.lastContract &&
+    state.lastContractType==="liquidity" &&
+    state.lastContractChain===$("chain").value;
+
+  const liquidityEnabled=n("lpFee")>0;
+
+  const visible=
+    state.type==="liquidity" &&
+    sameDeployment &&
+    liquidityEnabled;
+
+  panel.hidden=!visible;
+  if(!visible)return;
+
+  const cfg=liquidityDexConfig();
+
+  $("liquidityDexName").textContent=
+    cfg ? cfg.name : "Not supported";
+
+  $("liquidityTokenAddress").textContent=
+    shortAddress(state.lastContract);
+
+  const pool=$("liquidityPoolAddress");
+
+  if(state.liquiditySetup.pair){
+    pool.textContent=shortAddress(state.liquiditySetup.pair);
+    pool.className="liquidity-pool-good";
+  }else{
+    pool.textContent=
+      state.liquiditySetup.status==="missing"
+        ? "Not created"
+        : "Not detected";
+
+    pool.className=
+      state.liquiditySetup.status==="missing"
+        ? "liquidity-pool-missing"
+        : "";
+  }
+
+  const btn=$("checkLiquidityPoolBtn");
+  if(btn)btn.disabled=!cfg;
+
+  if(!cfg){
+    setLiquiditySetupStatus(
+      "DEX liquidity setup is not enabled for this network yet.",
+      "warn"
+    );
+  }
+}
+
+function addressWord(address){
+  const clean=String(address||"")
+    .toLowerCase()
+    .replace(/^0x/,"");
+
+  if(!/^[0-9a-f]{40}$/.test(clean)){
+    throw new Error("Invalid EVM address");
+  }
+
+  return clean.padStart(64,"0");
+}
+
+function decodeAddressWord(data){
+  const clean=String(data||"").replace(/^0x/,"");
+
+  if(clean.length<64){
+    throw new Error("Invalid address response");
+  }
+
+  return "0x"+clean.slice(-40);
+}
+
+async function liquidityEthCall(to,data){
+  return ethereum.request({
+    method:"eth_call",
+    params:[
+      {to,data},
+      "latest"
+    ]
+  });
+}
+
+async function checkLiquidityPool(){
+  const btn=$("checkLiquidityPoolBtn");
+
+  try{
+    if(!window.ethereum){
+      throw new Error("EVM wallet not available.");
+    }
+
+    if(
+      !state.lastContract ||
+      state.lastContractType!=="liquidity"
+    ){
+      throw new Error("Deploy a Liquidity token first.");
+    }
+
+    const cfg=liquidityDexConfig();
+
+    if(!cfg){
+      throw new Error(
+        "Liquidity setup is not enabled for this network yet."
+      );
+    }
+
+    btn.disabled=true;
+    btn.textContent="Checking…";
+
+    setLiquiditySetupStatus(
+      "Checking DEX router, factory and TOKEN / "+
+      cfg.wrappedSymbol+" pool…",
+      "warn"
+    );
+
+    await ensureNetwork();
+
+    const c=selectedChain();
+
+    const chainId=await ethereum.request({
+      method:"eth_chainId"
+    });
+
+    if(chainId.toLowerCase()!==c.chainId.toLowerCase()){
+      throw new Error("Wallet is not on "+c.name+".");
+    }
+
+    // Router.factory()
+    const routerFactory=decodeAddressWord(
+      await liquidityEthCall(
+        cfg.router,
+        "0xc45a0155"
+      )
+    );
+
+    if(
+      routerFactory.toLowerCase()!==
+      cfg.factory.toLowerCase()
+    ){
+      throw new Error("DEX router factory mismatch.");
+    }
+
+    // Router.WETH()
+    const routerWrapped=decodeAddressWord(
+      await liquidityEthCall(
+        cfg.router,
+        "0xad5c4648"
+      )
+    );
+
+    if(
+      routerWrapped.toLowerCase()!==
+      cfg.wrappedNative.toLowerCase()
+    ){
+      throw new Error("DEX wrapped native mismatch.");
+    }
+
+    // Factory.getPair(token, WETH)
+    const getPairData=
+      "0xe6a43905"+
+      addressWord(state.lastContract)+
+      addressWord(cfg.wrappedNative);
+
+    const pair=decodeAddressWord(
+      await liquidityEthCall(
+        cfg.factory,
+        getPairData
+      )
+    );
+
+    const ZERO="0x0000000000000000000000000000000000000000";
+
+    if(pair.toLowerCase()===ZERO){
+      state.liquiditySetup={
+        pair:null,
+        status:"missing"
+      };
+
+      renderLiquiditySetup();
+
+      setLiquiditySetupStatus(
+        "No TOKEN / "+cfg.wrappedSymbol+
+        " pool exists yet. Liquidity fee remains OFF.",
+        "warn"
+      );
+
+      return;
+    }
+
+    const code=await ethereum.request({
+      method:"eth_getCode",
+      params:[pair,"latest"]
+    });
+
+    if(!code || code==="0x"){
+      throw new Error("Pool address has no contract code.");
+    }
+
+    // Pair.factory()
+    const pairFactory=decodeAddressWord(
+      await liquidityEthCall(
+        pair,
+        "0xc45a0155"
+      )
+    );
+
+    if(
+      pairFactory.toLowerCase()!==
+      cfg.factory.toLowerCase()
+    ){
+      throw new Error("Pool factory mismatch.");
+    }
+
+    // Pair.token0()
+    const token0=decodeAddressWord(
+      await liquidityEthCall(
+        pair,
+        "0x0dfe1681"
+      )
+    );
+
+    // Pair.token1()
+    const token1=decodeAddressWord(
+      await liquidityEthCall(
+        pair,
+        "0xd21220a7"
+      )
+    );
+
+    const token=state.lastContract.toLowerCase();
+    const wrapped=cfg.wrappedNative.toLowerCase();
+
+    const validPair=
+      (
+        token0.toLowerCase()===token &&
+        token1.toLowerCase()===wrapped
+      ) ||
+      (
+        token1.toLowerCase()===token &&
+        token0.toLowerCase()===wrapped
+      );
+
+    if(!validPair){
+      throw new Error(
+        "Pool does not contain this token and "+
+        cfg.wrappedSymbol+"."
+      );
+    }
+
+    state.liquiditySetup={
+      pair,
+      status:"good"
+    };
+
+    renderLiquiditySetup();
+
+    setLiquiditySetupStatus(
+      "Pool verified. TOKEN / "+
+      cfg.wrappedSymbol+
+      " is registered in "+cfg.name+".",
+      "good"
+    );
+
+  }catch(e){
+    state.liquiditySetup={
+      pair:null,
+      status:"error"
+    };
+
+    renderLiquiditySetup();
+
+    setLiquiditySetupStatus(
+      "Pool check failed: "+(e.message||e),
+      "bad"
+    );
+
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Check Pool";
+  }
+}
+
 function isEvmAddress(value){
   return /^0x[a-fA-F0-9]{40}$/.test(String(value||"").trim());
 }
@@ -1819,7 +2208,12 @@ async function deployToken(){
     setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
-    state.lastContract=receipt.contractAddress;renderPreview();
+    state.lastContract=receipt.contractAddress;
+    state.lastContractChain=$("chain").value;
+    state.lastContractType=state.type;
+    state.liquiditySetup={pair:null,status:"idle"};
+    renderPreview();
+    renderLiquiditySetup();
     setStatus(`✅ Test token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
   }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
   finally{btn.disabled=false}
@@ -1853,6 +2247,42 @@ $("rewardToken")?.addEventListener("blur",()=>{
 });
 $("walletBtn").addEventListener("click",connectWallet);$("switchBtn").addEventListener("click",async()=>{try{await ensureNetwork();setStatus("Wallet switched to "+selectedChain().name+".","good")}catch(e){setStatus("Network switch failed: "+(e.message||e),"bad")}});$("deployBtn").addEventListener("click",deployToken);$("downloadBtn").addEventListener("click",downloadConfig);$("copyBtn").addEventListener("click",copyPlan);$("chain").addEventListener("change",updateChain);document.querySelectorAll(".type").forEach(x=>x.addEventListener("click",()=>setType(x.dataset.type)));document.addEventListener("input",renderPreview);
 if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect Wallet";$("projectWallet").value=state.account||"";renderPreview()});ethereum.on?.("chainChanged",()=>setStatus("Wallet network changed.","warn"))}
+
+$("checkLiquidityPoolBtn")?.addEventListener(
+  "click",
+  checkLiquidityPool
+);
+
+$("chain")?.addEventListener(
+  "change",
+  ()=>{
+    state.liquiditySetup={pair:null,status:"idle"};
+    renderLiquiditySetup();
+  }
+);
+
+document.querySelectorAll(".network-card").forEach(
+  card=>card.addEventListener(
+    "click",
+    ()=>setTimeout(()=>{
+      state.liquiditySetup={pair:null,status:"idle"};
+      renderLiquiditySetup();
+    },0)
+  )
+);
+
+document.querySelectorAll(".type").forEach(
+  card=>card.addEventListener(
+    "click",
+    ()=>setTimeout(renderLiquiditySetup,0)
+  )
+);
+
+$("lpFee")?.addEventListener(
+  "input",
+  renderLiquiditySetup
+);
+
 updateChain();setType("standard");renderPreview();
 </script>
 
