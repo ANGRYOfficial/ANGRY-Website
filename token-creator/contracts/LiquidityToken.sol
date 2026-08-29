@@ -29,6 +29,18 @@ contract AngryLiquidityTokenTest {
 
     address public immutable projectWallet;
 
+    // Liquidity destination.
+    // The planned liquidity fee stays inactive until a valid
+    // destination has been configured and explicitly activated.
+    address public dexRouter;
+    address public dexFactory;
+    address public liquidityPair;
+    address public wrappedNative;
+
+    bool public liquidityConfigured;
+    bool public liquidityActive;
+    bool public liquidityDestinationLocked;
+
     // 100 basis points = 1%
     uint16 public immutable holderFeeBps;
     uint16 public immutable liquidityFeeBps;
@@ -57,6 +69,21 @@ contract AngryLiquidityTokenTest {
         uint256 liquidityAmount,
         uint256 projectAmount,
         uint256 burnAmount
+    );
+
+    event LiquidityDestinationConfigured(
+        address indexed router,
+        address indexed factory,
+        address indexed pair,
+        address wrappedNative
+    );
+
+    event LiquidityReserveActivated(
+        address indexed pair
+    );
+
+    event LiquidityReserveDeactivated(
+        address indexed pair
     );
 
     constructor(
@@ -110,6 +137,118 @@ contract AngryLiquidityTokenTest {
             address(0),
             msg.sender,
             _totalSupply
+        );
+    }
+
+    modifier onlyProjectWallet() {
+        require(
+            msg.sender == projectWallet,
+            "Only project wallet"
+        );
+        _;
+    }
+
+    function configureLiquidityDestination(
+        address router_,
+        address factory_,
+        address pair_,
+        address wrappedNative_
+    )
+        external
+        onlyProjectWallet
+    {
+        require(
+            liquidityFeeBps > 0,
+            "Liquidity fee disabled"
+        );
+
+        require(
+            !liquidityDestinationLocked,
+            "Liquidity destination locked"
+        );
+
+        require(router_ != address(0), "Router required");
+        require(factory_ != address(0), "Factory required");
+        require(pair_ != address(0), "Pair required");
+        require(
+            wrappedNative_ != address(0),
+            "Wrapped native required"
+        );
+
+        require(
+            router_.code.length > 0,
+            "Router must be contract"
+        );
+
+        require(
+            factory_.code.length > 0,
+            "Factory must be contract"
+        );
+
+        require(
+            pair_.code.length > 0,
+            "Pair must be contract"
+        );
+
+        require(
+            wrappedNative_.code.length > 0,
+            "Wrapped native must be contract"
+        );
+
+        dexRouter = router_;
+        dexFactory = factory_;
+        liquidityPair = pair_;
+        wrappedNative = wrappedNative_;
+
+        liquidityConfigured = true;
+        liquidityActive = false;
+
+        emit LiquidityDestinationConfigured(
+            router_,
+            factory_,
+            pair_,
+            wrappedNative_
+        );
+    }
+
+    function activateLiquidityReserve()
+        external
+        onlyProjectWallet
+    {
+        require(
+            liquidityFeeBps > 0,
+            "Liquidity fee disabled"
+        );
+
+        require(
+            liquidityConfigured,
+            "Liquidity not configured"
+        );
+
+        require(
+            liquidityPair != address(0),
+            "Liquidity pair required"
+        );
+
+        liquidityActive = true;
+
+        // Once activated for the first time the destination
+        // can no longer be silently changed.
+        liquidityDestinationLocked = true;
+
+        emit LiquidityReserveActivated(
+            liquidityPair
+        );
+    }
+
+    function deactivateLiquidityReserve()
+        external
+        onlyProjectWallet
+    {
+        liquidityActive = false;
+
+        emit LiquidityReserveDeactivated(
+            liquidityPair
         );
     }
 
@@ -237,8 +376,25 @@ contract AngryLiquidityTokenTest {
     {
         return
             uint256(holderFeeBps) +
+            (
+                liquidityActive
+                    ? uint256(liquidityFeeBps)
+                    : uint256(0)
+            ) +
+            uint256(projectFeeBps) +
+            uint256(burnFeeBps);
+    }
+
+    function plannedTotalFeeBps()
+        external
+        view
+        returns (uint256)
+    {
+        return
+            uint256(holderFeeBps) +
             uint256(liquidityFeeBps) +
-            uint256(projectFeeBps);
+            uint256(projectFeeBps) +
+            uint256(burnFeeBps);
     }
 
     function _transfer(
@@ -256,8 +412,17 @@ contract AngryLiquidityTokenTest {
         uint256 holderAmount =
             amount * holderFeeBps / 10000;
 
-        uint256 liquidityAmount =
-            amount * liquidityFeeBps / 10000;
+        uint256 liquidityAmount = 0;
+
+        // Liquidity fee is never collected before the
+        // creator has configured and activated the destination.
+        if (
+            liquidityActive &&
+            liquidityFeeBps > 0
+        ) {
+            liquidityAmount =
+                amount * liquidityFeeBps / 10000;
+        }
 
         uint256 projectAmount =
             amount * projectFeeBps / 10000;
