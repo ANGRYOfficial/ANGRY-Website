@@ -950,7 +950,7 @@ Do not present individual numbering controls as if each copy were unique.
           </div>
           <div class="field">
             <label id="supplyLabel">Supply</label>
-            <input id="supply" type="number" min="1" value="0">
+            <input id="supply" type="number" min="1" value="1">
             <div class="help" id="supplyHelp">Single NFT = exactly 1.</div>
           </div>
           <div class="field" id="mintPriceField">
@@ -965,7 +965,7 @@ Do not present individual numbering controls as if each copy were unique.
           </div>
           <div class="field" id="royaltyField">
             <label>Royalty (%)</label>
-            <input id="royalty" type="number" min="0" max="10" step="0.1" value="0">
+            <input id="royalty" type="number" min="0" max="10" step="0.1" value="2.5">
             <div class="help">Allowed range: 0–10%. Marketplace royalty enforcement can differ.</div>
           </div>
           <div class="field" id="recipientField">
@@ -1684,8 +1684,8 @@ function showOnlyPurposeSettings(){
 function applyPurposeDefaults(){
   const supply=$("supply"), max=$("maxWallet"), price=$("mintPrice");
   if(state.purpose==="artwork"){supply.value=1;max.value=1;}
-  if(state.purpose==="collection"){if(+supply.value<2)supply.value=0;if(+max.value<1||+max.value>+supply.value)max.value=2;}
-  if(state.purpose==="editions"){if(+supply.value<2||+supply.value>10000)supply.value=0;max.value=Math.min(5,+supply.value);}
+  if(state.purpose==="collection"){if(+supply.value<2)supply.value=100;if(+max.value<1||+max.value>+supply.value)max.value=2;}
+  if(state.purpose==="editions"){if(+supply.value<2||+supply.value>10000)supply.value=100;max.value=Math.min(5,+supply.value);}
   if(state.purpose==="tickets"){supply.value=500;max.value=4;price.value=0;$("royalty").value=0;}
   if(state.purpose==="membership"){supply.value=100;max.value=1;}
   if(state.purpose==="certificate"){supply.value=100;max.value=1;price.value=0;$("royalty").value=0;}

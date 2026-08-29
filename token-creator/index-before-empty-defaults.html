@@ -891,9 +891,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="step">03</div>
           <div><div class="section-title">Token details</div><div class="section-sub">Set the basic token information.</div></div>
           <div class="form-grid">
-            <div class="field"><label for="name">Token name</label><input id="name" value="" maxlength="40" autocomplete="off"></div>
-            <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="" maxlength="10" autocomplete="off"></div>
-            <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="0" min="1" step="1"></div>
+            <div class="field"><label for="name">Token name</label><input id="name" value="ANGRY Test" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="ANGT" maxlength="10" autocomplete="off"></div>
+            <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="1000000" min="1" step="1"></div>
             <div class="field"><label>Decimals</label><input value="18" readonly></div>
             <div class="field-help">The Standard beta mints the full supply once to the deployer wallet.</div>
 
@@ -2311,44 +2311,6 @@ updateChain();setType("standard");renderPreview();
 
   apply();
   window.addEventListener("resize",apply);
-
-})();
-</script>
-
-
-<script id="angry-zero-liquidity-defaults">
-(function(){
-
-  function resetLiquidityDefaults(){
-    const defaults = {
-      holderFee: "0",
-      lpFee: "0",
-      projectFee: "0",
-      burnFee: "0"
-    };
-
-    Object.entries(defaults).forEach(([id,value])=>{
-      const el = document.getElementById(id);
-      if(!el) return;
-
-      el.value = value;
-      el.dispatchEvent(new Event("input", {bubbles:true}));
-      el.dispatchEvent(new Event("change", {bubbles:true}));
-    });
-  }
-
-  window.addEventListener("DOMContentLoaded", ()=>{
-    resetLiquidityDefaults();
-
-    document.querySelectorAll(
-      '[data-type="liquidity"],[data-contract="liquidity"],[data-token-type="liquidity"]'
-    ).forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        setTimeout(resetLiquidityDefaults, 0);
-        setTimeout(resetLiquidityDefaults, 50);
-      });
-    });
-  });
 
 })();
 </script>

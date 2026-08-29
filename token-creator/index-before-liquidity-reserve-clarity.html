@@ -753,51 +753,6 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 }
 </style>
 
-
-<style id="angry-liquidity-reserve-clarity">
-.liquidity-reserve-notice{
-  grid-column:3;
-  margin-top:10px;
-  padding:11px;
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  border:1px solid rgba(242,184,75,.25);
-  border-radius:11px;
-  background:rgba(242,184,75,.035);
-}
-.liquidity-reserve-icon{
-  width:28px;
-  height:28px;
-  min-width:28px;
-  border-radius:8px;
-  display:grid;
-  place-items:center;
-  background:rgba(242,184,75,.09);
-  border:1px solid rgba(242,184,75,.24);
-  color:#f2b84b;
-  font-size:11px;
-  font-weight:900;
-}
-.liquidity-reserve-notice b{
-  display:block;
-  color:#e8d4aa;
-  font-size:10px;
-}
-.liquidity-reserve-notice span{
-  display:block;
-  margin-top:3px;
-  color:#978c76;
-  font-size:8.8px;
-  line-height:1.45;
-}
-@media(max-width:640px){
-  .liquidity-reserve-notice{
-    grid-column:1/-1;
-  }
-}
-</style>
-
 </head>
 <body>
 
@@ -891,9 +846,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="step">03</div>
           <div><div class="section-title">Token details</div><div class="section-sub">Set the basic token information.</div></div>
           <div class="form-grid">
-            <div class="field"><label for="name">Token name</label><input id="name" value="" maxlength="40" autocomplete="off"></div>
-            <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="" maxlength="10" autocomplete="off"></div>
-            <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="0" min="1" step="1"></div>
+            <div class="field"><label for="name">Token name</label><input id="name" value="ANGRY Test" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="ANGT" maxlength="10" autocomplete="off"></div>
+            <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="1000000" min="1" step="1"></div>
             <div class="field"><label>Decimals</label><input value="18" readonly></div>
             <div class="field-help">The Standard beta mints the full supply once to the deployer wallet.</div>
 
@@ -990,9 +945,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
             </div>
 
             <div class="field">
-              <label for="lpFee">Liquidity Reserve (%)</label>
+              <label for="lpFee">Auto Liquidity (%)</label>
               <input id="lpFee" type="number" value="0.4" min="0" max="5" step="0.1">
-              <div class="mini-help">Collected inside the token contract. A supported DEX and active liquidity pool must be configured before automatic liquidity can operate.</div>
+              <div class="mini-help">Reserved for automatic liquidity mechanics.</div>
             </div>
 
             <div class="field">
@@ -1076,19 +1031,6 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
               </div>
             </div>
           </div>
-
-
-<div id="liquidityReserveNotice" class="liquidity-reserve-notice">
-  <div class="liquidity-reserve-icon">L</div>
-  <div>
-    <b>Liquidity reserve only</b>
-    <span>
-      The liquidity fee is currently held by the token contract.
-      It is not sent to Uniswap, PancakeSwap or another DEX automatically.
-      DEX routing will be enabled only after a supported destination and active pool are configured.
-    </span>
-  </div>
-</div>
 
           <div class="feeBox">
             <div class="feeLine">
@@ -1364,8 +1306,8 @@ function updateFeeModeUI(){
   if(state.type==="liquidity"){
     if(label)label.textContent="Holder Reflection (%)";
     if(help)help.textContent="Distributed to eligible holders in the token itself.";
-    if(title)title.textContent="Liquidity reserve rules";
-    if(sub)sub.textContent="Plan reflection, liquidity reserve, true burn and creator allocation."
+    if(title)title.textContent="Liquidity fee rules";
+    if(sub)sub.textContent="Plan reflection, automatic liquidity, true burn and creator allocation.";
   }else if(state.type==="reward"){
     if(label)label.textContent="Reward Distribution (%)";
     if(help)help.textContent="Used to generate the selected reward asset for eligible holders.";
@@ -1405,7 +1347,7 @@ function validateBasic(){const issues=[];const name=$("name").value.trim(),symbo
 function renderPreview(){
   feeStatus();
   const c=selectedChain();
-  const typeNames={standard:"Standard Token",liquidity:"Liquidity Fee Token",reward:"Reward Token"};
+  const typeNames={standard:"Standard Token",liquidity:"Liquidity Generator",reward:"Reward Token"};
   const name=$("name").value||"—", symbol=$("symbol").value||"—", supply=$("supply").value||"—";
   const shortOwner=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Not connected";
   let rows=[
@@ -1422,9 +1364,9 @@ function renderPreview(){
     rows.push(["Mintable","No"],["Token tax","0%"],["Admin controls","No"]);
   }else{
     if(state.type==="liquidity"){
-      rows.push(["Holder Reflection",n("holderFee")+"%"],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Burn",n("burnFee")+"%"],["Planned tax",calcFees()+"%"]);
+      rows.push(["Holder Reflection",n("holderFee")+"%"],["Auto liquidity",n("lpFee")+"%"],["Project / Creator",n("projectFee")+"%"],["Burn",n("burnFee")+"%"],["Planned tax",calcFees()+"%"]);
     }else{
-      rows.push(["Reward Distribution",n("holderFee")+"%"],["Reward asset",rewardAssetLabel()],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
+      rows.push(["Reward Distribution",n("holderFee")+"%"],["Reward asset",rewardAssetLabel()],["Auto liquidity",n("lpFee")+"%"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
       if(state.rewardAsset==="custom"){
         const customAddress=$("rewardToken").value.trim();
         rows.push(["Custom reward contract",customAddress||"Not entered"]);
@@ -2311,44 +2253,6 @@ updateChain();setType("standard");renderPreview();
 
   apply();
   window.addEventListener("resize",apply);
-
-})();
-</script>
-
-
-<script id="angry-zero-liquidity-defaults">
-(function(){
-
-  function resetLiquidityDefaults(){
-    const defaults = {
-      holderFee: "0",
-      lpFee: "0",
-      projectFee: "0",
-      burnFee: "0"
-    };
-
-    Object.entries(defaults).forEach(([id,value])=>{
-      const el = document.getElementById(id);
-      if(!el) return;
-
-      el.value = value;
-      el.dispatchEvent(new Event("input", {bubbles:true}));
-      el.dispatchEvent(new Event("change", {bubbles:true}));
-    });
-  }
-
-  window.addEventListener("DOMContentLoaded", ()=>{
-    resetLiquidityDefaults();
-
-    document.querySelectorAll(
-      '[data-type="liquidity"],[data-contract="liquidity"],[data-token-type="liquidity"]'
-    ).forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        setTimeout(resetLiquidityDefaults, 0);
-        setTimeout(resetLiquidityDefaults, 50);
-      });
-    });
-  });
 
 })();
 </script>
