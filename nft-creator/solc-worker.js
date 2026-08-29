@@ -205,6 +205,7 @@ self.addEventListener("message",async(event)=>{
       },
       settings:{
         optimizer:{enabled:true,runs:200},
+        viaIR:action==="compileCollection",
         evmVersion:"prague",
         outputSelection:{
           "*":{

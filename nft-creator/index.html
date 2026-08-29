@@ -510,6 +510,7 @@ textarea::placeholder{
 Keep these fields in the DOM for existing JS,
 but do not present unsupported sale controls to users.
 */
+
 /* 1 of 1 already explains itself through the selected NFT type */
 #artworkSettings{
   display:none !important;
@@ -765,6 +766,30 @@ Do not present individual numbering controls as if each copy were unique.
 
 </style>
 
+
+<style id="angry-collection-role-ui-v1">
+.collection-access-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.collection-access-head small{display:block;color:var(--muted,#9ca3af);margin-top:4px;line-height:1.5}
+.collection-role-tabs{display:flex;gap:8px;margin:12px 0 10px;overflow-x:auto;padding-bottom:2px}
+.collection-role-tab{border:1px solid #30343a;background:#111418;color:#d7dbe0;border-radius:12px;padding:10px 13px;font-weight:800;white-space:nowrap;cursor:pointer}
+.collection-role-tab.active{border-color:#ff5a24;background:rgba(255,90,36,.12);color:#fff}
+.collection-role-card{border:1px solid #2a2f35;border-radius:16px;padding:14px;background:#0b0e11;margin-top:10px}
+.collection-role-card.public{border-color:#264b35;background:#0b120e}
+.collection-role-card.creator{border-color:#5a3a22;background:#120d09}
+.collection-role-card.admin{border-color:#49345f;background:#100c14}
+.collection-role-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.collection-role-title b{font-size:16px}
+.collection-role-badge{font-size:11px;font-weight:900;letter-spacing:.04em;padding:5px 8px;border-radius:999px;border:1px solid #353a40;color:#cfd3d8}
+.collection-public-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.collection-stat{border:1px solid #272c32;border-radius:12px;padding:10px;background:#0d1014}
+.collection-stat small{display:block;color:#8d949d;margin-bottom:4px}
+.collection-stat strong{font-size:15px}
+.collection-role-help{font-size:12px;color:#9da4ad;line-height:1.5;margin-top:7px}
+.collection-owner-only-note{font-size:12px;color:#f0b98f;line-height:1.5;margin:8px 0}
+.collection-admin-note{font-size:12px;color:#c8acd9;line-height:1.5;margin:8px 0}
+@media(max-width:560px){.collection-public-stats{grid-template-columns:1fr 1fr}.collection-role-card{padding:12px}.collection-role-tab{padding:9px 11px;font-size:12px}}
+</style>
+
 </head>
 <body>
 
@@ -900,7 +925,7 @@ Do not present individual numbering controls as if each copy were unique.
             <div class="bulk-actions">
               <button type="button" class="mini-btn primary-mini" id="addOneBtn">Add 1 image</button>
               <label class="native-multi-wrap">
-                <span class="mini-btn native-multi-label">Add up to 10</span>
+                <span class="mini-btn native-multi-label">Select multiple</span>
                 <input id="nativeMultiInput" class="native-multi-input" type="file"
                        accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif" multiple>
               </label>
@@ -913,7 +938,7 @@ Do not present individual numbering controls as if each copy were unique.
           </div>
           <div class="thumb-grid" id="bulkThumbs"></div>
           <div class="help" id="bulkHelp">For a unique collection, the artwork count should match Supply before live deployment.</div><div class="purpose-readiness mobile-upload-note">
-      <b>Using a phone?</b> We recommend <b>Add 1 image</b> for the most reliable upload experience. Multi-image upload availability depends on your browser or gallery support.
+      <b>Using a phone?</b> For better stability, selecting about <b>10–20 images at a time</b> is recommended. ANGRY does not impose a per-selection batch limit; the number your device can handle depends on the browser, gallery and available memory.
     </div><div class="bulk-feedback hidden" id="bulkFeedback"></div>
         </div>
 
@@ -955,7 +980,7 @@ Do not present individual numbering controls as if each copy were unique.
           </div>
           <div class="field" id="maxWalletField">
             <label id="maxWalletLabel">Max per wallet</label>
-            <input id="maxWallet" type="number" min="1" step="1" value="1">
+            <input id="maxWallet" type="number" min="0" value="0">
             <div class="help" id="maxWalletHelp">Single NFT is locked to 1.</div>
           </div>
           <div class="field" id="royaltyField">
@@ -1451,11 +1476,23 @@ Do not present individual numbering controls as if each copy were unique.
             Complete the details above, then create your NFT.
           </div>
 
+          <button
+            class="btn primary live-hidden"
+            id="collectionWalletConfirmBtn"
+            type="button"
+            style="margin-top:10px"
+          >Continue to MetaMask</button>
+
           <div
             class="live-result live-hidden"
             id="simpleCreateResult"
             style="margin-top:10px"
           ></div>
+
+          <div class="status" style="margin-top:12px">
+            <b>After deployment</b><br>
+            Public minting and creator controls open on separate pages. The NFT creation page stays focused only on creating NFTs.
+          </div>
         </div>
 
 <div class="live-lab" id="liveLab" style="display:none!important">
@@ -1560,7 +1597,7 @@ const CHAINS={
     explorer:"https://amoy.polygonscan.com",standard:"ERC-721 / ERC-1155"
   }
 };
-const state={chain:"sepolia",purpose:"artwork",type:"single",account:null,imageFile:null,imageUrl:null,collectionFiles:[],collectionUrls:[],liveImageUri:"",liveMetadataUri:"",lastNftContract:""};
+const state={chain:"sepolia",purpose:"artwork",type:"single",account:null,imageFile:null,imageUrl:null,collectionFiles:[],collectionUrls:[],liveImageUri:"",liveMetadataUri:"",lastNftContract:"",collectionManager:null};
 
 function currentChain(){return CHAINS[state.chain]}
 function setStatus(text,kind=""){const s=$("status");s.className="status"+(kind?" "+kind:"");s.textContent=text}
@@ -1694,7 +1731,7 @@ function applyPurposeRules(){
 
   if(state.purpose==="collection"){
     supply.min="2";
-    supply.max="100";
+    supply.max="1000";
   }else if(state.purpose==="editions"){
     supply.min="2";
     supply.max="10000";
@@ -1706,9 +1743,8 @@ function applyPurposeRules(){
     supply.removeAttribute("max");
   }
 
-  const editionsSaleControls=state.purpose==="editions";
-  $("mintPriceField").classList.toggle("hidden",!editionsSaleControls);
-  $("maxWalletField").classList.toggle("hidden",!editionsSaleControls);
+  $("mintPriceField").classList.remove("hidden");
+  $("maxWalletField").classList.toggle("hidden", state.purpose!=="collection");
   $("royaltyField").classList.remove("hidden");
   $("recipientField").classList.remove("hidden");
   $("maxWalletLabel").textContent="Max per wallet";
@@ -1719,7 +1755,7 @@ function applyPurposeRules(){
     $("maxWalletHelp").textContent="Single NFT is locked to 1 per wallet.";
   }else{
     $("supplyHelp").textContent=state.purpose==="collection"
-      ?"Beta limit: 2–100 unique NFTs per collection."
+      ?"Collection limit: 2–1,000 unique NFTs."
       : state.purpose==="editions"
       ?"One artwork can create 2–10,000 editions. The artwork is uploaded only once."
       : state.purpose==="tickets"
@@ -1728,6 +1764,10 @@ function applyPurposeRules(){
       ?"Maximum number of certificates that can be issued."
       :"Maximum number of NFTs/items in this setup.";
     $("maxWalletHelp").textContent="Cannot be higher than the total supply.";
+  }
+
+  if(state.purpose==="collection"){
+    $("maxWalletHelp").textContent="Mint limit enforced on-chain. Use 0 for no per-wallet mint limit. Transfers are not blocked by this mint limit.";
   }
 
   if(state.purpose==="editions") $("supplyLabel").textContent="Number of editions";
@@ -1757,6 +1797,8 @@ function applyPurposeRules(){
     $("maxWalletLabel").textContent="Max public mint per wallet";
     $("mintPriceHelp").textContent="Price paid for one public ticket. Set 0 for a free public mint. Organizer reserve distribution does not require buying the ticket.";
     $("maxWalletHelp").textContent="Applies only to public minting. Organizer reserve is tracked separately and remains inside total supply.";
+  }else if(state.purpose==="collection"){
+    $("mintPriceHelp").textContent="Primary public mint price per NFT. 98% is credited to the creator and the fixed 2% ANGRY platform fee is credited separately on-chain. Gas is paid separately by the collector. Set 0 for a free mint.";
   }else if(state.purpose==="membership"){
     $("mintPriceHelp").textContent="Membership purchase price per pass. Set 0 for free/issuer-distributed access.";
   }else{
@@ -2062,7 +2104,7 @@ function validateConfiguration(){
   if(state.purpose!=="tickets"&&Number.isFinite(supply)&&Number.isFinite(max)&&max>supply)errors.push("Max per wallet cannot be higher than total supply.");
   if(state.purpose==="artwork"&&(supply!==1||max!==1))errors.push("1 of 1 NFT must keep Supply and Max per wallet at 1.");
   if(["collection","editions"].includes(state.purpose)&&supply<2)errors.push("This NFT type needs a supply of at least 2.");
-  if(state.purpose==="collection"&&supply>100)errors.push("NFT Collection beta limit is 100 unique NFTs.");
+  if(state.purpose==="collection"&&supply>1000)errors.push("NFT Collection limit is 1,000 unique NFTs.");
   if(state.purpose==="editions"&&supply>10000)errors.push("Multiple Editions beta limit is 10,000 copies.");
 
   if(state.purpose!=="certificate"){
@@ -2076,7 +2118,7 @@ function validateConfiguration(){
   if(state.purpose==="collection" && $("collectionArtworkMode").value==="unique"){
     const artworkCount=state.collectionFiles.length;
     if(artworkCount>supply)errors.push("Uploaded artwork count cannot be higher than collection supply.");
-    else if(artworkCount<supply)warnings.push("Unique collection currently has "+artworkCount+" of "+supply+" artwork files. The counts must match before live deployment.");
+    else if(artworkCount<supply)errors.push("Unique collection needs exactly "+supply+" artwork files before creation. Currently loaded: "+artworkCount+".");
   }
 
   if(state.purpose==="tickets"){
@@ -2361,15 +2403,58 @@ function buildLiveMetadata(imageUri){
   };
 }
 
+function activeCollectionCreateConfig(){
+  return state?.activeCollectionCreateSnapshot || null;
+}
+
+function captureCollectionCreateSnapshot(){
+  return {
+    nftName:$("nftName").value.trim(),
+    collectionName:$("collectionName").value.trim(),
+    description:$("description").value.trim(),
+    symbol:$("symbol").value.trim(),
+    supply:Number($("supply").value||0),
+    mintPriceRaw:String($("mintPrice").value||"0").trim()||"0",
+    maxWallet:Number($("maxWallet").value||0),
+    royalty:Number($("royalty").value||0),
+    recipient:$("recipient").value.trim()||state.account||""
+  };
+}
+
+function applyCollectionCreateSnapshot(cfg){
+  if(!cfg)return;
+  const values={
+    nftName:cfg.nftName,
+    collectionName:cfg.collectionName,
+    description:cfg.description,
+    symbol:cfg.symbol,
+    supply:String(cfg.supply),
+    mintPrice:String(cfg.mintPriceRaw),
+    maxWallet:String(cfg.maxWallet),
+    royalty:String(cfg.royalty)
+  };
+  Object.entries(values).forEach(([id,value])=>{
+    const el=$(id);
+    if(el && value!==undefined && value!==null)el.value=value;
+  });
+  if(cfg.recipient && $("recipient"))$("recipient").value=cfg.recipient;
+}
+
 function buildLiveCollectionMetadata(imageUri,index){
+  const cfg=activeCollectionCreateConfig();
+  if(cfg)applyCollectionCreateSnapshot(cfg);
+
   const base=metadata();
-  const entered=$("nftName").value.trim()||"Untitled NFT";
+  const entered=(cfg?.nftName || $("nftName").value.trim() || "Untitled NFT");
   const cleanBase=entered.replace(/\s*#\d+\s*$/,"").trim()||entered;
-  const supply=Number($("supply").value||0);
+  const supply=cfg?.supply ?? Number($("supply").value||0);
+  const description=cfg?.description ?? $("description").value.trim();
+  const creatorWallet=cfg?.recipient || $("recipient").value.trim()||state.account||"";
+  const royalty=cfg?.royalty ?? Number($("royalty").value||0);
 
   return {
     name:cleanBase+" #"+index,
-    description:$("description").value.trim(),
+    description,
     image:imageUri,
     attributes:[
       {trait_type:"Created with",value:"ANGRY NFT Creator"},
@@ -2381,8 +2466,8 @@ function buildLiveCollectionMetadata(imageUri,index){
       structure:"ERC-721 collection",
       token_id:index,
       supply:supply,
-      creator_wallet:$("recipient").value.trim()||state.account||"",
-      royalty_percent:Number($("royalty").value||0)
+      creator_wallet:creatorWallet,
+      royalty_percent:royalty
     },
     source_configuration:base
   };
@@ -2401,16 +2486,18 @@ async function uploadCollectionToIpfs(){
     return;
   }
 
-  const supply=Number($("supply").value||0);
+  const cfg=activeCollectionCreateConfig();
+  if(cfg)applyCollectionCreateSnapshot(cfg);
+  const supply=cfg?.supply ?? Number($("supply").value||0);
 
   if(!Number.isInteger(supply)||supply<2){
     setStatus("Collection supply must be at least 2.","warn");
     return;
   }
 
-  if(supply>10){
+  if(supply>1000){
     setStatus(
-      "Live Collection beta is currently limited to 10 NFTs. Use Supply 10 for this test.",
+      "NFT Collection supports up to 1,000 unique NFTs.",
       "warn"
     );
     return;
@@ -2441,6 +2528,8 @@ async function uploadCollectionToIpfs(){
 
   try{
     const baseName=(
+      cfg?.collectionName||
+      cfg?.nftName||
       $("collectionName").value.trim()||
       $("nftName").value.trim()||
       "ANGRY-Collection"
@@ -2555,6 +2644,7 @@ async function uploadCollectionToIpfs(){
       "Collection IPFS upload failed: "+(e.message||e),
       "warn"
     );
+    throw e;
   }finally{
     btn.disabled=false;
   }
@@ -2711,6 +2801,951 @@ function compileEditions(){
   });
 }
 
+function buildCollectionMetadataMerkle(ethers, metadataUris){
+  if(!Array.isArray(metadataUris) || !metadataUris.length){
+    throw new Error("Collection metadata URI list is empty.");
+  }
+
+  const leaves=metadataUris.map((uri,index)=>{
+    const uriHash=ethers.keccak256(
+      ethers.toUtf8Bytes(String(uri||""))
+    );
+    return ethers.keccak256(
+      ethers.solidityPacked(
+        ["uint256","bytes32"],
+        [BigInt(index+1),uriHash]
+      )
+    );
+  });
+
+  const layers=[leaves];
+
+  while(layers[layers.length-1].length>1){
+    const layer=layers[layers.length-1];
+    const next=[];
+
+    for(let i=0;i<layer.length;i+=2){
+      const left=layer[i];
+      const right=layer[i+1]||left;
+      const ordered=BigInt(left)<=BigInt(right)
+        ? [left,right]
+        : [right,left];
+
+      next.push(
+        ethers.keccak256(
+          ethers.concat(ordered)
+        )
+      );
+    }
+
+    layers.push(next);
+  }
+
+  const proofs=leaves.map((_,leafIndex)=>{
+    const proof=[];
+    let index=leafIndex;
+
+    for(let level=0;level<layers.length-1;level++){
+      const layer=layers[level];
+      let sibling=index%2===0 ? index+1 : index-1;
+      if(sibling>=layer.length)sibling=index;
+      proof.push(layer[sibling]);
+      index=Math.floor(index/2);
+    }
+
+    return proof;
+  });
+
+  return {
+    root:layers[layers.length-1][0],
+    leaves,
+    proofs
+  };
+}
+
+async function pinCollectionManifestToIpfs(merkle, metadataUris){
+  const cfg=activeCollectionCreateConfig();
+  if(cfg)applyCollectionCreateSnapshot(cfg);
+  const supply=metadataUris.length;
+  const baseName=(
+    cfg?.collectionName||
+    cfg?.nftName||
+    $("collectionName").value.trim()||
+    $("nftName").value.trim()||
+    "ANGRY-Collection"
+  ).replace(/[^a-z0-9._-]+/gi,"-");
+
+  const mintPriceEth=cfg?.mintPriceRaw ?? (String($("mintPrice").value||"0").trim()||"0");
+  const platformFeeRecipient=(
+    cfg?.recipient ||
+    $("recipient").value.trim() ||
+    state.account ||
+    ""
+  ).toLowerCase();
+  const manifest={
+    schema:"angry-erc721-collection-manifest-v2",
+    network:"Ethereum Sepolia",
+    collection_name:cfg?.collectionName ?? $("collectionName").value.trim(),
+    symbol:cfg?.symbol ?? $("symbol").value.trim(),
+    max_supply:supply,
+    max_per_wallet:cfg?.maxWallet ?? Number($("maxWallet").value||0),
+    mint_price_eth:mintPriceEth,
+    platform_fee_bps:ANGRY_PLATFORM_FEE_BPS,
+    platform_fee_percent:ANGRY_PLATFORM_FEE_BPS/100,
+    platform_fee_recipient:platformFeeRecipient,
+    metadata_root:merkle.root,
+    public_mint_initially_enabled:false,
+    items:metadataUris.map((metadataUri,index)=>({
+      token_id:index+1,
+      metadata_uri:metadataUri,
+      proof:merkle.proofs[index]
+    }))
+  };
+
+  const response=await fetchWithRetry(
+    "https://angry-nft-storage.demiandemian147.workers.dev/pinJSONToIPFS",
+    {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        pinataOptions:{cidVersion:1},
+        pinataMetadata:{name:baseName+"-mint-manifest.json"},
+        pinataContent:manifest
+      })
+    }
+  );
+
+  const data=await response.json().catch(()=>({}));
+
+  if(!response.ok||!data.IpfsHash){
+    throw new Error(
+      data.error?.details||
+      data.error||
+      data.message||
+      ("Collection manifest upload failed ("+response.status+")")
+    );
+  }
+
+  return "ipfs://"+data.IpfsHash;
+}
+
+
+const COLLECTION_MANAGER_STORAGE_KEY="angry:last-sepolia-collection-v1";
+
+// Sepolia beta platform economics. For testnet, the validated connected
+// creator wallet is used as the platform-fee recipient. Mainnet must use
+// a dedicated ANGRY treasury address configured explicitly.
+const ANGRY_PLATFORM_FEE_BPS=200; // 2.00%
+
+const COLLECTION_MANAGER_ABI=[
+  "function owner() view returns (address)",
+  "function maxSupply() view returns (uint256)",
+  "function maxPerWallet() view returns (uint256)",
+  "function metadataRoot() view returns (bytes32)",
+  "function manifestURI() view returns (string)",
+  "function publicMintEnabled() view returns (bool)",
+  "function totalSupply() view returns (uint256)",
+  "function remainingSupply() view returns (uint256)",
+  "function mintedByWallet(address) view returns (uint256)",
+  "function ownerOf(uint256) view returns (address)",
+  "function tokenURI(uint256) view returns (string)",
+  "function mintPrice() view returns (uint256)",
+  "function platformFeeRecipient() view returns (address)",
+  "function platformFeeBps() view returns (uint96)",
+  "function creatorProceeds() view returns (uint256)",
+  "function platformProceeds() view returns (uint256)",
+  "function creatorMint(address,uint256,string,bytes32[])",
+  "function publicMint(uint256,string,bytes32[]) payable",
+  "function setPublicMintEnabled(bool)",
+  "function setMintPrice(uint256)",
+  "function withdrawCreatorProceeds()",
+  "function withdrawPlatformFees()"
+];
+
+function formatCollectionEth(wei){
+  try{
+    const value=BigInt(wei||0);
+    const whole=value/1000000000000000000n;
+    const fraction=(value%1000000000000000000n).toString().padStart(18,"0").replace(/0+$/,"");
+    return fraction ? whole.toString()+"."+fraction.slice(0,8) : whole.toString();
+  }catch(_){
+    return "0";
+  }
+}
+
+async function readCollectionEconomics(contract){
+  try{
+    const [mintPrice,feeRecipient,feeBps,creatorProceeds,platformProceeds]=await Promise.all([
+      contract.mintPrice(),
+      contract.platformFeeRecipient(),
+      contract.platformFeeBps(),
+      contract.creatorProceeds(),
+      contract.platformProceeds()
+    ]);
+    return {
+      paidMintVersion:true,
+      mintPrice,
+      platformFeeRecipient:feeRecipient,
+      platformFeeBps:Number(feeBps),
+      creatorProceeds,
+      platformProceeds
+    };
+  }catch(_){
+    return {
+      paidMintVersion:false,
+      mintPrice:0n,
+      platformFeeRecipient:"",
+      platformFeeBps:0,
+      creatorProceeds:0n,
+      platformProceeds:0n
+    };
+  }
+}
+
+function saveCollectionManagerDeployment(data){
+  try{
+    localStorage.setItem(
+      COLLECTION_MANAGER_STORAGE_KEY,
+      JSON.stringify(data)
+    );
+  }catch(_){ }
+}
+
+function restoreCollectionManagerDeployment(){
+  try{
+    const raw=localStorage.getItem(
+      COLLECTION_MANAGER_STORAGE_KEY
+    );
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    if(
+      data?.address &&
+      /^0x[a-fA-F0-9]{40}$/.test(data.address) &&
+      $("collectionManagerContract")
+    ){
+      $("collectionManagerContract").value=data.address;
+    }
+  }catch(_){ }
+}
+
+function collectionManifestHttpCandidates(uri){
+  const value=String(uri||"").trim();
+  if(/^https:\/\//i.test(value))return [value];
+  if(!/^ipfs:\/\//i.test(value))return [];
+
+  const path=value.replace(/^ipfs:\/\//i,"").replace(/^ipfs\//i,"");
+  return [
+    "https://gateway.pinata.cloud/ipfs/"+path,
+    "https://ipfs.io/ipfs/"+path,
+    "https://dweb.link/ipfs/"+path
+  ];
+}
+
+async function fetchCollectionManifest(uri){
+  const candidates=collectionManifestHttpCandidates(uri);
+  if(!candidates.length){
+    throw new Error("Collection manifest URI is not a supported IPFS/HTTPS URI.");
+  }
+
+  let lastError=null;
+
+  for(const url of candidates){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),20000);
+
+    try{
+      const response=await fetch(url,{
+        method:"GET",
+        cache:"no-store",
+        signal:controller.signal
+      });
+
+      if(!response.ok){
+        throw new Error("HTTP "+response.status);
+      }
+
+      const manifest=await response.json();
+
+      if(
+        !["angry-erc721-collection-manifest-v1","angry-erc721-collection-manifest-v2"].includes(manifest?.schema) ||
+        !Array.isArray(manifest?.items)
+      ){
+        throw new Error("The IPFS file is not a valid ANGRY Collection manifest.");
+      }
+
+      return manifest;
+    }catch(e){
+      lastError=e;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  throw new Error(
+    "Could not load the Collection manifest from IPFS. "+
+    (lastError?.message||lastError||"")
+  );
+}
+
+function setCollectionManagerProgress(text,kind=""){
+  const el=$("collectionManagerProgress");
+  if(!el)return;
+  el.textContent=text;
+  el.style.color=kind==="good"?"#86efac":kind==="warn"?"#fca5a5":"";
+}
+
+function showCollectionManagerResult(html){
+  const el=$("collectionManagerResult");
+  if(!el)return;
+  el.innerHTML=html;
+  el.classList.remove("live-hidden");
+}
+
+async function getCollectionManagerContext(requireSigner=false){
+  if(!window.ethereum){
+    throw new Error("Open ANGRY NFT Creator inside MetaMask or another compatible EVM wallet browser.");
+  }
+
+  const ethers=await import(
+    "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm"
+  );
+
+  const provider=new ethers.BrowserProvider(window.ethereum);
+  const network=await provider.getNetwork();
+
+  if(network.chainId!==11155111n){
+    await switchChain();
+    const actual=String(
+      await ethereum.request({method:"eth_chainId"})
+    ).toLowerCase();
+    if(actual!=="0xaa36a7"){
+      throw new Error("Wallet is not on Ethereum Sepolia.");
+    }
+  }
+
+  const runner=requireSigner
+    ? await provider.getSigner()
+    : provider;
+
+  return {ethers,provider,runner};
+}
+
+
+let activeCollectionRoleView="public";
+
+function connectedCollectionWallet(){
+  return String(state.account||window.ethereum?.selectedAddress||"").toLowerCase();
+}
+
+function setCollectionRoleView(view){
+  const allowed=["public","creator","admin"];
+  if(!allowed.includes(view))view="public";
+
+  const creatorTab=$("collectionCreatorTabBtn");
+  const adminTab=$("collectionAdminTabBtn");
+  if(view==="creator" && creatorTab?.classList.contains("live-hidden"))view="public";
+  if(view==="admin" && adminTab?.classList.contains("live-hidden"))view="public";
+
+  activeCollectionRoleView=view;
+  $("collectionPublicView")?.classList.toggle("live-hidden",view!=="public");
+  $("collectionCreatorView")?.classList.toggle("live-hidden",view!=="creator");
+  $("collectionAdminView")?.classList.toggle("live-hidden",view!=="admin");
+
+  $("collectionPublicTabBtn")?.classList.toggle("active",view==="public");
+  $("collectionCreatorTabBtn")?.classList.toggle("active",view==="creator");
+  $("collectionAdminTabBtn")?.classList.toggle("active",view==="admin");
+}
+
+function updateCollectionRoleUI(){
+  const manager=state.collectionManager;
+  const tabs=$("collectionRoleTabs");
+  if(!manager){
+    tabs?.classList.add("live-hidden");
+    $("collectionPublicView")?.classList.add("live-hidden");
+    $("collectionCreatorView")?.classList.add("live-hidden");
+    $("collectionAdminView")?.classList.add("live-hidden");
+    return {isCreator:false,isPlatform:false};
+  }
+
+  const connected=connectedCollectionWallet();
+  const isCreator=!!connected && connected===String(manager.owner||"").toLowerCase();
+  const isPlatform=!!connected && !!manager.paidMintVersion && connected===String(manager.platformFeeRecipient||"").toLowerCase();
+
+  tabs?.classList.remove("live-hidden");
+  $("collectionCreatorTabBtn")?.classList.toggle("live-hidden",!isCreator);
+  $("collectionAdminTabBtn")?.classList.toggle("live-hidden",!isPlatform);
+
+  if(activeCollectionRoleView==="creator"&&!isCreator)activeCollectionRoleView="public";
+  if(activeCollectionRoleView==="admin"&&!isPlatform)activeCollectionRoleView="public";
+
+  const minted=Number(manager.totalSupply||0);
+  const max=Number(manager.maxSupply||0);
+  const remaining=Math.max(0,max-minted);
+  if($("collectionPublicSupply"))$("collectionPublicSupply").textContent=minted+" / "+max;
+  if($("collectionPublicRemaining"))$("collectionPublicRemaining").textContent=String(remaining);
+  if($("collectionPublicPrice"))$("collectionPublicPrice").textContent=formatCollectionEth(manager.mintPrice||0n)+" ETH";
+  if($("collectionPublicWalletLimit"))$("collectionPublicWalletLimit").textContent=manager.maxPerWallet===0?"No limit":String(manager.maxPerWallet);
+  if($("collectionPublicMintStatus"))$("collectionPublicMintStatus").textContent=manager.publicMintEnabled
+    ? "Public mint is ON. The mint button sends the selected NFT to the connected collector wallet."
+    : "Public mint is OFF. Only the collection creator can turn it on.";
+  if($("collectionCreatorBalance"))$("collectionCreatorBalance").textContent=formatCollectionEth(manager.creatorProceeds||0n)+" ETH";
+  if($("collectionCreatorPublicState"))$("collectionCreatorPublicState").textContent=manager.publicMintEnabled?"ON":"OFF";
+  if($("collectionAdminBalance"))$("collectionAdminBalance").textContent=formatCollectionEth(manager.platformProceeds||0n)+" ETH";
+  if($("creatorSelectedTokenDisplay"))$("creatorSelectedTokenDisplay").textContent=String($("collectionMintTokenId")?.value||"1");
+
+  setCollectionRoleView(activeCollectionRoleView);
+  return {isCreator,isPlatform};
+}
+
+async function refreshCollectionManagerStats(){
+  if(!state.collectionManager)return;
+
+  const {contract,address,manifest}=state.collectionManager;
+  const [owner,maxSupply,maxPerWallet,totalSupply,remaining,publicEnabled]=await Promise.all([
+    contract.owner(),
+    contract.maxSupply(),
+    contract.maxPerWallet(),
+    contract.totalSupply(),
+    contract.remainingSupply(),
+    contract.publicMintEnabled()
+  ]);
+
+  const economics=await readCollectionEconomics(contract);
+
+  Object.assign(state.collectionManager,{
+    owner,
+    maxSupply:Number(maxSupply),
+    maxPerWallet:Number(maxPerWallet),
+    totalSupply:Number(totalSupply),
+    publicMintEnabled:publicEnabled,
+    ...economics
+  });
+
+  const tokenInput=$("collectionMintTokenId");
+  if(tokenInput)tokenInput.max=String(maxSupply);
+
+  const priceInput=$("collectionManagerMintPrice");
+  if(priceInput)priceInput.value=formatCollectionEth(economics.mintPrice);
+
+  const connected=connectedCollectionWallet();
+  const isCreator=!!connected && connected===String(owner).toLowerCase();
+  const isPlatform=!!connected && economics.paidMintVersion && connected===String(economics.platformFeeRecipient||"").toLowerCase();
+
+  const publicBtn=$("toggleCollectionPublicMintBtn");
+  if(publicBtn){
+    publicBtn.disabled=!isCreator;
+    publicBtn.textContent=publicEnabled
+      ? "Public mint: ON · Turn OFF"
+      : "Public mint: OFF · Turn ON";
+  }
+
+  const creatorMintBtn=$("creatorMintCollectionBtn");
+  if(creatorMintBtn)creatorMintBtn.disabled=!isCreator;
+
+  const publicMintBtn=$("publicMintCollectionBtn");
+  if(publicMintBtn){
+    publicMintBtn.disabled=!publicEnabled;
+    publicMintBtn.textContent=publicEnabled
+      ? "Collector mint · "+formatCollectionEth(economics.mintPrice)+" ETH + gas"
+      : "Collector public mint selected NFT";
+  }
+
+  const updatePriceBtn=$("updateCollectionMintPriceBtn");
+  if(updatePriceBtn)updatePriceBtn.disabled=!economics.paidMintVersion || !isCreator;
+
+  const creatorWithdraw=$("withdrawCreatorProceedsBtn");
+  if(creatorWithdraw)creatorWithdraw.disabled=!economics.paidMintVersion || !isCreator || economics.creatorProceeds===0n;
+
+  const platformWithdraw=$("withdrawPlatformFeesBtn");
+  if(platformWithdraw)platformWithdraw.disabled=!economics.paidMintVersion || !isPlatform || economics.platformProceeds===0n;
+
+  showCollectionManagerResult(
+    "<b>Collection ready ✅</b>"+
+    "<br>Minted: "+totalSupply.toString()+" / "+maxSupply.toString()+
+    "<br>Remaining: "+remaining.toString()+
+    "<br>Mint price: "+formatCollectionEth(economics.mintPrice)+" ETH"+
+    "<br>Max per wallet: "+(maxPerWallet===0n?"No limit":maxPerWallet.toString())+
+    "<br>Public mint: "+(publicEnabled?"ON":"OFF")+
+    '<br><a target="_blank" rel="noopener" href="https://sepolia.etherscan.io/address/'+address+'">View contract on Sepolia</a>'
+  );
+
+  updateCollectionRoleUI();
+}
+
+async function loadCollectionManager(){
+  const loadBtn=$("loadCollectionManagerBtn");
+  const mintBtn=$("creatorMintCollectionBtn");
+  const publicBtn=$("toggleCollectionPublicMintBtn");
+  const collectorBtn=$("publicMintCollectionBtn");
+  const priceBtn=$("updateCollectionMintPriceBtn");
+  const address=String(
+    $("collectionManagerContract")?.value||""
+  ).trim();
+
+  if(!/^0x[a-fA-F0-9]{40}$/.test(address)){
+    setCollectionManagerProgress("Enter a valid Collection contract address.","warn");
+    return;
+  }
+
+  if(loadBtn)loadBtn.disabled=true;
+  if(mintBtn)mintBtn.disabled=true;
+  if(publicBtn)publicBtn.disabled=true;
+  if(collectorBtn)collectorBtn.disabled=true;
+  if(priceBtn)priceBtn.disabled=true;
+
+  try{
+    setCollectionManagerProgress("Reading Collection contract from Ethereum Sepolia…");
+
+    const {ethers,runner}=await getCollectionManagerContext(false);
+    const contract=new ethers.Contract(
+      address,
+      COLLECTION_MANAGER_ABI,
+      runner
+    );
+
+    const [owner,maxSupply,maxPerWallet,root,manifestUri]=await Promise.all([
+      contract.owner(),
+      contract.maxSupply(),
+      contract.maxPerWallet(),
+      contract.metadataRoot(),
+      contract.manifestURI()
+    ]);
+
+    setCollectionManagerProgress("Loading the committed mint manifest from IPFS…");
+
+    const manifest=await fetchCollectionManifest(manifestUri);
+
+    if(String(manifest.metadata_root||"").toLowerCase()!==String(root).toLowerCase()){
+      throw new Error("Manifest metadata root does not match the on-chain Collection root.");
+    }
+
+    if(Number(manifest.max_supply)!==Number(maxSupply)){
+      throw new Error("Manifest supply does not match the on-chain Collection supply.");
+    }
+
+    state.collectionManager={
+      address,
+      contract,
+      manifestUri,
+      manifest,
+      owner,
+      maxSupply:Number(maxSupply),
+      maxPerWallet:Number(maxPerWallet)
+    };
+
+    saveCollectionManagerDeployment({
+      address,
+      manifestUri,
+      maxSupply:Number(maxSupply),
+      maxPerWallet:Number(maxPerWallet),
+      owner
+    });
+
+    if(!$("collectionMintRecipient").value.trim()){
+      $("collectionMintRecipient").value=state.account||owner;
+    }
+
+    await refreshCollectionManagerStats();
+    setCollectionManagerProgress("Collection loaded. Use Public Mint to collect an NFT. If this wallet owns the collection, Creator Dashboard is available separately.","good");
+
+  }catch(e){
+    state.collectionManager=null;
+    updateCollectionRoleUI();
+    setCollectionManagerProgress(
+      "Could not load Collection: "+(e?.message||e),
+      "warn"
+    );
+  }finally{
+    if(loadBtn)loadBtn.disabled=false;
+  }
+}
+
+async function creatorMintSelectedCollectionToken(){
+  const manager=state.collectionManager;
+  if(!manager){
+    setCollectionManagerProgress("Load the Collection contract first.","warn");
+    return;
+  }
+
+  const tokenId=Number($("collectionMintTokenId")?.value||0);
+  const recipient=String(
+    $("collectionMintRecipient")?.value||state.account||""
+  ).trim();
+
+  if(!Number.isInteger(tokenId)||tokenId<1||tokenId>manager.maxSupply){
+    setCollectionManagerProgress(
+      "Token ID must be between 1 and "+manager.maxSupply+".",
+      "warn"
+    );
+    return;
+  }
+
+  if(!/^0x[a-fA-F0-9]{40}$/.test(recipient)){
+    setCollectionManagerProgress("Enter a valid recipient wallet address.","warn");
+    return;
+  }
+
+  const item=manager.manifest.items.find(
+    row=>Number(row?.token_id)===tokenId
+  );
+
+  if(
+    !item ||
+    !item.metadata_uri ||
+    !Array.isArray(item.proof)
+  ){
+    setCollectionManagerProgress(
+      "Token #"+tokenId+" is missing from the verified manifest.",
+      "warn"
+    );
+    return;
+  }
+
+  const btn=$("creatorMintCollectionBtn");
+  if(btn)btn.disabled=true;
+
+  try{
+    setCollectionManagerProgress("Checking creator wallet and on-chain mint limit…");
+
+    const {ethers,runner}=await getCollectionManagerContext(true);
+    const signerAddress=await runner.getAddress();
+
+    if(signerAddress.toLowerCase()!==String(manager.owner).toLowerCase()){
+      throw new Error("The connected wallet is not the Collection creator/owner.");
+    }
+
+    const writeContract=new ethers.Contract(
+      manager.address,
+      COLLECTION_MANAGER_ABI,
+      runner
+    );
+
+    try{
+      const alreadyOwner=await writeContract.ownerOf(BigInt(tokenId));
+      if(alreadyOwner){
+        throw new Error(
+          "Token #"+tokenId+" is already minted to "+alreadyOwner+"."
+        );
+      }
+    }catch(checkError){
+      if(String(checkError?.message||checkError).includes("already minted")){
+        throw checkError;
+      }
+      // NOT_MINTED is expected for a token that is still available.
+    }
+
+    const mintedForRecipient=await writeContract.mintedByWallet(recipient);
+    if(
+      manager.maxPerWallet!==0 &&
+      Number(mintedForRecipient)>=manager.maxPerWallet
+    ){
+      throw new Error(
+        "MAX_PER_WALLET: this recipient has already reached the on-chain mint limit of "+manager.maxPerWallet+"."
+      );
+    }
+
+    setCollectionManagerProgress(
+      "MetaMask approval required to mint NFT #"+tokenId+" to "+recipient+"…"
+    );
+
+    const tx=await writeContract.creatorMint(
+      recipient,
+      BigInt(tokenId),
+      item.metadata_uri,
+      item.proof
+    );
+
+    setCollectionManagerProgress(
+      "Mint transaction sent · "+tx.hash+" · waiting for Sepolia confirmation…"
+    );
+
+    await tx.wait();
+
+    const owner=await writeContract.ownerOf(BigInt(tokenId));
+    const tokenUri=await writeContract.tokenURI(BigInt(tokenId));
+
+    showCollectionManagerResult(
+      "<b>NFT #"+tokenId+" minted ✅</b>"+
+      "<br>Owner: "+owner+
+      "<br>Metadata: "+tokenUri+
+      "<br>Transaction: "+tx.hash+
+      '<br><a target="_blank" rel="noopener" href="https://sepolia.etherscan.io/tx/'+tx.hash+'">Open transaction on Sepolia explorer</a>'
+    );
+
+    setCollectionManagerProgress(
+      "NFT #"+tokenId+" is confirmed on Ethereum Sepolia.",
+      "good"
+    );
+
+    await refreshCollectionManagerStats();
+
+    const next=tokenId+1;
+    if(next<=manager.maxSupply){
+      $("collectionMintTokenId").value=String(next);
+    }
+
+  }catch(e){
+    let message=e?.shortMessage||e?.reason||e?.message||String(e);
+    if(String(message).includes("MAX_PER_WALLET")){
+      message="Max per wallet reached. The contract correctly blocked this mint.";
+    }else if(String(message).includes("ALREADY_MINTED")){
+      message="This Token ID has already been minted.";
+    }else if(String(message).includes("INVALID_METADATA_PROOF")){
+      message="Metadata proof verification failed. Do not mint; reload the committed manifest.";
+    }
+
+    setCollectionManagerProgress("Mint stopped: "+message,"warn");
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+async function publicMintSelectedCollectionToken(){
+  const manager=state.collectionManager;
+  if(!manager){
+    setCollectionManagerProgress("Load the Collection contract first.","warn");
+    return;
+  }
+  if(!manager.publicMintEnabled){
+    setCollectionManagerProgress("Public mint is OFF. The creator must enable it first.","warn");
+    return;
+  }
+
+  const tokenId=Number($("collectionMintTokenId")?.value||0);
+  if(!Number.isInteger(tokenId)||tokenId<1||tokenId>manager.maxSupply){
+    setCollectionManagerProgress("Token ID must be between 1 and "+manager.maxSupply+".","warn");
+    return;
+  }
+
+  const item=manager.manifest.items.find(row=>Number(row?.token_id)===tokenId);
+  if(!item||!item.metadata_uri||!Array.isArray(item.proof)){
+    setCollectionManagerProgress("Token #"+tokenId+" is missing from the verified manifest.","warn");
+    return;
+  }
+
+  const btn=$("publicMintCollectionBtn");
+  if(btn)btn.disabled=true;
+
+  try{
+    const {ethers,runner}=await getCollectionManagerContext(true);
+    const collector=await runner.getAddress();
+    const writeContract=new ethers.Contract(manager.address,COLLECTION_MANAGER_ABI,runner);
+
+    const mintedForCollector=await writeContract.mintedByWallet(collector);
+    if(manager.maxPerWallet!==0 && Number(mintedForCollector)>=manager.maxPerWallet){
+      throw new Error("MAX_PER_WALLET: connected collector has reached the on-chain mint limit of "+manager.maxPerWallet+".");
+    }
+
+    try{
+      const existingOwner=await writeContract.ownerOf(BigInt(tokenId));
+      if(existingOwner)throw new Error("ALREADY_MINTED: Token #"+tokenId+" belongs to "+existingOwner+".");
+    }catch(checkError){
+      const t=String(checkError?.message||checkError);
+      if(t.includes("ALREADY_MINTED")||t.includes("belongs to"))throw checkError;
+    }
+
+    const payment=manager.paidMintVersion ? BigInt(manager.mintPrice||0) : 0n;
+    const fee=manager.paidMintVersion
+      ? (payment*BigInt(manager.platformFeeBps||0))/10000n
+      : 0n;
+    const creatorShare=payment-fee;
+
+    const ok=window.confirm(
+      "Public mint NFT #"+tokenId+"?\n\n"+
+      "Mint price: "+formatCollectionEth(payment)+" ETH\n"+
+      "Creator share: "+formatCollectionEth(creatorShare)+" ETH\n"+
+      "ANGRY platform fee: "+formatCollectionEth(fee)+" ETH\n"+
+      "Ethereum gas is additional."
+    );
+    if(!ok)return;
+
+    setCollectionManagerProgress(
+      "MetaMask approval required: "+formatCollectionEth(payment)+" ETH mint price + Sepolia gas…"
+    );
+
+    const tx=await writeContract.publicMint(
+      BigInt(tokenId),
+      item.metadata_uri,
+      item.proof,
+      {value:payment}
+    );
+
+    setCollectionManagerProgress("Public mint sent · "+tx.hash+" · waiting for Sepolia confirmation…");
+    await tx.wait();
+
+    const nftOwner=await writeContract.ownerOf(BigInt(tokenId));
+    const tokenUri=await writeContract.tokenURI(BigInt(tokenId));
+
+    showCollectionManagerResult(
+      "<b>Collector public mint #"+tokenId+" confirmed ✅</b>"+
+      "<br>Collector / owner: "+nftOwner+
+      "<br>Mint price: "+formatCollectionEth(payment)+" ETH"+
+      "<br>Creator share credited: "+formatCollectionEth(creatorShare)+" ETH"+
+      "<br>ANGRY fee credited: "+formatCollectionEth(fee)+" ETH"+
+      "<br>Metadata: "+tokenUri+
+      "<br>Transaction: "+tx.hash+
+      '<br><a target="_blank" rel="noopener" href="https://sepolia.etherscan.io/tx/'+tx.hash+'">Open transaction on Sepolia explorer</a>'
+    );
+
+    setCollectionManagerProgress("NFT #"+tokenId+" public mint is confirmed on Ethereum Sepolia.","good");
+    await refreshCollectionManagerStats();
+
+    const next=tokenId+1;
+    if(next<=manager.maxSupply)$("collectionMintTokenId").value=String(next);
+  }catch(e){
+    let message=e?.shortMessage||e?.reason||e?.message||String(e);
+    if(String(message).includes("MAX_PER_WALLET"))message="Max per wallet reached. The contract correctly blocked this collector mint.";
+    else if(String(message).includes("ALREADY_MINTED"))message="This Token ID has already been minted.";
+    else if(String(message).includes("WRONG_MINT_PAYMENT"))message="Mint price changed on-chain. Reload the Collection and try again.";
+    else if(String(message).includes("PUBLIC_MINT_DISABLED"))message="Public mint is OFF. Reload the Collection.";
+    setCollectionManagerProgress("Public mint stopped: "+message,"warn");
+  }finally{
+    if(btn)btn.disabled=!manager.publicMintEnabled;
+  }
+}
+
+async function updateCollectionMintPrice(){
+  const manager=state.collectionManager;
+  if(!manager){setCollectionManagerProgress("Load the Collection contract first.","warn");return;}
+  if(!manager.paidMintVersion){setCollectionManagerProgress("This legacy beta contract does not support paid public mint.","warn");return;}
+
+  const raw=String($("collectionManagerMintPrice")?.value||"0").trim();
+  if(raw===""||Number(raw)<0||!Number.isFinite(Number(raw))){
+    setCollectionManagerProgress("Enter a valid non-negative mint price in ETH.","warn");
+    return;
+  }
+
+  const btn=$("updateCollectionMintPriceBtn");
+  if(btn)btn.disabled=true;
+  try{
+    const {ethers,runner}=await getCollectionManagerContext(true);
+    const signerAddress=await runner.getAddress();
+    if(signerAddress.toLowerCase()!==String(manager.owner).toLowerCase())throw new Error("The connected wallet is not the Collection creator/owner.");
+
+    const newPrice=ethers.parseEther(raw||"0");
+    const writeContract=new ethers.Contract(manager.address,COLLECTION_MANAGER_ABI,runner);
+    setCollectionManagerProgress("MetaMask approval required to update mint price to "+raw+" ETH…");
+    const tx=await writeContract.setMintPrice(newPrice);
+    await tx.wait();
+    setCollectionManagerProgress("Mint price updated on-chain to "+raw+" ETH.","good");
+    await refreshCollectionManagerStats();
+  }catch(e){
+    setCollectionManagerProgress("Mint price update stopped: "+(e?.shortMessage||e?.reason||e?.message||e),"warn");
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+async function withdrawCollectionProceeds(kind){
+  const manager=state.collectionManager;
+  if(!manager||!manager.paidMintVersion){
+    setCollectionManagerProgress("Load a paid-mint ANGRY Collection first.","warn");
+    return;
+  }
+
+  const isPlatform=kind==="platform";
+  const btn=$(isPlatform?"withdrawPlatformFeesBtn":"withdrawCreatorProceedsBtn");
+  if(btn)btn.disabled=true;
+
+  try{
+    const {ethers,runner}=await getCollectionManagerContext(true);
+    const signerAddress=await runner.getAddress();
+    const required=isPlatform?manager.platformFeeRecipient:manager.owner;
+    if(signerAddress.toLowerCase()!==String(required).toLowerCase()){
+      throw new Error(isPlatform?"Connect the ANGRY platform fee wallet to withdraw this balance.":"Connect the Collection creator wallet to withdraw creator proceeds.");
+    }
+
+    const amount=isPlatform?BigInt(manager.platformProceeds||0):BigInt(manager.creatorProceeds||0);
+    if(amount===0n)throw new Error("There is no balance ready to withdraw.");
+
+    const writeContract=new ethers.Contract(manager.address,COLLECTION_MANAGER_ABI,runner);
+    setCollectionManagerProgress("MetaMask approval required to withdraw "+formatCollectionEth(amount)+" ETH…");
+    const tx=isPlatform
+      ? await writeContract.withdrawPlatformFees()
+      : await writeContract.withdrawCreatorProceeds();
+    await tx.wait();
+    setCollectionManagerProgress((isPlatform?"ANGRY platform fee":"Creator proceeds")+" withdrawn successfully.","good");
+    await refreshCollectionManagerStats();
+  }catch(e){
+    setCollectionManagerProgress("Withdrawal stopped: "+(e?.shortMessage||e?.reason||e?.message||e),"warn");
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+async function toggleCollectionPublicMint(){
+  const manager=state.collectionManager;
+  if(!manager){
+    setCollectionManagerProgress("Load the Collection contract first.","warn");
+    return;
+  }
+
+  const next=!manager.publicMintEnabled;
+
+  if(next){
+    const price=manager.paidMintVersion?formatCollectionEth(manager.mintPrice):"0";
+    const ok=window.confirm(
+      "Turn public mint ON?\n\nCollector mint price: "+price+" ETH + gas.\n"+
+      (manager.paidMintVersion?"Primary mint split: "+(100-manager.platformFeeBps/100)+"% creator / "+(manager.platformFeeBps/100)+"% ANGRY.":"Legacy beta contract: public mint is free.")
+    );
+    if(!ok)return;
+  }
+
+  const btn=$("toggleCollectionPublicMintBtn");
+  if(btn)btn.disabled=true;
+
+  try{
+    const {ethers,runner}=await getCollectionManagerContext(true);
+    const signerAddress=await runner.getAddress();
+
+    if(signerAddress.toLowerCase()!==String(manager.owner).toLowerCase()){
+      throw new Error("The connected wallet is not the Collection creator/owner.");
+    }
+
+    const writeContract=new ethers.Contract(
+      manager.address,
+      COLLECTION_MANAGER_ABI,
+      runner
+    );
+
+    setCollectionManagerProgress(
+      "MetaMask approval required to turn public mint "+(next?"ON":"OFF")+"…"
+    );
+
+    const tx=await writeContract.setPublicMintEnabled(next);
+    await tx.wait();
+
+    manager.publicMintEnabled=next;
+    setCollectionManagerProgress(
+      "Public mint is now "+(next?"ON":"OFF")+" on Ethereum Sepolia.",
+      "good"
+    );
+
+    await refreshCollectionManagerStats();
+  }catch(e){
+    setCollectionManagerProgress(
+      "Public mint update stopped: "+(e?.shortMessage||e?.reason||e?.message||e),
+      "warn"
+    );
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+function updateCollectionManagerVisibility(){
+  const panel=$("collectionManagerPanel");
+  if(!panel)return;
+
+  const isCollection=
+    state.chain==="sepolia" &&
+    state.purpose==="collection";
+
+  panel.classList.toggle(
+    "live-hidden",
+    !isCollection
+  );
+}
+
 async function deployCollectionSepolia(){
   if(!(
     state.chain==="sepolia" &&
@@ -2724,73 +3759,69 @@ async function deployCollectionSepolia(){
     return;
   }
 
-  const supply=Number($("supply").value||0);
-  const collection=$("collectionName").value.trim();
-  const symbol=$("symbol").value.trim();
-  const recipient=$("recipient").value.trim()||state.account||"";
+  const cfg=activeCollectionCreateConfig();
+  if(cfg)applyCollectionCreateSnapshot(cfg);
+
+  const supply=cfg?.supply ?? Number($("supply").value||0);
+  const collection=cfg?.collectionName ?? $("collectionName").value.trim();
+  const symbol=cfg?.symbol ?? $("symbol").value.trim();
+  const recipient=cfg?.recipient || $("recipient").value.trim()||state.account||"";
+  const maxWallet=cfg?.maxWallet ?? Number($("maxWallet").value||0);
+  const mintPriceRaw=String(cfg?.mintPriceRaw ?? $("mintPrice").value ?? "0").trim()||"0";
 
   if(!collection||!symbol){
-    setStatus(
-      "Collection name and symbol are required.",
-      "warn"
-    );
-    return;
+    throw new Error("Collection name and symbol are required.");
   }
 
   if(!/^0x[a-fA-F0-9]{40}$/.test(recipient)){
-    setStatus(
-      "Connect a valid EVM wallet before deployment.",
-      "warn"
-    );
-    return;
+    throw new Error("Connect a valid EVM wallet before deployment.");
   }
 
-  if(supply<2||supply>10){
-    setStatus(
-      "Live Collection beta currently supports 2 to 10 NFTs.",
-      "warn"
-    );
-    return;
+  if(!Number.isInteger(supply)||supply<2||supply>1000){
+    throw new Error("NFT Collection supply must be a whole number from 2 to 1,000.");
+  }
+
+  if(!Number.isInteger(maxWallet)||maxWallet<0||maxWallet>supply){
+    throw new Error("Max per wallet must be 0 (no mint limit) or a whole number up to the collection supply.");
+  }
+
+  if(Number(mintPriceRaw)<0||!Number.isFinite(Number(mintPriceRaw))){
+    throw new Error("Mint price must be a valid non-negative ETH amount.");
   }
 
   if(
     !Array.isArray(state.liveCollectionMetadataUris) ||
     state.liveCollectionMetadataUris.length!==supply
   ){
-    setStatus(
-      "Upload all "+supply+" collection artwork + metadata to IPFS first.",
-      "warn"
-    );
-    return;
+    throw new Error("Upload all "+supply+" collection artwork + metadata to IPFS first.");
   }
 
   if(!$("rightsCheck").checked){
-    setStatus(
-      "Confirm artwork ownership/permission before deployment.",
-      "warn"
-    );
-    return;
+    throw new Error("Confirm artwork ownership/permission before deployment.");
   }
 
   if(!window.ethereum){
-    setStatus(
-      "Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.",
-      "warn"
-    );
-    return;
+    throw new Error("Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.");
   }
 
   const btn=$("deployOneOfOneBtn");
   btn.disabled=true;
   $("deployResult").classList.add("live-hidden");
 
+  // The separate Continue-to-MetaMask experiment is intentionally disabled.
+  // This restores the exact deployment pattern that already succeeded on this phone:
+  // compile -> manifest -> ContractFactory.deploy() -> MetaMask confirmation.
+  const walletConfirmBtn=$("collectionWalletConfirmBtn");
+  if(walletConfirmBtn){
+    walletConfirmBtn.onclick=null;
+    walletConfirmBtn.classList.add("live-hidden");
+    walletConfirmBtn.disabled=true;
+  }
+
   try{
     if(!state.account){
       await connectWallet();
-
-      if(!state.account){
-        throw new Error("Wallet is not connected.");
-      }
+      if(!state.account)throw new Error("Wallet is not connected.");
     }
 
     await switchChain();
@@ -2800,55 +3831,76 @@ async function deployCollectionSepolia(){
     ).toLowerCase();
 
     if(actual!=="0xaa36a7"){
-      throw new Error(
-        "Wallet is not on Ethereum Sepolia."
-      );
+      throw new Error("Wallet is not on Ethereum Sepolia.");
     }
 
     $("deployProgress").textContent=
-      "Loading Solidity compiler and compiling the fixed-supply ERC-721 Collection contract…";
+      "Loading Solidity compiler and compiling the paid ERC-721 Collection contract…";
 
     const compiled=await compileCollection();
 
     $("deployProgress").textContent=
-      "Collection contract compiled. Preparing wallet deployment…";
+      "Collection contract compiled. Preparing metadata commitment…";
 
     const ethers=await import(
       "https://cdn.jsdelivr.net/npm/ethers@6.15.0/+esm"
     );
 
-    const provider=
-      new ethers.BrowserProvider(window.ethereum);
-
+    const provider=new ethers.BrowserProvider(window.ethereum);
     const signer=await provider.getSigner();
+    const mintPriceWei=ethers.parseEther(mintPriceRaw);
+    const platformFeeRecipient=recipient.toLowerCase();
 
     const royaltyPct=Math.max(
       0,
       Math.min(
         10,
-        Number($("royalty").value||0)
+        cfg?.royalty ?? Number($("royalty").value||0)
       )
     );
-
-    const royaltyBps=Math.round(
-      royaltyPct*100
-    );
-
-    const factory=
-      new ethers.ContractFactory(
-        compiled.abi,
-        compiled.bytecode,
-        signer
-      );
+    const royaltyBps=Math.round(royaltyPct*100);
 
     $("deployProgress").textContent=
-      "Wallet approval required. Review the Sepolia Collection deployment before confirming.";
+      "Building the verified metadata commitment for "+supply+" unique NFTs…";
 
+    const merkle=buildCollectionMetadataMerkle(
+      ethers,
+      state.liveCollectionMetadataUris
+    );
+
+    $("deployProgress").textContent=
+      "Uploading the collection mint manifest to IPFS…";
+
+    const manifestUri=await pinCollectionManifestToIpfs(
+      merkle,
+      state.liveCollectionMetadataUris
+    );
+
+    state.liveCollectionManifestUri=manifestUri;
+    state.liveCollectionMetadataRoot=merkle.root;
+
+    const factory=new ethers.ContractFactory(
+      compiled.abi,
+      compiled.bytecode,
+      signer
+    );
+
+    $("deployProgress").textContent=
+      "Opening MetaMask deployment confirmation…";
+
+    // LAST-KNOWN-GOOD MOBILE PATH: this is the same deployment mechanism that
+    // successfully deployed the earlier scalable Collection on this device.
     const contract=await factory.deploy(
       collection,
       symbol,
       recipient,
-      state.liveCollectionMetadataUris,
+      supply,
+      maxWallet,
+      merkle.root,
+      manifestUri,
+      mintPriceWei,
+      platformFeeRecipient,
+      ANGRY_PLATFORM_FEE_BPS,
       recipient,
       royaltyBps
     );
@@ -2863,49 +3915,75 @@ async function deployCollectionSepolia(){
     await contract.waitForDeployment();
 
     const address=await contract.getAddress();
-
     state.lastNftContract=address;
 
-    const explorer=
-      "https://sepolia.etherscan.io/address/"+address;
+    saveCollectionManagerDeployment({
+      address,
+      manifestUri,
+      maxSupply:supply,
+      maxPerWallet:maxWallet,
+      owner:recipient
+    });
 
-    $("deployResult").classList.remove(
-      "live-hidden"
-    );
+    if($("collectionManagerContract")){
+      $("collectionManagerContract").value=address;
+    }
+    if($("collectionMintRecipient")){
+      $("collectionMintRecipient").value=recipient;
+    }
+
+    const explorer="https://sepolia.etherscan.io/address/"+address;
+
+    $("deployResult").classList.remove("live-hidden");
+
+    const walletLimitText=maxWallet===0
+      ? "No per-wallet mint limit"
+      : maxWallet+" mint"+(maxWallet===1?"":"s")+" per wallet";
 
     $("deployResult").innerHTML=
-      "<b>"+supply+" NFT Collection deployed ✅</b>"+
+      "<b>NFT Collection contract deployed ✅</b>"+
       "<br>Contract: "+address+
-      "<br>Token IDs: #1–#"+supply+
-      "<br>Owner: "+recipient+
+      "<br>Max supply: "+supply+
+      "<br>Minted at deployment: 0"+
+      "<br>Wallet mint limit: "+walletLimitText+
+      "<br>Mint price: "+mintPriceRaw+" ETH per public mint"+
+      "<br>Primary mint split: 98% creator / 2% ANGRY"+
+      "<br>Public mint: disabled until the creator enables it"+
+      "<br>Manifest: "+state.liveCollectionManifestUri+
+      "<br>Creator: "+recipient+
       "<br><a target=\"_blank\" rel=\"noopener\" href=\""+
       explorer+
-      "\">Open contract on Sepolia explorer</a>";
+      "\">Open contract on Sepolia explorer</a>"+
+      '<div style="display:grid;gap:8px;margin-top:12px">'+
+        '<a class="live-action primary" style="display:block;text-align:center;text-decoration:none" href="../nft-mint/?contract='+address+'">Open Public Mint Page</a>'+
+        '<a class="live-action" style="display:block;text-align:center;text-decoration:none" href="../nft-dashboard/?contract='+address+'">Open Creator Dashboard</a>'+
+      '</div>'+
+      '<br><small>Public minting and creator controls are intentionally separated from NFT creation.</small>';
 
     $("deployProgress").textContent=
-      "Collection confirmed on Ethereum Sepolia.";
+      "Collection contract confirmed on Ethereum Sepolia. No mass pre-mint was performed.";
 
     setStatus(
-      supply+
-      " NFT Collection deployed successfully on Ethereum Sepolia. Token IDs #1–#"+
-      supply+
-      " were minted to the recipient wallet.",
+      "Collection contract deployed successfully with max supply "+supply+
+      ". Metadata is committed on-chain, Max per wallet is enforced, public mint starts disabled, and paid public mints split 98% to creator / 2% to ANGRY.",
       "good"
     );
 
-  }catch(e){
-    $("deployProgress").textContent=
-      "Collection deployment stopped: "+(e.message||e);
+    return address;
 
+  }catch(e){
+    const detail=e?.shortMessage||e?.reason||e?.message||String(e);
+    $("deployProgress").textContent=
+      "Collection deployment stopped: "+detail;
     setStatus(
-      "Sepolia Collection deployment failed: "+(e.message||e),
+      "Sepolia Collection deployment failed: "+detail,
       "warn"
     );
+    throw e;
   }finally{
     btn.disabled=false;
   }
 }
-
 
 async function deployEditionsSepolia(){
   const name=$("nftName").value.trim();
@@ -2919,9 +3997,6 @@ async function deployEditionsSepolia(){
 
   const metadataUri=$("liveMetadataUri").value.trim();
   const supply=Number($("supply").value||0);
-  const mintPriceRaw=String($("mintPrice").value||"0").trim()||"0";
-  const mintPriceNumber=Number(mintPriceRaw);
-  const maxWallet=Number($("maxWallet").value||0);
 
   if(!name||!collection||!symbol){
     setStatus(
@@ -2942,22 +4017,6 @@ async function deployEditionsSepolia(){
   if(!Number.isInteger(supply) || supply<2 || supply>10000){
     setStatus(
       "Multiple Editions supply must be between 2 and 10,000.",
-      "warn"
-    );
-    return;
-  }
-
-  if(!Number.isFinite(mintPriceNumber) || mintPriceNumber<0){
-    setStatus(
-      "Mint price must be 0 or higher.",
-      "warn"
-    );
-    return;
-  }
-
-  if(!Number.isInteger(maxWallet) || maxWallet<1 || maxWallet>supply){
-    setStatus(
-      "Max per wallet must be at least 1 and cannot be higher than the edition supply.",
       "warn"
     );
     return;
@@ -3044,8 +4103,6 @@ async function deployEditionsSepolia(){
 
     const signer=await provider.getSigner();
 
-    const mintPriceWei=ethers.parseEther(mintPriceRaw);
-
     const royaltyPct=Math.max(
       0,
       Math.min(
@@ -3072,8 +4129,6 @@ async function deployEditionsSepolia(){
       recipient,
       metadataUri,
       supply,
-      mintPriceWei,
-      maxWallet,
       recipient,
       royaltyBps
     );
@@ -3098,10 +4153,7 @@ async function deployEditionsSepolia(){
       result.innerHTML=
         "<b>Multiple Editions deployed ✅</b>"+
         "<br>Contract: "+address+
-        "<br>Max supply: "+supply+
-        "<br>Minted at deployment: 0"+
-        "<br>Mint price: "+mintPriceRaw+" ETH"+
-        "<br>Max per wallet: "+maxWallet+
+        "<br>Supply: "+supply+
         "<br>Token ID: #1"+
         "<br>Owner: "+recipient+
         '<br><a target="_blank" rel="noopener" href="'+
@@ -3113,7 +4165,8 @@ async function deployEditionsSepolia(){
       "Multiple Editions confirmed on Ethereum Sepolia.";
 
     setStatus(
-      "Multiple Editions public-mint contract deployed successfully on Ethereum Sepolia.",
+      supply+
+      " editions were deployed successfully on Ethereum Sepolia.",
       "good"
     );
 
@@ -3264,7 +4317,8 @@ function render(){
   }else if(state.purpose==="editions"){
     extra="<br>One artwork will be used for <b>"+$("supply").value+"</b> copies of the same item.";
   }else if(state.purpose==="collection"){
-    extra="<br>This prepares a collection where NFTs may have separate artwork/metadata. Artwork loaded: <b>"+state.collectionFiles.length+"/"+$("supply").value+"</b>.";
+    extra="<br>This prepares a scalable collection where each NFT can have separate artwork/metadata. The full supply is <b>not pre-minted during deployment</b>; metadata is committed first and NFTs mint later. Artwork loaded: <b>"+state.collectionFiles.length+"/"+$("supply").value+"</b>."+
+      "<br>Primary public mint: <b>"+price+" "+currentChain().native+"</b> per NFT · split <b>98% creator / 2% ANGRY</b>. Collector pays network gas separately. Royalty is separate from primary mint revenue.";
   }
 
   $("reviewSummary").innerHTML=
@@ -3277,6 +4331,7 @@ function render(){
 
   $("prepareBtn").disabled=v.errors.length>0 || !$("rightsCheck").checked;
   updateLiveLab();
+  updateCollectionManagerVisibility();
 }
 function loadImage(file){
   if(!file||!isSupportedImageFile(file)){setStatus("Please choose a supported image file.","warn");return}
@@ -3392,6 +4447,36 @@ async function waitForHiddenAction(
 }
 
 
+function mirrorHiddenProgress(sourceId,target){
+  const source=$(sourceId);
+  if(!source||!target)return ()=>{};
+
+  const copy=()=>{
+    const text=String(source.textContent||"").trim();
+    if(text)target.textContent=text;
+  };
+
+  copy();
+  const observer=new MutationObserver(copy);
+  observer.observe(source,{childList:true,subtree:true,characterData:true});
+  return ()=>observer.disconnect();
+}
+
+function showSimpleCreateResult(progress,result){
+  const hiddenResult=$("deployResult");
+  if(!hiddenResult||hiddenResult.classList.contains("live-hidden"))return false;
+
+  progress.textContent=state.purpose==="collection"
+    ? "Collection created successfully."
+    : "NFT created successfully.";
+
+  if(result){
+    result.innerHTML=hiddenResult.innerHTML;
+    result.classList.remove("live-hidden");
+  }
+  return true;
+}
+
 async function runSimpleCreate(){
   const btn=$("simpleCreateBtn");
   const progress=$("simpleCreateProgress");
@@ -3399,71 +4484,42 @@ async function runSimpleCreate(){
 
   if(!btn)return;
 
-  const validation=
-    typeof validateConfiguration==="function"
-      ? validateConfiguration()
-      : {errors:[]};
+  const validation=typeof validateConfiguration==="function"
+    ? validateConfiguration()
+    : {errors:[]};
 
   if(validation?.errors?.length){
-    progress.textContent=
-      "Check the highlighted fields before creating.";
-
-    setStatus(
-      validation.errors.join(" "),
-      "warn"
-    );
-
+    progress.textContent="Check the highlighted fields before creating.";
+    setStatus(validation.errors.join(" "),"warn");
     return;
   }
 
-
   if(!$("rightsCheck")?.checked){
-    progress.textContent=
-      "Confirm artwork ownership or permission first.";
-
+    progress.textContent="Confirm artwork ownership or permission first.";
     setStatus(
       "Confirm that you own the artwork or have permission to use it before creating the NFT.",
       "warn"
     );
-
     return;
   }
 
-
-  if(
-    !(
-      state.chain==="sepolia" &&
-      (
-        state.purpose==="artwork" ||
-        state.purpose==="collection" ||
-        state.purpose==="editions"
-      )
-    )
-  ){
-    progress.textContent=
-      "One-click deployment is currently available for Ethereum Sepolia NFT tests.";
-
-    setStatus(
-      "This setup is not enabled for one-click deployment yet.",
-      "warn"
-    );
-
+  if(!(
+    state.chain==="sepolia" &&
+    (state.purpose==="artwork" || state.purpose==="collection" || state.purpose==="editions")
+  )){
+    progress.textContent="One-click deployment is currently available for Ethereum Sepolia NFT tests.";
+    setStatus("This setup is not enabled for one-click deployment yet.","warn");
     return;
   }
-
 
   if(!window.ethereum){
-    progress.textContent=
-      "Open ANGRY NFT Creator in a compatible EVM wallet browser.";
-
+    progress.textContent="Open ANGRY NFT Creator in a compatible EVM wallet browser.";
     setStatus(
       "Open ANGRY NFT Creator in MetaMask or another compatible EVM wallet browser.",
       "warn"
     );
-
     return;
   }
-
 
   btn.disabled=true;
 
@@ -3471,208 +4527,115 @@ async function runSimpleCreate(){
     result.classList.add("live-hidden");
     result.innerHTML="";
   }
+  if($("deployResult"))$("deployResult").classList.add("live-hidden");
 
-  if($("deployResult")){
-    $("deployResult").classList.add(
-      "live-hidden"
-    );
-  }
-
+  let stopMirror=()=>{};
+  let creationFailed=false;
 
   try{
+    // Freeze Collection economics/settings at the exact moment Create is pressed.
+    // Async IPFS/compiler/wallet steps must never re-read a stale browser-history value.
+    if(state.purpose==="collection"){
+      state.activeCollectionCreateSnapshot=captureCollectionCreateSnapshot();
+      applyCollectionCreateSnapshot(state.activeCollectionCreateSnapshot);
+      try{
+        localStorage.setItem(
+          "angry_collection_draft_v2",
+          JSON.stringify(state.activeCollectionCreateSnapshot)
+        );
+      }catch(_){ }
+      render();
+    }
 
-    /* --------------------------------------------
-       WALLET
-    --------------------------------------------- */
-
-    progress.textContent=
-      "Connecting wallet…";
-
+    progress.textContent="Connecting wallet…";
     if(!state.account){
       await connectWallet();
-
-      if(!state.account){
-        throw new Error(
-          "Wallet connection was not completed."
-        );
-      }
+      if(!state.account)throw new Error("Wallet connection was not completed.");
     }
 
-
-    /* --------------------------------------------
-       NETWORK
-    --------------------------------------------- */
-
-    progress.textContent=
-      "Checking network…";
-
+    progress.textContent="Checking network…";
     await switchChain();
-
-    const actual=String(
-      await ethereum.request({
-        method:"eth_chainId"
-      })
-    ).toLowerCase();
-
-    if(actual!=="0xaa36a7"){
-      throw new Error(
-        "Wallet is not on Ethereum Sepolia."
-      );
-    }
-
-
-    /* --------------------------------------------
-       RESET PREVIOUS STORAGE STATE
-    --------------------------------------------- */
+    const actual=String(await ethereum.request({method:"eth_chainId"})).toLowerCase();
+    if(actual!=="0xaa36a7")throw new Error("Wallet is not on Ethereum Sepolia.");
 
     if(state.purpose==="editions"){
-    return await deployEditionsSepolia();
-}
-
-if(state.purpose==="collection"){
-
-      if(
-        Array.isArray(
-          state.liveCollectionImageUris
-        )
-      ){
-        state.liveCollectionImageUris=[];
-      }
-
-      if(
-        Array.isArray(
-          state.liveCollectionMetadataUris
-        )
-      ){
-        state.liveCollectionMetadataUris=[];
-      }
-
-    }else{
-
-      state.liveImageUri="";
-      state.liveMetadataUri="";
-
-      if($("liveMetadataUri")){
-        $("liveMetadataUri").value="";
-      }
+      return await deployEditionsSepolia();
     }
 
+    if(state.purpose==="collection"){
+      applyCollectionCreateSnapshot(state.activeCollectionCreateSnapshot);
+      state.liveCollectionImageUris=[];
+      state.liveCollectionMetadataUris=[];
 
-    /* --------------------------------------------
-       IPFS / STORAGE
-       Calls existing tested upload button logic.
-    --------------------------------------------- */
+      progress.textContent="Uploading Collection artwork + metadata to IPFS…";
+      stopMirror=mirrorHiddenProgress("ipfsProgress",progress);
+      await uploadCollectionToIpfs();
+      stopMirror(); stopMirror=()=>{};
 
-    progress.textContent=
-      state.purpose==="collection"
-        ? "Uploading collection artwork…"
-        : "Uploading artwork…";
+      if(!simpleStorageReady()){
+        throw new Error("Artwork upload did not finish. Check the status message and try again.");
+      }
 
+      applyCollectionCreateSnapshot(state.activeCollectionCreateSnapshot);
+      progress.textContent="Preparing Collection contract. After compile + manifest preparation, MetaMask deployment confirmation will open automatically.";
+      stopMirror=mirrorHiddenProgress("deployProgress",progress);
+      await deployCollectionSepolia();
+      stopMirror(); stopMirror=()=>{};
+
+      if(!showSimpleCreateResult(progress,result)){
+        const detail=String($("deployProgress")?.textContent||"").trim();
+        throw new Error(detail || "Deployment did not finish. Check the status message and try again.");
+      }
+      return;
+    }
+
+    // Keep the previously-tested 1-of-1 path unchanged.
+    state.liveImageUri="";
+    state.liveMetadataUri="";
+    if($("liveMetadataUri"))$("liveMetadataUri").value="";
+
+    progress.textContent="Uploading artwork…";
     const upload=$("uploadIpfsBtn");
-
-    if(!upload){
-      throw new Error(
-        "Storage action is unavailable."
-      );
-    }
-
+    if(!upload)throw new Error("Storage action is unavailable.");
     upload.click();
-
-    await waitForHiddenAction(
-      upload,
-      20*60*1000
-    );
-
-
+    await waitForHiddenAction(upload,20*60*1000);
     if(!simpleStorageReady()){
-      throw new Error(
-        "Artwork upload did not finish. Check the status message and try again."
-      );
+      throw new Error("Artwork upload did not finish. Check the status message and try again.");
     }
 
-
-    /* --------------------------------------------
-       DEPLOY
-       Calls existing tested deployment logic.
-    --------------------------------------------- */
-
-    progress.textContent=
-      "Waiting for wallet confirmation…";
-
+    progress.textContent="Preparing contract deployment…";
     const deploy=$("deployOneOfOneBtn");
-
-    if(!deploy){
-      throw new Error(
-        "Deployment action is unavailable."
-      );
-    }
-
+    if(!deploy)throw new Error("Deployment action is unavailable.");
     deploy.click();
+    await waitForHiddenAction(deploy,20*60*1000);
 
-    await waitForHiddenAction(
-      deploy,
-      20*60*1000
-    );
-
-
-    /* --------------------------------------------
-       RESULT
-    --------------------------------------------- */
-
-    const hiddenResult=$("deployResult");
-
-    if(
-      hiddenResult &&
-      !hiddenResult.classList.contains(
-        "live-hidden"
-      )
-    ){
-
-      progress.textContent=
-        state.purpose==="collection"
-          ? "Collection created successfully."
-          : "NFT created successfully.";
-
-      if(result){
-        result.innerHTML=
-          hiddenResult.innerHTML;
-
-        result.classList.remove(
-          "live-hidden"
-        );
-      }
-
-    }else{
-
-      throw new Error(
-        "Deployment did not finish. Check the status message and try again."
-      );
-
+    if(!showSimpleCreateResult(progress,result)){
+      throw new Error("Deployment did not finish. Check the status message and try again.");
     }
 
-  }
-  catch(e){
-
-    const message=
-      e?.message || String(e);
-
-    progress.textContent=
-      "Creation stopped: "+message;
-
-    setStatus(
-      "NFT creation stopped: "+message,
-      "warn"
-    );
-
-  }
-  finally{
-
+  }catch(e){
+    creationFailed=true;
+    const message=e?.shortMessage||e?.reason||e?.message||String(e);
+    progress.textContent="Creation stopped: "+message;
+    setStatus("NFT creation stopped: "+message,"warn");
+  }finally{
+    stopMirror();
+    if(state.purpose==="collection" && state.activeCollectionCreateSnapshot){
+      applyCollectionCreateSnapshot(state.activeCollectionCreateSnapshot);
+      render();
+      state.activeCollectionCreateSnapshot=null;
+    }
     btn.disabled=false;
-    updateSimpleCreateUI();
-
+    if(!creationFailed){
+      updateSimpleCreateUI();
+    }else{
+      const supply=Math.max(1,Number($("supply")?.value||1));
+      btn.textContent=state.purpose==="collection"
+        ? "Create "+supply+" NFT Collection"
+        : "Create NFT";
+    }
   }
 }
-
 
 $("simpleCreateBtn")
   ?.addEventListener(
@@ -3954,15 +4917,12 @@ $("nativeMultiInput").addEventListener("change",e=>{
     return;
   }
 
-  const batch=files.slice(0,10);
-  addCollectionFiles(batch);
+  addCollectionFiles(files);
 
-  if(files.length>10){
-    setBulkFeedback(
-      "You selected "+files.length+" images. ANGRY accepted the first 10 in this batch.",
-      "warn"
-    );
-  }
+  setBulkFeedback(
+    files.length+" image"+(files.length===1?"":"s")+" returned by the device picker. ANGRY did not apply a batch cap.",
+    "good"
+  );
 
   e.target.value="";
 });
@@ -3984,9 +4944,9 @@ $("clearBulkBtn").addEventListener("click",e=>{
 $("supply").addEventListener("change",()=>{
   if(state.purpose==="collection"){
     const n=Number($("supply").value||0);
-    if(n>100){
-      $("supply").value=100;
-      setStatus("NFT Collection beta limit is 100 unique NFTs. Supply was adjusted to 100.","warn");
+    if(n>1000){
+      $("supply").value=1000;
+      setStatus("NFT Collection limit is 1,000 unique NFTs. Supply was adjusted to 1,000.","warn");
     }else if(n<2){
       $("supply").value=2;
       setStatus("NFT Collection needs at least 2 NFTs. Supply was adjusted to 2.","warn");
@@ -4088,7 +5048,22 @@ $("deployOneOfOneBtn")?.addEventListener("click",()=>{
 $("liveMetadataUri")?.addEventListener("input",()=>{
   state.liveMetadataUri=$("liveMetadataUri").value.trim();
 });
-if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";$("walletBtn").classList.toggle("wallet-connected",!!state.account);render()})}
+$("collectionPublicTabBtn")?.addEventListener("click",()=>setCollectionRoleView("public"));
+$("collectionCreatorTabBtn")?.addEventListener("click",()=>setCollectionRoleView("creator"));
+$("collectionAdminTabBtn")?.addEventListener("click",()=>setCollectionRoleView("admin"));
+$("collectionMintTokenId")?.addEventListener("input",()=>{
+  if($("creatorSelectedTokenDisplay"))$("creatorSelectedTokenDisplay").textContent=String($("collectionMintTokenId")?.value||"1");
+});
+$("loadCollectionManagerBtn")?.addEventListener("click",loadCollectionManager);
+$("creatorMintCollectionBtn")?.addEventListener("click",creatorMintSelectedCollectionToken);
+$("publicMintCollectionBtn")?.addEventListener("click",publicMintSelectedCollectionToken);
+$("updateCollectionMintPriceBtn")?.addEventListener("click",updateCollectionMintPrice);
+$("withdrawCreatorProceedsBtn")?.addEventListener("click",()=>withdrawCollectionProceeds("creator"));
+$("withdrawPlatformFeesBtn")?.addEventListener("click",()=>withdrawCollectionProceeds("platform"));
+$("toggleCollectionPublicMintBtn")?.addEventListener("click",toggleCollectionPublicMint);
+$("collectionManagerContract")?.addEventListener("input",updateCollectionManagerVisibility);
+if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("recipient").value=state.account||"";if($("collectionMintRecipient")&&!$("collectionMintRecipient").value.trim())$("collectionMintRecipient").value=state.account||"";$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect wallet";$("walletBtn").classList.toggle("wallet-connected",!!state.account);render()})}
+if(window.ethereum){ethereum.on?.("accountsChanged",()=>{if(state.collectionManager)setTimeout(()=>refreshCollectionManagerStats().catch(()=>{}),50)})}
 setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 </script>
 
@@ -4204,5 +5179,136 @@ setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 
 })();
 </script>
+
+
+<script id="angry-editions-maxwallet-ui">
+(function(){
+
+  function updateMaxWalletUI(){
+    const field = document.getElementById("maxWalletField");
+    const input = document.getElementById("maxWallet");
+    const label = document.getElementById("maxWalletLabel");
+    const help = document.getElementById("maxWalletHelp");
+    const editions = document.getElementById("editionSettings");
+
+    if(!field || !input || !editions) return;
+
+    const editionsActive = !editions.classList.contains("hidden");
+
+    if(editionsActive){
+      field.style.display = "";
+
+      if(label){
+        label.textContent = "Max per wallet";
+      }
+
+      if(help){
+        help.textContent =
+          "Maximum number of copies one wallet can receive. Enter 0 for no limit, or a whole number up to the total number of editions.";
+      }
+
+      input.min = "0";
+      input.step = "1";
+
+      // If an older hidden state left this at zero,
+      // make the required field usable immediately.
+      if(!Number.isInteger(Number(input.value)) || Number(input.value) < 0){
+        input.value = "0";
+        input.dispatchEvent(new Event("input",{bubbles:true}));
+        input.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", function(){
+    updateMaxWalletUI();
+
+    document.querySelectorAll('[data-type="edition"]').forEach(function(btn){
+      btn.addEventListener("click", function(){
+        setTimeout(updateMaxWalletUI, 0);
+        setTimeout(updateMaxWalletUI, 50);
+      });
+    });
+
+    const editionSettings = document.getElementById("editionSettings");
+
+    if(editionSettings){
+      new MutationObserver(updateMaxWalletUI).observe(
+        editionSettings,
+        {attributes:true, attributeFilter:["class"]}
+      );
+    }
+  });
+
+})();
+</script>
+
+
+<script id="angry-collection-draft-history-fix-v2">
+(function(){
+  const KEY="angry_collection_draft_v2";
+  const FIELD_IDS=[
+    "nftName","collectionName","description","symbol",
+    "supply","mintPrice","maxWallet","royalty"
+  ];
+
+  function isCollection(){
+    return typeof state!=="undefined" && state.purpose==="collection";
+  }
+
+  function makeDraft(){
+    if(!isCollection())return null;
+    const data={};
+    FIELD_IDS.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)data[id]=el.value;
+    });
+    const recipient=document.getElementById("recipient");
+    if(recipient)data.recipient=recipient.value;
+    data.savedAt=Date.now();
+    return data;
+  }
+
+  function save(){
+    const data=makeDraft();
+    if(!data)return;
+    try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){ }
+  }
+
+  function restore(){
+    if(!isCollection())return;
+    let data=null;
+    try{data=JSON.parse(localStorage.getItem(KEY)||"null");}catch(_){ }
+    if(!data)return;
+
+    FIELD_IDS.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && Object.prototype.hasOwnProperty.call(data,id))el.value=data[id];
+    });
+    if(data.recipient && document.getElementById("recipient")){
+      document.getElementById("recipient").value=data.recipient;
+    }
+    if(typeof render==="function")render();
+  }
+
+  FIELD_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.setAttribute("autocomplete","off");
+    el.addEventListener("input",save);
+    el.addEventListener("change",save);
+  });
+
+  window.addEventListener("pagehide",save);
+  window.addEventListener("pageshow",()=>setTimeout(restore,0));
+  window.addEventListener("focus",()=>setTimeout(restore,0));
+  window.addEventListener("popstate",()=>setTimeout(restore,0));
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="hidden")save();
+    else setTimeout(restore,0);
+  });
+})();
+</script>
+
 </body>
 </html>
