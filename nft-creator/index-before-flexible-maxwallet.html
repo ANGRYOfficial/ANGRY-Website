@@ -960,7 +960,7 @@ Do not present individual numbering controls as if each copy were unique.
           </div>
           <div class="field" id="maxWalletField">
             <label id="maxWalletLabel">Max per wallet</label>
-            <input id="maxWallet" type="number" min="0" value="0">
+            <input id="maxWallet" type="number" min="1" value="1">
             <div class="help" id="maxWalletHelp">Single NFT is locked to 1.</div>
           </div>
           <div class="field" id="royaltyField">
@@ -1683,11 +1683,11 @@ function showOnlyPurposeSettings(){
 }
 function applyPurposeDefaults(){
   const supply=$("supply"), max=$("maxWallet"), price=$("mintPrice");
-  if(state.purpose==="artwork"){supply.value=1;max.value=0;}
+  if(state.purpose==="artwork"){supply.value=1;max.value=1;}
   if(state.purpose==="collection"){if(+supply.value<2)supply.value=0;if(+max.value<1||+max.value>+supply.value)max.value=2;}
-  if(state.purpose==="editions"){if(+supply.value<2||+supply.value>10000)supply.value=0;max.value=0;}
+  if(state.purpose==="editions"){if(+supply.value<2||+supply.value>10000)supply.value=0;max.value=1;}
   if(state.purpose==="tickets"){supply.value=500;max.value=4;price.value=0;$("royalty").value=0;}
-  if(state.purpose==="membership"){supply.value=100;max.value=0;}
+  if(state.purpose==="membership"){supply.value=100;max.value=1;}
   if(state.purpose==="certificate"){supply.value=100;max.value=1;price.value=0;$("royalty").value=0;}
   if(state.purpose==="game"){supply.value=1000;max.value=20;}
   showOnlyPurposeSettings();
@@ -2062,7 +2062,7 @@ function validateConfiguration(){
   if(!$("symbol").value.trim())errors.push("Symbol is required.");
 
   if(!Number.isInteger(supply)||supply<1)errors.push("Supply must be a whole number of at least 1.");
-  if(!Number.isInteger(max)||max<0)errors.push("Max per wallet must be 0 or a positive whole number.");
+  if(!Number.isInteger(max)||max<1)errors.push("Max per wallet must be a whole number of at least 1.");
   if(state.purpose!=="tickets"&&Number.isFinite(supply)&&Number.isFinite(max)&&max>supply)errors.push("Max per wallet cannot be higher than total supply.");
   if(state.purpose==="artwork"&&(supply!==1||max!==1))errors.push("1 of 1 NFT must keep Supply and Max per wallet at 1.");
   if(["collection","editions"].includes(state.purpose)&&supply<2)errors.push("This NFT type needs a supply of at least 2.");
@@ -4208,16 +4208,16 @@ setPurpose("artwork");updateArtworkMode();updateTicketSaleControls();render();
 
       if(help){
         help.textContent =
-          "Maximum number of copies one wallet can receive. Enter 0 for no limit, or a whole number up to the total number of editions.";
+          "Maximum number of copies one wallet can receive. Must be at least 1 and cannot exceed Number of editions.";
       }
 
-      input.min = "0";
+      input.min = "1";
       input.step = "1";
 
       // If an older hidden state left this at zero,
       // make the required field usable immediately.
-      if(!Number.isInteger(Number(input.value)) || Number(input.value) < 0){
-        input.value = "0";
+      if(!Number.isInteger(Number(input.value)) || Number(input.value) < 1){
+        input.value = "1";
         input.dispatchEvent(new Event("input",{bubbles:true}));
         input.dispatchEvent(new Event("change",{bubbles:true}));
       }
