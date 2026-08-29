@@ -1183,6 +1183,13 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
               type="button"
             >Check Pool</button>
 
+            <button
+              class="btn primary"
+              id="createLiquidityPoolBtn"
+              type="button"
+              hidden
+            >Create Pool</button>
+
             <div class="status" id="liquiditySetupStatus">
               Ready to check the DEX pool.
             </div>
@@ -1292,6 +1299,18 @@ function renderLiquiditySetup(){
   const btn=$("checkLiquidityPoolBtn");
   if(btn)btn.disabled=!cfg;
 
+  const createBtn=$("createLiquidityPoolBtn");
+
+  if(createBtn){
+    const canCreate=
+      !!cfg &&
+      state.liquiditySetup.status==="missing" &&
+      !state.liquiditySetup.pair;
+
+    createBtn.hidden=!canCreate;
+    createBtn.disabled=!canCreate;
+  }
+
   if(!cfg){
     setLiquiditySetupStatus(
       "DEX liquidity setup is not enabled for this network yet.",
@@ -1330,6 +1349,208 @@ async function liquidityEthCall(to,data){
       "latest"
     ]
   });
+}
+
+
+async function createLiquidityPool(){
+  const btn=$("createLiquidityPoolBtn");
+
+  try{
+    if(!window.ethereum){
+      throw new Error("EVM wallet not available.");
+    }
+
+    if(
+      !state.lastContract ||
+      state.lastContractType!=="liquidity"
+    ){
+      throw new Error("Deploy a Liquidity token first.");
+    }
+
+    if(state.liquiditySetup.status!=="missing"){
+      throw new Error("Check the pool first.");
+    }
+
+    const cfg=liquidityDexConfig();
+
+    if(!cfg){
+      throw new Error(
+        "Liquidity setup is not enabled for this network."
+      );
+    }
+
+    if(!state.account){
+      await connectWallet();
+    }
+
+    if(!state.account){
+      throw new Error("Wallet not connected.");
+    }
+
+    btn.disabled=true;
+    btn.textContent="Creating Pool…";
+
+    setLiquiditySetupStatus(
+      "Preparing TOKEN / "+
+      cfg.wrappedSymbol+
+      " pool creation on "+
+      cfg.name+"…",
+      "warn"
+    );
+
+    await ensureNetwork();
+
+    const c=selectedChain();
+
+    const chainId=await ethereum.request({
+      method:"eth_chainId"
+    });
+
+    if(chainId.toLowerCase()!==c.chainId.toLowerCase()){
+      throw new Error("Wallet is not on "+c.name+".");
+    }
+
+    // Re-check Router.factory()
+    const routerFactory=decodeAddressWord(
+      await liquidityEthCall(
+        cfg.router,
+        "0xc45a0155"
+      )
+    );
+
+    if(
+      routerFactory.toLowerCase()!==
+      cfg.factory.toLowerCase()
+    ){
+      throw new Error("DEX router factory mismatch.");
+    }
+
+    // Re-check Router.WETH()
+    const routerWrapped=decodeAddressWord(
+      await liquidityEthCall(
+        cfg.router,
+        "0xad5c4648"
+      )
+    );
+
+    if(
+      routerWrapped.toLowerCase()!==
+      cfg.wrappedNative.toLowerCase()
+    ){
+      throw new Error("DEX wrapped native mismatch.");
+    }
+
+    // Factory.getPair() again before creating
+    const getPairData=
+      "0xe6a43905"+
+      addressWord(state.lastContract)+
+      addressWord(cfg.wrappedNative);
+
+    const existingPair=decodeAddressWord(
+      await liquidityEthCall(
+        cfg.factory,
+        getPairData
+      )
+    );
+
+    const ZERO=
+      "0x0000000000000000000000000000000000000000";
+
+    if(existingPair.toLowerCase()!==ZERO){
+      state.liquiditySetup={
+        pair:existingPair,
+        status:"good"
+      };
+
+      renderLiquiditySetup();
+
+      setLiquiditySetupStatus(
+        "Pool already exists. Verifying it now…",
+        "warn"
+      );
+
+      await checkLiquidityPool();
+      return;
+    }
+
+    // Uniswap V2 Factory:
+    // createPair(address,address)
+    const createPairData=
+      "0xc9c65396"+
+      addressWord(state.lastContract)+
+      addressWord(cfg.wrappedNative);
+
+    setLiquiditySetupStatus(
+      "Estimating gas to create TOKEN / "+
+      cfg.wrappedSymbol+
+      " pool…",
+      "warn"
+    );
+
+    const gas=await ethereum.request({
+      method:"eth_estimateGas",
+      params:[{
+        from:state.account,
+        to:cfg.factory,
+        data:createPairData
+      }]
+    });
+
+    const gasDec=parseInt(gas,16);
+
+    const paddedGas=
+      "0x"+
+      Math.ceil(gasDec*1.20).toString(16);
+
+    setLiquiditySetupStatus(
+      "Wallet approval required to create the pool. "+
+      "This creates the pair only — it does not add liquidity yet.",
+      "warn"
+    );
+
+    const txHash=await ethereum.request({
+      method:"eth_sendTransaction",
+      params:[{
+        from:state.account,
+        to:cfg.factory,
+        data:createPairData,
+        gas:paddedGas
+      }]
+    });
+
+    setLiquiditySetupStatus(
+      "Pool creation transaction sent. Waiting for confirmation…",
+      "warn"
+    );
+
+    await waitReceipt(txHash);
+
+    setLiquiditySetupStatus(
+      "Pool transaction confirmed. Verifying pool…",
+      "warn"
+    );
+
+    state.liquiditySetup={
+      pair:null,
+      status:"idle"
+    };
+
+    await checkLiquidityPool();
+
+  }catch(e){
+    setLiquiditySetupStatus(
+      "Create Pool failed: "+(e.message||e),
+      "bad"
+    );
+
+  }finally{
+    if(btn){
+      btn.disabled=false;
+      btn.textContent="Create Pool";
+    }
+
+    renderLiquiditySetup();
+  }
 }
 
 async function checkLiquidityPool(){
@@ -2251,6 +2472,11 @@ if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||nu
 $("checkLiquidityPoolBtn")?.addEventListener(
   "click",
   checkLiquidityPool
+);
+
+$("createLiquidityPoolBtn")?.addEventListener(
+  "click",
+  createLiquidityPool
 );
 
 $("chain")?.addEventListener(
