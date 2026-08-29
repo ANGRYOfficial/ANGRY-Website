@@ -835,7 +835,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
           <div class="type-grid">
             <button class="type active" type="button" data-type="standard" data-fee-usd="5.99"><div class="type-top"><span class="type-icon">S</span><b>Standard</b></div><p>Simple token with no tax, extra mint or admin mechanics.</p><span class="status-badge ready">Deploy ready</span></button>
-            <button class="type" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Holder reflection, liquidity reserve and creator fee rules.</p><span class="status-badge">TESTNET</span></button>
+            <button class="type" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">L</span><b>Liquidity</b></div><p>Reflection, auto liquidity, creator fee and burn.</p><span class="status-badge">TESTNET</span></button>
             <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="status-badge">TESTNET</span></button>
           </div>
         </div>
@@ -850,7 +850,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
             <div class="field"><label for="symbol">Symbol</label><input id="symbol" value="" maxlength="10" autocomplete="off"></div>
             <div class="field"><label for="supply">Total supply</label><input id="supply" type="number" value="" min="1" step="1"></div>
             <div class="field"><label>Decimals</label><input value="18" readonly></div>
-            <div class="field-help">The Standard beta mints the full supply once to the deployer wallet.</div>
+            <div class="field-help">The full token supply is minted once to the deployer wallet.</div>
 
 <div class="token-profile-box">
   <div class="token-profile-head">
@@ -941,7 +941,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
             <div class="field">
               <label for="holderFee" id="holderFeeLabel">Holder Reflection (%)</label>
               <input id="holderFee" type="number" value="" min="0" max="5" step="0.1">
-              <div class="mini-help" id="holderFeeHelp">Distributed to eligible holders in the token itself.</div>
+              <div class="mini-help" id="holderFeeHelp">Distributed automatically to eligible token holders.</div>
             </div>
 
             <div class="field">
@@ -953,7 +953,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
             <div class="field">
               <label for="projectFee">Project / Creator (%)</label>
               <input id="projectFee" type="number" value="" min="0" max="5" step="0.1">
-              <div class="mini-help">Allocated to the creator/project fee wallet.</div>
+              <div class="mini-help">Sent automatically to the creator / project wallet.</div>
             </div>
 
             <div class="field">
@@ -1305,9 +1305,9 @@ function updateFeeModeUI(){
   const sub=$("feeSectionSub");
   if(state.type==="liquidity"){
     if(label)label.textContent="Holder Reflection (%)";
-    if(help)help.textContent="Distributed to eligible holders in the token itself.";
-    if(title)title.textContent="Liquidity fee rules";
-    if(sub)sub.textContent="Plan reflection, automatic liquidity, true burn and creator allocation.";
+    if(help)help.textContent="Distributed automatically to eligible token holders.";
+    if(title)title.textContent="Liquidity Token Rules";
+    if(sub)sub.textContent="Choose how transaction fees are distributed.";
   }else if(state.type==="reward"){
     if(label)label.textContent="Reward Distribution (%)";
     if(help)help.textContent="Used to generate the selected reward asset for eligible holders.";
@@ -1762,7 +1762,38 @@ async function deployToken(){
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
     state.lastContract=receipt.contractAddress;renderPreview();
-    setStatus(`✅ Test token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
+    if(state.type==="liquidity"){
+setStatus(
+`✅ Token created successfully on ${c.name}.<br>
+Contract: <b>${receipt.contractAddress}</b><br><br>
+
+<b>Next step — Initial Liquidity</b><br>
+100% of the token supply is in your wallet.<br>
+Create the first TOKEN / ETH liquidity pool on Uniswap V2.<br>
+After the initial pool exists, Auto Liquidity works automatically.<br><br>
+
+<a class="link" target="_blank" rel="noopener"
+href="https://app.uniswap.org/positions/create/v2">
+Open Uniswap V2
+</a>
+&nbsp;•&nbsp;
+<a class="link" target="_blank" rel="noopener"
+href="${c.explorer}/address/${receipt.contractAddress}">
+View contract
+</a>`,
+"good"
+);
+}else{
+setStatus(
+`✅ Test token deployed on ${c.name}.<br>
+Contract: <b>${receipt.contractAddress}</b><br>
+<a class="link" target="_blank" rel="noopener"
+href="${c.explorer}/address/${receipt.contractAddress}">
+Open network explorer
+</a>`,
+"good"
+);
+}
   }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
   finally{btn.disabled=false}
 }
