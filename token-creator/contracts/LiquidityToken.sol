@@ -14,6 +14,21 @@ pragma solidity ^0.8.24;
  * Liquidity reserve is NOT automatically deposited to a DEX yet.
  * DEX-router integration is added separately per supported network.
  */
+interface IAngryLiquidityRouter {
+    function factory() external view returns (address);
+    function WETH() external view returns (address);
+}
+
+interface IAngryLiquidityFactory {
+    function getPair(
+        address tokenA,
+        address tokenB
+    )
+        external
+        view
+        returns (address);
+}
+
 interface IAngryLiquidityPair {
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -199,6 +214,30 @@ contract AngryLiquidityTokenTest {
         require(
             wrappedNative_.code.length > 0,
             "Wrapped native must be contract"
+        );
+
+        IAngryLiquidityRouter router =
+            IAngryLiquidityRouter(router_);
+
+        require(
+            router.factory() == factory_,
+            "Router factory mismatch"
+        );
+
+        require(
+            router.WETH() == wrappedNative_,
+            "Router wrapped native mismatch"
+        );
+
+        IAngryLiquidityFactory factory =
+            IAngryLiquidityFactory(factory_);
+
+        require(
+            factory.getPair(
+                address(this),
+                wrappedNative_
+            ) == pair_,
+            "Pair not registered in factory"
         );
 
         IAngryLiquidityPair pair =
