@@ -1221,7 +1221,7 @@ const CHAINS = {
   polygonAmoy:{name:"Polygon Amoy",family:"evm",chainId:"0x13882",chainIdDec:80002,native:"POL",nativeSymbol:"POL",rpc:"https://rpc-amoy.polygon.technology",explorer:"https://amoy.polygonscan.com",deploy:false},
   solanaDevnet:{name:"Solana Devnet",family:"solana",chainId:null,chainIdDec:null,native:"SOL",nativeSymbol:"SOL",rpc:"https://api.devnet.solana.com",explorer:"https://explorer.solana.com/?cluster=devnet",deploy:false}
 };
-const state={type:"standard",rewardAsset:"usdt",customReward:{status:"idle",address:"",chainKey:"",meta:null,message:""},account:null,lastContract:null,lastContractChain:null,lastContractType:null,liquiditySetup:{pair:null,status:"idle"}};
+const state={type:"standard",rewardAsset:"usdt",customReward:{status:"idle",address:"",chainKey:"",meta:null,message:""},account:null,lastContract:null,lastContractChain:null,lastContractType:null,lastLiquidityFee:null,liquiditySetup:{pair:null,status:"idle"}};
 
 function setStatus(text,kind=""){
   const s=$("status"); s.className="status"+(kind?" "+kind:""); s.innerHTML=text;
@@ -1230,6 +1230,80 @@ function n(id){const v=parseFloat($(id)?.value||"0");return Number.isFinite(v)?v
 function calcFees(){if(state.type==="standard")return 0;return n("holderFee")+n("lpFee")+n("projectFee")+n("burnFee")}
 function feeStatus(){const t=calcFees();$("totalFee").textContent=(Math.round(t*100)/100)+"%";$("totalFee").className="total "+(t<=1?"good":t<=2?"warn":"bad");$("feeMessage").textContent=t<=1?"Low-fee target.":t<=2?"Moderate fee.":"High fee — review before future deployment."}
 function selectedChain(){return CHAINS[$("chain").value]}
+
+const LIQUIDITY_SESSION_KEY="angryLiquiditySessionV1";
+
+function saveLiquiditySession(){
+  try{
+    if(
+      !state.lastContract ||
+      state.lastContractType!=="liquidity" ||
+      !state.lastContractChain
+    ){
+      return;
+    }
+
+    localStorage.setItem(
+      LIQUIDITY_SESSION_KEY,
+      JSON.stringify({
+        lastContract:state.lastContract,
+        lastContractChain:state.lastContractChain,
+        lastContractType:state.lastContractType,
+        lastLiquidityFee:
+          Number.isFinite(Number(state.lastLiquidityFee))
+            ? Number(state.lastLiquidityFee)
+            : 0,
+        liquiditySetup:{
+          pair:state.liquiditySetup?.pair || null,
+          status:state.liquiditySetup?.status || "idle"
+        }
+      })
+    );
+  }catch(e){
+    console.warn("Liquidity session save failed",e);
+  }
+}
+
+function loadLiquiditySession(){
+  try{
+    const raw=localStorage.getItem(LIQUIDITY_SESSION_KEY);
+
+    if(!raw)return null;
+
+    const saved=JSON.parse(raw);
+
+    if(
+      !saved ||
+      !isEvmAddress(saved.lastContract) ||
+      !CHAINS[saved.lastContractChain] ||
+      saved.lastContractType!=="liquidity"
+    ){
+      return null;
+    }
+
+    state.lastContract=saved.lastContract;
+    state.lastContractChain=saved.lastContractChain;
+    state.lastContractType="liquidity";
+    state.lastLiquidityFee=
+      Number.isFinite(Number(saved.lastLiquidityFee))
+        ? Number(saved.lastLiquidityFee)
+        : 0;
+
+    state.liquiditySetup={
+      pair:isEvmAddress(saved?.liquiditySetup?.pair)
+        ? saved.liquiditySetup.pair
+        : null,
+      status:String(saved?.liquiditySetup?.status || "idle")
+    };
+
+    return saved;
+
+  }catch(e){
+    console.warn("Liquidity session restore failed",e);
+    return null;
+  }
+}
+
 
 const LIQUIDITY_DEX_CONFIG = {
   sepolia:{
@@ -1462,6 +1536,7 @@ async function createLiquidityPool(){
         status:"good"
       };
 
+      saveLiquiditySession();
       renderLiquiditySetup();
 
       setLiquiditySetupStatus(
@@ -1648,6 +1723,7 @@ async function checkLiquidityPool(){
         status:"missing"
       };
 
+      saveLiquiditySession();
       renderLiquiditySetup();
 
       setLiquiditySetupStatus(
@@ -1724,6 +1800,7 @@ async function checkLiquidityPool(){
       status:"good"
     };
 
+    saveLiquiditySession();
     renderLiquiditySetup();
 
     setLiquiditySetupStatus(
@@ -2432,7 +2509,10 @@ async function deployToken(){
     state.lastContract=receipt.contractAddress;
     state.lastContractChain=$("chain").value;
     state.lastContractType=state.type;
+    state.lastLiquidityFee=
+      state.type==="liquidity" ? n("lpFee") : null;
     state.liquiditySetup={pair:null,status:"idle"};
+    saveLiquiditySession();
     renderPreview();
     renderLiquiditySetup();
     setStatus(`✅ Test token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
@@ -2509,7 +2589,43 @@ $("lpFee")?.addEventListener(
   renderLiquiditySetup
 );
 
-updateChain();setType("standard");renderPreview();
+const restoredLiquiditySession=loadLiquiditySession();
+
+if(
+  restoredLiquiditySession &&
+  CHAINS[restoredLiquiditySession.lastContractChain]
+){
+  $("chain").value=
+    restoredLiquiditySession.lastContractChain;
+}
+
+updateChain();
+
+if(restoredLiquiditySession){
+  setType("liquidity");
+
+  if(
+    $("lpFee") &&
+    Number(restoredLiquiditySession.lastLiquidityFee)>0
+  ){
+    $("lpFee").value=
+      String(restoredLiquiditySession.lastLiquidityFee);
+  }
+
+  renderPreview();
+  renderLiquiditySetup();
+
+  setLiquiditySetupStatus(
+    state.liquiditySetup.pair
+      ? "Previous liquidity setup restored. Tap Check Pool to re-verify."
+      : "Previous Liquidity token restored. Tap Check Pool to continue.",
+    "good"
+  );
+
+}else{
+  setType("standard");
+  renderPreview();
+}
 </script>
 
 
