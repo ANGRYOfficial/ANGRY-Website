@@ -1373,6 +1373,76 @@ footer{
 
 </style>
 
+
+<style id="angry-public-simple-checker-v1">
+.angry-simple-checker .checker-label-row{margin-bottom:8px;}
+.angry-simple-checker>p{max-width:720px;margin-bottom:16px;}
+.angry-simple-ca-wrap{margin-top:0;}
+.angry-auto-network{color:#c9c9c9!important;}
+.angry-auto-dot{width:7px;height:7px;border-radius:50%;background:#ff5a1f;display:inline-block;box-shadow:0 0 0 3px rgba(255,90,31,.12);}
+.angry-auto-status{margin-top:10px;color:#888;font-size:.82rem;line-height:1.45;min-height:19px;}
+.angry-auto-status.is-working{color:#ff8a61;}
+.angry-auto-status.is-error{color:#ff7a7a;}
+.angry-auto-status.is-ready{color:#bdbdbd;}
+@media (max-width:640px){
+  .angry-simple-checker{padding:18px!important;}
+  .angry-simple-checker .checker-label-row{align-items:center;}
+  .angry-simple-checker .network-mini{font-size:.68rem;}
+}
+</style>
+
+<style id="angry-one-report-preview-style">
+/* ANGRY PUBLIC ONE-REPORT PREVIEW */
+.tool-jump-wrap{display:none!important;}
+.checker{margin-bottom:18px!important;}
+.analysis-modules{margin-top:18px!important;display:block!important;}
+.analysis-modules>.module-title{display:block!important;margin-bottom:12px!important;}
+.analysis-modules>.module-title h3{font-size:1.45rem!important;margin:0 0 5px!important;}
+.analysis-modules>.module-title p{margin:0!important;color:#929292!important;}
+.analysis-modules>.tool{display:block!important;margin:0 0 12px!important;padding:20px!important;border-radius:18px!important;background:#111!important;border:1px solid #292929!important;}
+.analysis-modules>.tool>strong{display:block!important;font-size:1.08rem!important;margin-bottom:5px!important;}
+.analysis-modules>.tool>small{display:block!important;color:#8f8f8f!important;line-height:1.5!important;}
+.analysis-modules>.tool>button{display:none!important;}
+#mod-holders,#mod-history,#mod-relations,#mod-timeline,#mod-cross{display:none!important;}
+#result{margin-top:18px!important;}
+.angry-public-report-note{margin:8px 0 0;color:#777;font-size:.8rem;line-height:1.5;}
+.angry-auto-status{margin-top:10px!important;}
+@media(max-width:640px){
+  .analysis-modules>.tool{padding:16px!important;border-radius:15px!important;}
+}
+</style>
+
+<style id="angry-single-card-public-style">
+#mod-burn,
+#mod-liquidity,
+#mod-holders{
+  display:none!important;
+}
+#angry-inline-burn > #burnResult > div,
+#angry-inline-liquidity > #liquidityResult > div{
+  padding:0!important;
+  background:transparent!important;
+  border-radius:0!important;
+}
+#angry-inline-burn #burnResult,
+#angry-inline-liquidity #liquidityResult{
+  color:#e9e9e9;
+}
+.angry-public-output-moved{display:none!important;}
+</style>
+
+
+<style id="angry-single-card-extra-style">
+#mod-creator,
+#mod-kol{
+  display:none!important;
+}
+#angry-inline-creator > #creatorResult > div,
+#angry-inline-kol > #kolPromotionResult > div{
+  padding-left:0!important;
+  padding-right:0!important;
+}
+</style>
 </head>
 
 <body>
@@ -1405,8 +1475,7 @@ footer{
     </h1>
 
     <p class="intro">
-      Check token activity, holders, liquidity, creator history
-      and other important on-chain information from one place.
+      Paste a contract address once. ANGRY automatically detects the network and shows the public token report in one place.
     </p>
 
   </div>
@@ -1420,68 +1489,50 @@ footer{
           <a href="#mod-relations">Relations</a><a href="#mod-timeline">Timeline</a><a href="#mod-kol">KOL</a><a href="#mod-cross">Cross-Token</a>
         </div>
       </div>
-      <section id="token-checker" class="checker">
+      <section id="token-checker" class="checker angry-simple-checker">
         <div class="checker-label-row">
           <h2>Token Checker</h2>
-          <span class="network-mini"><img class="angry-network-logo" src="../assets/networks/solana.svg" alt="" aria-hidden="true"> Solana</span>
+          <span class="network-mini angry-auto-network"><span class="angry-auto-dot"></span> Auto detect</span>
         </div>
-        <p>Enter a token contract address to start the analysis.</p>
-        <div class="angry-network-picker" aria-label="Select blockchain network">
-          <div class="angry-network-picker-label">Network</div>
-          <div class="angry-network-tabs" role="group" aria-label="Blockchain network">
-            <button type="button" class="angry-network-btn active" data-network="solana" aria-pressed="true" onclick="angrySetNetwork('solana')"><img class="angry-network-logo" src="../assets/networks/solana.svg" alt="" aria-hidden="true">Solana</button>
-            <button type="button" class="angry-network-btn" data-network="ethereum" aria-pressed="false" onclick="angrySetNetwork('ethereum')"><img class="angry-network-logo" src="../assets/networks/ethereum.svg" alt="" aria-hidden="true">Ethereum</button>
-            <button type="button" class="angry-network-btn" data-network="base" aria-pressed="false" onclick="angrySetNetwork('base')"><img class="angry-network-logo" src="../assets/networks/base.svg" alt="" aria-hidden="true">Base</button>
-            <button type="button" class="angry-network-btn" data-network="arbitrum" aria-pressed="false" onclick="angrySetNetwork('arbitrum')"><img class="angry-network-logo" src="../assets/networks/arbitrum.png" alt="" aria-hidden="true">Arbitrum</button>
-            <button type="button" class="angry-network-btn" data-network="bsc" aria-pressed="false" onclick="angrySetNetwork('bsc')"><img class="angry-network-logo" src="../assets/networks/bsc.svg" alt="" aria-hidden="true">BSC</button>
-            <button type="button" class="angry-network-btn" data-network="robinhood" aria-pressed="false" onclick="angrySetNetwork('robinhood')"><img class="angry-network-logo" src="../assets/networks/robinhood.jpg" alt="" aria-hidden="true">Robinhood</button>
-          </div>
-        </div>
+        <p>Paste a token contract address. ANGRY detects the network and starts automatically.</p>
 
-        <div class="ca-input-wrap">
-          <input id="contract" type="text" placeholder="Enter Solana contract address..." autocomplete="off" spellcheck="false">
-          <button class="input-clear" type="button" aria-label="Clear contract address" title="Clear contract address" onclick="clearMainContract()">×</button>
+        <div class="ca-input-wrap angry-simple-ca-wrap">
+          <input id="contract" type="text" placeholder="Paste token contract address..." autocomplete="off" spellcheck="false" inputmode="text">
+          <button class="input-clear" type="button" aria-label="Clear contract address" title="Clear contract address" onclick="clearMainContract(); angryResetAutoChecker();">×</button>
         </div>
-        <div class="checker-hint">
-          <span>One CA powers all single-token modules below.</span>
-          <span>Cross-Token accepts a second CA.</span>
-        </div>
-        <button onclick="checkToken()">ANALYZE TOKEN</button>
+        <div id="angryAutoStatus" class="angry-auto-status" aria-live="polite">Supports Solana, Ethereum, Base, Arbitrum, BSC and Robinhood Chain.</div>
         <div id="result"></div>
       </section>
 
       <section class="analysis-modules">
-        <div class="module-title">
-          <h3>Analysis <span class="orange">Modules</span></h3>
-          <p>Open the checks you need for deeper token research.</p>
-        </div>
+        
 
         <div class="tool" id="mod-burn">
-          <strong>Token Burn</strong>
-          <small>Check burn activity and current token supply.</small>
+          <strong>Supply Analysis</strong>
+          <small>Check current token supply with lightweight RPC data.</small>
           <button style="margin-top:15px;" onclick="analyzeBurns()">Check Burn</button>
-          <div id="burnResult" style="display:none;margin-top:15px;"></div>
+          <div class="angry-public-output-moved">Burn output is shown in the token summary.</div>
         </div>
 
         <div class="tool" id="mod-liquidity">
-          <strong>Liquidity</strong>
+          <strong>Liquidity Analysis</strong>
           <small>Check liquidity, pool concentration and trading activity.</small>
           <button style="margin-top:15px;" onclick="analyzeLiquidity()">Check Liquidity</button>
-          <div id="liquidityResult" style="display:none;margin-top:15px;"></div>
+          <div class="angry-public-output-moved">Liquidity output is shown in the token summary.</div>
         </div>
 
         <div class="tool" id="mod-holders">
-          <strong>Holders</strong>
+          <strong>Holder Analysis</strong>
           <small>Review major holders and token concentration.</small>
           <button style="margin-top:15px;" onclick="analyzeHolders()">Check Holders</button>
           <div id="holderResult" style="display:none;margin-top:15px;"></div>
         </div>
 
         <div class="tool" id="mod-creator">
-          <strong>Creator Wallet</strong>
+          <strong>Creator / Deployer</strong>
           <small>Review the detected creator or deployer wallet.</small>
           <button style="margin-top:15px;" onclick="analyzeCreator()">Check Creator</button>
-          <div id="creatorResult" style="display:none;margin-top:15px;"></div>
+          <div class="angry-public-output-moved">Creator output is shown in the token summary.</div>
         </div>
 
         <div class="tool" id="mod-history">
@@ -1506,19 +1557,17 @@ footer{
         </div>
 
         <div class="tool" id="mod-kol">
-          <strong>KOL / Promotion</strong>
+          <strong>KOL / Promotion Activity</strong>
           <small>
-            Check public KOL trading and promotion signals connected to this token.
-            KOL activity is informational and does not by itself indicate fraud or a scam.
+            Review detected public promotion signals connected to this token.
+            Promotion activity is informational and is not a scam signal by itself.
           </small>
-
-          <div class="kol-note">Promotion activity is informational and is not a scam signal by itself.</div>
 
           <button style="margin-top:15px;" onclick="analyzeKolPromotion()">
             Check Promotion
           </button>
 
-          <div id="kolPromotionResult" style="display:none;margin-top:15px;"></div>
+          <div class="angry-public-output-moved">KOL output is shown in the token summary.</div>
         </div>
 
 
@@ -1697,6 +1746,118 @@ footer{
   });
 
 
+
+// ============================================================
+// ANGRY SOLANA SECURITY RPC FALLBACK
+// Authorization Analysis should not depend only on Helius.
+// Order:
+// 1) ANGRY/Helius Worker (uses existing cache when available)
+// 2) PublicNode Solana RPC
+// 3) Solana public mainnet RPC
+//
+// This fallback is ONLY for lightweight standard JSON-RPC reads.
+// Heavy history / creator scans remain separate.
+// ============================================================
+async function angryFetchSolanaMintAccount(contract) {
+  const payload = {
+    jsonrpc: "2.0",
+    id: 30,
+    method: "getAccountInfo",
+    params: [
+      contract,
+      {
+        encoding: "jsonParsed",
+        commitment: "confirmed"
+      }
+    ]
+  };
+
+  const endpoints = [
+    {
+      name: "ANGRY RPC",
+      url: HELIUS_PROXY_URL,
+      smart: true
+    },
+    {
+      name: "PublicNode",
+      url: "https://solana-rpc.publicnode.com",
+      smart: false
+    },
+    {
+      name: "Solana Public RPC",
+      url: "https://api.mainnet-beta.solana.com",
+      smart: false
+    }
+  ];
+
+  let lastError = "No RPC endpoint returned token security data.";
+
+  for (const endpoint of endpoints) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 7000);
+
+    try {
+      const fetcher =
+        endpoint.smart && typeof angrySmartFetch === "function"
+          ? angrySmartFetch
+          : (typeof ANGRY_NATIVE_FETCH === "function"
+              ? ANGRY_NATIVE_FETCH
+              : window.fetch.bind(window));
+
+      const response = await fetcher(endpoint.url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        lastError = `${endpoint.name} HTTP ${response.status}`;
+        continue;
+      }
+
+      const data = await response.json();
+
+      if (data?.error) {
+        lastError =
+          `${endpoint.name}: ${data.error?.message || "RPC error"}`;
+        continue;
+      }
+
+      const mintAccount = data?.result?.value || null;
+      const mintInfo = mintAccount?.data?.parsed?.info || null;
+
+      if (mintAccount && mintInfo) {
+        return {
+          ok: true,
+          source: endpoint.name,
+          data,
+          mintAccount,
+          mintInfo
+        };
+      }
+
+      lastError = `${endpoint.name}: mint account was not returned.`;
+    } catch (error) {
+      lastError =
+        `${endpoint.name}: ${error?.name === "AbortError" ? "request timed out" : (error?.message || "failed to fetch")}`;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  return {
+    ok: false,
+    source: "",
+    error: lastError,
+    data: null,
+    mintAccount: null,
+    mintInfo: null
+  };
+}
+
 async function checkToken() {
   const contract = document.getElementById("contract").value.trim();
   const result = document.getElementById("result");
@@ -1733,34 +1894,15 @@ async function checkToken() {
       mintAuthority: undefined,
       freezeAuthority: undefined,
       decimals: undefined,
-      extensions: []
+      extensions: [],
+      source: "",
+      error: ""
     };
 
     try {
-      const securityRpcUrl =
-        HELIUS_PROXY_URL;
-
-      const mintAccountResponse = await fetch(securityRpcUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: 30,
-          method: "getAccountInfo",
-          params: [
-            contract,
-            {
-              encoding: "jsonParsed"
-            }
-          ]
-        })
-      });
-
-      const mintAccountData = await mintAccountResponse.json();
-      const mintAccount = mintAccountData?.result?.value || null;
-      const mintInfo = mintAccount?.data?.parsed?.info || null;
+      const securityRpc = await angryFetchSolanaMintAccount(contract);
+      const mintAccount = securityRpc?.mintAccount || null;
+      const mintInfo = securityRpc?.mintInfo || null;
 
       if (mintAccount && mintInfo) {
         const ORIGINAL_TOKEN_PROGRAM =
@@ -1787,10 +1929,17 @@ async function checkToken() {
           decimals: mintInfo.decimals,
           extensions: Array.isArray(mintInfo.extensions)
             ? mintInfo.extensions
-            : []
+            : [],
+          source: securityRpc?.source || "",
+          error: ""
         };
+      } else {
+        tokenSecurity.error =
+          securityRpc?.error || "Unable to retrieve token security data.";
       }
     } catch (securityError) {
+      tokenSecurity.error =
+        securityError?.message || "Unable to retrieve token security data.";
       console.warn("Token security check unavailable:", securityError);
     }
 
@@ -1977,12 +2126,18 @@ const formatPercent = (value) => {
 
     const transferFeeExt = getMintExtension("transferFeeConfig");
     const permanentDelegateExt = getMintExtension("permanentDelegate");
+    const tokenMetadataExt = getMintExtension("tokenMetadata");
     const transferHookExt = getMintExtension("transferHook");
     const defaultStateExt = getMintExtension("defaultAccountState");
     const mintCloseExt = getMintExtension("mintCloseAuthority");
     const nonTransferableExt = getMintExtension("nonTransferable");
 
     const transferFeeState = getExtensionState(transferFeeExt);
+    const tokenMetadataState = getExtensionState(tokenMetadataExt);
+    const metadataUpdateAuthority = readStateValue(
+      tokenMetadataState,
+      ["updateAuthority", "update_authority", "authority"]
+    );
     const permanentDelegateState = getExtensionState(permanentDelegateExt);
     const transferHookState = getExtensionState(transferHookExt);
     const defaultState = getExtensionState(defaultStateExt);
@@ -2054,134 +2209,202 @@ const formatPercent = (value) => {
       </div>
     `;
 
-    const token2022ExtensionsHtml =
-      tokenSecurity.tokenProgram === "Token-2022"
-        ? `
-          <div style="margin-top:16px;padding-top:14px;border-top:1px solid #292929;">
-            <div style="font-size:17px;font-weight:bold;margin-bottom:8px;">
-              🧩 Token-2022 Extensions
-            </div>
+    const authStatusRow = (ok, label, detail = "") => `
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;">
+        <span style="
+          width:24px;height:24px;min-width:24px;border-radius:50%;
+          border:2px solid ${ok === true ? "#59c98b" : ok === false ? "#ff6b5f" : "#777"};
+          color:${ok === true ? "#59c98b" : ok === false ? "#ff6b5f" : "#aaa"};
+          display:inline-flex;align-items:center;justify-content:center;
+          font-weight:900;font-size:14px;line-height:1;
+        ">${ok === true ? "✓" : ok === false ? "×" : "?"}</span>
+        <div style="line-height:1.45;">
+          <div>${label}</div>
+          ${detail ? `<div style="font-size:12px;color:#888;margin-top:2px;">${detail}</div>` : ""}
+        </div>
+      </div>
+    `;
 
-            ${
-              extensionList.length === 0
-                ? `
-                  <div style="color:#888;font-size:13px;">
-                    No mint extensions reported by the RPC.
-                  </div>
-                `
-                : `
-                  ${extensionRow(
-                    "Transfer Fee",
-                    transferFeeExt
-                      ? (
-                          '<span style="color:#ff9f1a;">⚠️ Configured</span>' +
-                          (transferFeePercent
-                            ? '<div style="font-size:13px;color:#ddd;margin-top:3px;">Fee: ' +
-                              transferFeePercent + '</div>'
-                            : '') +
-                          '<div style="font-size:12px;color:#888;margin-top:5px;">Update authority: ' +
-                          (transferFeeConfigAuthority
-                            ? shortSecurityAddress(transferFeeConfigAuthority)
-                            : 'None / Disabled') +
-                          '</div>' +
-                          '<div style="font-size:12px;color:#888;margin-top:2px;">Withdraw authority: ' +
-                          (withdrawWithheldAuthority
-                            ? shortSecurityAddress(withdrawWithheldAuthority)
-                            : 'None / Disabled') +
-                          '</div>'
-                        )
-                      : '<span style="color:#7ac943;">✅ None</span>'
-                  )}
+    const securityAvailable = tokenSecurity.available === true;
 
-                  ${extensionRow(
-                    "Permanent Delegate",
-                    permanentDelegateExt
-                      ? extensionAuthorityText(permanentDelegateAddress)
-                      : '<span style="color:#7ac943;">✅ None</span>'
-                  )}
+    const mintDisabled = securityAvailable ? tokenSecurity.mintAuthority === null : null;
+    const freezeDisabled = securityAvailable ? tokenSecurity.freezeAuthority === null : null;
+    const transferFeeDisabled = securityAvailable ? !transferFeeExt : null;
+    const permanentDelegateDisabled = securityAvailable
+      ? (!permanentDelegateExt ||
+         permanentDelegateAddress === null ||
+         permanentDelegateAddress === undefined ||
+         permanentDelegateAddress === "")
+      : null;
 
-                  ${extensionRow(
-                    "Transfer Hook",
-                    transferHookExt
-                      ? (
-                          '<span style="color:#ff9f1a;">⚠️ Active</span>' +
-                          (transferHookProgram
-                            ? '<div style="font-size:12px;color:#888;margin-top:3px;">Program: ' +
-                              shortSecurityAddress(transferHookProgram) +
-                              '</div>'
-                            : '')
-                        )
-                      : '<span style="color:#7ac943;">✅ None</span>'
-                  )}
+    let metadataAuthorityOk = null;
+    let metadataAuthorityLabel = "Metadata update authority";
+    let metadataAuthorityDetail = "";
 
-                  ${extensionRow(
-                    "Default Account State",
-                    defaultStateExt
-                      ? (
-                          '<span style="color:#ff9f1a;">⚠️ Configured</span>' +
-                          '<div style="font-size:13px;color:#ddd;margin-top:3px;">' +
-                          String(defaultAccountState ?? "Unknown") +
-                          '</div>'
-                        )
-                      : '<span style="color:#7ac943;">✅ Standard / Not configured</span>'
-                  )}
+    if (!securityAvailable) {
+      metadataAuthorityOk = null;
+      metadataAuthorityLabel = "Metadata update authority — unable to verify";
+      metadataAuthorityDetail = "Token security data is currently unavailable.";
+    } else if (tokenSecurity.tokenProgram === "Token-2022" && tokenMetadataExt) {
+      metadataAuthorityOk =
+        metadataUpdateAuthority === null ||
+        metadataUpdateAuthority === undefined ||
+        metadataUpdateAuthority === "";
+      metadataAuthorityLabel = metadataAuthorityOk
+        ? "Metadata update authority is disabled"
+        : "Metadata can still be updated";
+      metadataAuthorityDetail = metadataAuthorityOk
+        ? ""
+        : shortSecurityAddress(String(metadataUpdateAuthority));
+    } else {
+      metadataAuthorityLabel = "Metadata update authority not verified";
+      metadataAuthorityDetail =
+        "ANGRY does not guess this value when it is not exposed by the mint account.";
+    }
 
-                  ${extensionRow(
-                    "Mint Close Authority",
-                    mintCloseExt
-                      ? extensionAuthorityText(mintCloseAuthority)
-                      : '<span style="color:#7ac943;">✅ None</span>'
-                  )}
+    const swapFeeOk =
+      transferFeeDisabled === null
+        ? null
+        : transferFeeDisabled
+          ? true
+          : (Number.isFinite(transferFeeBps) ? transferFeeBps <= 500 : null);
 
-                  ${extensionRow(
-                    "Non-Transferable",
-                    nonTransferableExt
-                      ? '<span style="color:#ff4d4d;">⚠️ Enabled</span>'
-                      : '<span style="color:#7ac943;">✅ No</span>'
-                  )}
+    const swapFeeLabel =
+      transferFeeDisabled === null
+        ? "Transfer fee — unable to verify"
+        : transferFeeDisabled
+          ? "Transfer fee acceptable (0%)"
+          : Number.isFinite(transferFeeBps)
+            ? (transferFeeBps <= 500
+                ? `Transfer fee acceptable (${transferFeePercent || "configured"})`
+                : `Transfer fee high (${transferFeePercent || "configured"})`)
+            : "Transfer fee is configured";
 
-                  ${
-                    otherExtensions.length > 0
-                      ? `
-                        <div style="padding-top:10px;">
-                          <div style="font-weight:bold;margin-bottom:6px;">
-                            Other Extensions
-                          </div>
-                          ${otherExtensions.map(ext => `
-                            <div style="
-                              display:inline-block;
-                              padding:5px 8px;
-                              margin:0 5px 5px 0;
-                              border:1px solid #333;
-                              border-radius:8px;
-                              color:#bbb;
-                              font-size:12px;
-                            ">
-                              ${formatExtensionLabel(ext?.extension)}
-                            </div>
-                          `).join("")}
-                        </div>
-                      `
-                      : ''
-                  }
+    const authorizationHtml = `
+      <div style="margin-top:18px;padding:16px;background:#101010;border-radius:12px;">
+        <div style="font-size:19px;font-weight:900;margin-bottom:8px;">
+          Swap Analysis
+        </div>
+        ${authStatusRow(
+          swapFeeOk,
+          swapFeeLabel,
+          swapFeeOk === null
+            ? "Token security data is currently unavailable."
+            : swapFeeOk
+              ? ""
+              : "Transfer fees above 5% may materially affect swaps and transfers."
+        )}
 
-                  <div style="margin-top:12px;font-size:12px;line-height:1.5;color:#777;">
-                    Extensions describe additional Token-2022 behavior.
-                    An active extension is information or a risk signal,
-                    not proof that a token is a scam.
-                  </div>
-                `
-            }
+        <div style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="font-size:19px;font-weight:900;margin-bottom:8px;">
+            Authorization Analysis
           </div>
-        `
-        : "";
+        ${authStatusRow(
+          mintDisabled,
+          mintDisabled === null ? "Mint authority — unable to verify" :
+          mintDisabled ? "Mint authority is disabled" : "Mint authority is still active",
+          mintDisabled === null ? "Token security data is currently unavailable." :
+          mintDisabled ? "" : shortSecurityAddress(String(tokenSecurity.mintAuthority || "Unknown"))
+        )}
+        ${authStatusRow(
+          freezeDisabled,
+          freezeDisabled === null ? "Freeze authority — unable to verify" :
+          freezeDisabled ? "Freeze authority is disabled" : "Freeze authority is still active",
+          freezeDisabled === null ? "Token security data is currently unavailable." :
+          freezeDisabled ? "" : shortSecurityAddress(String(tokenSecurity.freezeAuthority || "Unknown"))
+        )}
+        ${authStatusRow(
+          metadataAuthorityOk,
+          metadataAuthorityLabel,
+          metadataAuthorityDetail
+        )}
+        ${authStatusRow(
+          permanentDelegateDisabled,
+          permanentDelegateDisabled === null ? "Permanent delegate — unable to verify" :
+          permanentDelegateDisabled ? "Permanent delegate is disabled" : "Permanent delegate is active",
+          permanentDelegateDisabled === null ? "Token security data is currently unavailable." :
+          permanentDelegateDisabled ? "" : shortSecurityAddress(String(permanentDelegateAddress || "Present"))
+        )}
+        ${authStatusRow(
+          transferFeeDisabled,
+          transferFeeDisabled === null ? "Transfer fee — unable to verify" :
+          transferFeeDisabled ? "Transfer fee acceptable (0%)" : `Transfer fee is configured${transferFeePercent ? ` (${transferFeePercent})` : ""}`,
+          transferFeeDisabled === null ? "Token security data is currently unavailable." :
+          transferFeeDisabled ? "" : "Token-2022 transfer fee configuration detected."
+        )}
+        ${authStatusRow(
+          securityAvailable ? !transferHookExt : null,
+          !securityAvailable ? "Transfer hook — unable to verify" :
+          !transferHookExt ? "Transfer hook is disabled" : "Transfer hook is configured",
+          !securityAvailable ? "Token security data is currently unavailable." :
+          !transferHookExt ? "" : "Token-2022 transfer hook extension detected."
+        )}
+        ${authStatusRow(
+          securityAvailable ? !mintCloseExt : null,
+          !securityAvailable ? "Mint close authority — unable to verify" :
+          !mintCloseExt ? "Mint close authority is disabled" : "Mint close authority is configured",
+          !securityAvailable ? "Token security data is currently unavailable." :
+          !mintCloseExt ? "" : "Token-2022 mint close authority extension detected."
+        )}
+        ${authStatusRow(
+          securityAvailable ? !nonTransferableExt : null,
+          !securityAvailable ? "Transferability — unable to verify" :
+          !nonTransferableExt ? "Token is transferable" : "Token is non-transferable",
+          !securityAvailable ? "Token security data is currently unavailable." :
+          !nonTransferableExt ? "" : "Token-2022 non-transferable extension detected."
+        )}
+        ${authStatusRow(
+          securityAvailable ? !defaultStateExt : null,
+          !securityAvailable ? "Default account state — unable to verify" :
+          !defaultStateExt ? "Default account state is standard" : `Default account state is configured (${String(defaultAccountState ?? "Unknown")})`,
+          !securityAvailable ? "Token security data is currently unavailable." :
+          !defaultStateExt ? "" : "Token-2022 default account state extension detected."
+        )}
+        <div style="margin-top:10px;color:#777;font-size:12px;line-height:1.5;">
+          These are automated on-chain checks. A green result is not a guarantee that a token is safe.
+        </div>
+        </div>
+
+        <div id="angry-inline-holder" style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="font-size:19px;font-weight:900;margin-bottom:8px;">Holder Analysis</div>
+          <div style="color:#888;font-size:13px;line-height:1.5;">Loading lightweight holder concentration…</div>
+        </div>
+        <div id="angry-inline-burn" style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="font-size:19px;font-weight:900;margin-bottom:6px;">Supply Analysis</div>
+          <div style="color:#888;font-size:13px;line-height:1.5;">Check current token supply with lightweight RPC data.</div>
+          <div id="burnResult" style="display:none;margin-top:12px;"></div>
+        </div>
+
+        <div id="angry-inline-liquidity" style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="color:#888;font-size:13px;line-height:1.5;">Check liquidity, pool concentration and liquidity security.</div>
+          <div id="liquidityResult" style="display:none;margin-top:12px;"></div>
+        </div>
+        <div id="angry-inline-creator" style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="font-size:19px;font-weight:900;margin-bottom:6px;">Creator / Deployer</div>
+          <div style="color:#888;font-size:13px;line-height:1.5;">Review the detected creator or deployer wallet.</div>
+          <div id="creatorResult" style="display:none;margin-top:12px;"></div>
+        </div>
+
+        <div id="angry-inline-kol" style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="font-size:19px;font-weight:900;margin-bottom:6px;">KOL / Promotion Activity</div>
+          <div style="color:#888;font-size:13px;line-height:1.5;">
+            Review detected public promotion signals connected to this token.
+            Promotion activity is informational and is not a scam signal by itself.
+          </div>
+          <div id="kolPromotionResult" style="display:none;margin-top:12px;"></div>
+        </div>
+      </div>
+    `;
+
+    const token2022ExtensionsHtml = "";
 
     const securityHtml = tokenSecurity.available
       ? `
         <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-          <div><strong>⛓️ Network:</strong> Solana</div>
+          <div><strong>Network:</strong> Solana</div>
           <div><strong>Token standard:</strong> ${tokenSecurity.tokenProgram || "SPL Token"}</div>
           <div><strong>Decimals:</strong> ${tokenSecurity.decimals !== undefined ? tokenSecurity.decimals : "N/A"}</div>
+          <div><strong>Security RPC:</strong> ${tokenSecurity.source || "Available RPC"}</div>
           <div><strong>Mint Authority:</strong> ${authorityText(tokenSecurity.mintAuthority)}</div>
           <div><strong>Freeze Authority:</strong> ${authorityText(tokenSecurity.freezeAuthority)}</div>
           <div><strong>Main DEX:</strong> ${pair.dexId || "N/A"}</div>
@@ -2191,10 +2414,10 @@ const formatPercent = (value) => {
       `
       : `
         <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-          <div><strong>⛓️ Network:</strong> Solana</div>
+          <div><strong>Network:</strong> Solana</div>
           <div><strong>Main DEX:</strong> ${pair.dexId || "N/A"}</div>
           <div><strong>Pools tracked:</strong> ${pairs.length}</div>
-          <div style="margin-top:10px;color:#888;font-size:13px;">🛡️ Token security data unavailable.</div>
+          <div style="margin-top:10px;color:#888;font-size:13px;">Token security data unavailable.</div>
         </div>
       `;
 
@@ -2213,17 +2436,7 @@ const formatPercent = (value) => {
         <div style="padding:11px;background:#101010;border-radius:11px;"><strong>Transactions 24h</strong><br>${totalTxns24h.toLocaleString("en-US")}</div>
       </div>
 
-      <div style="margin-top:9px;padding:14px;background:#101010;border-radius:12px;">
-        <div style="font-weight:900;margin-bottom:10px;">📈 Price Change</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;">
-          <div style="padding:10px;background:#0b0b0b;border-radius:10px;"><strong>5m</strong><br>${formatPercent(change5m)}</div>
-          <div style="padding:10px;background:#0b0b0b;border-radius:10px;"><strong>1h</strong><br>${formatPercent(change1h)}</div>
-          <div style="padding:10px;background:#0b0b0b;border-radius:10px;"><strong>6h</strong><br>${formatPercent(change6h)}</div>
-          <div style="padding:10px;background:#0b0b0b;border-radius:10px;"><strong>24h</strong><br>${formatPercent(change24h)}</div>
-        </div>
-      </div>
-
-      ${securityHtml}
+      ${authorizationHtml}
 
       <div style="margin-top:13px;color:#888;font-size:12px;line-height:1.55;">
         Solana tokens may expose mint authority, freeze authority, and Token-2022 extensions. ANGRY shows those Solana-native controls separately so market data stays simple while security signals remain visible.
@@ -2747,710 +2960,81 @@ const formatPercent = (value) => {
 
   angryPrunePersistentCache();
 
-async function analyzeBurns(maxPages = 20) {
+async function analyzeBurns() {
   const contract = document.getElementById("contract").value.trim();
   const burnResult = document.getElementById("burnResult");
-
+  if (!burnResult) return;
   burnResult.style.display = "block";
 
   if (!contract) {
-    burnResult.innerHTML =
-      "⚠️ Please enter a Solana token contract address first.";
+    burnResult.innerHTML = "Please enter a Solana token contract address first.";
     return;
   }
 
-  const PAGE_SIZE = 100;
-  const pageLimit = Math.max(
-    1,
-    Math.min(Number(maxPages) || 20, 50)
-  );
-
-  burnResult.innerHTML =
-    "⏳ Starting burn-history scan...";
-
-  const rpcUrl =
-    HELIUS_PROXY_URL;
+  burnResult.innerHTML = "Loading supply data...";
 
   try {
-    const supplyResponse = await fetch(rpcUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 41,
-        method: "getTokenSupply",
-        params: [contract]
-      })
-    });
-
-    if (!supplyResponse.ok) {
-      throw new Error(
-        "Unable to load token supply (HTTP " +
-        supplyResponse.status + ")"
-      );
-    }
-
-    const supplyData = await supplyResponse.json();
-
-    if (supplyData.error) {
-      throw new Error(
-        supplyData.error.message || "Token supply error"
-      );
-    }
-
-    const supplyInfo = supplyData?.result?.value || {};
-    const currentSupply = Number(
-      supplyInfo?.uiAmountString ??
-      supplyInfo?.uiAmount ??
-      0
-    );
-    const supplyDecimals = Number(supplyInfo?.decimals || 0);
-
-    let paginationToken = null;
-    let previousPaginationToken = null;
-    let historyComplete = false;
-    let pagesScanned = 0;
-    const transactions = [];
-
-    for (let page = 0; page < pageLimit; page++) {
-      const historyConfig = {
-        transactionDetails: "full",
-        encoding: "jsonParsed",
-        maxSupportedTransactionVersion: 0,
-        sortOrder: "desc",
-        limit: PAGE_SIZE,
-        filters: { status: "succeeded" }
-      };
-
-      if (paginationToken) {
-        historyConfig.paginationToken = paginationToken;
-      }
-
-      const historyResponse = await fetch(rpcUrl, {
+    // Lightweight path:
+    // Browser -> ANGRY Worker -> PublicNode -> Solana public RPC fallback.
+    // This route does NOT use Helius credits.
+    const response = await fetch(
+      "https://angry-api.demiandemian147.workers.dev/api/solana-public",
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           jsonrpc: "2.0",
-          id: 40 + page,
-          method: "getTransactionsForAddress",
-          params: [contract, historyConfig]
+          id: 81,
+          method: "getTokenSupply",
+          params: [contract, { commitment: "confirmed" }]
         })
-      });
-
-      if (!historyResponse.ok) {
-        throw new Error(
-          "Unable to load transaction history (HTTP " +
-          historyResponse.status + ")"
-        );
       }
-
-      const historyData = await historyResponse.json();
-
-      if (historyData.error) {
-        throw new Error(
-          historyData.error.message ||
-          "Transaction history error"
-        );
-      }
-
-      const pageTransactions =
-        historyData?.result?.data ||
-        historyData?.result?.transactions ||
-        [];
-
-      if (!Array.isArray(pageTransactions)) {
-        throw new Error("Unexpected transaction history response");
-      }
-
-      transactions.push(...pageTransactions);
-      pagesScanned = page + 1;
-
-      burnResult.innerHTML =
-        "⏳ Scanning burn history...<br>" +
-        transactions.length.toLocaleString("en-US") +
-        " transactions checked";
-
-      const nextPaginationToken =
-        historyData?.result?.paginationToken || null;
-
-      if (!nextPaginationToken) {
-        historyComplete = true;
-        paginationToken = null;
-        break;
-      }
-
-      if (
-        nextPaginationToken === paginationToken ||
-        nextPaginationToken === previousPaginationToken
-      ) {
-        paginationToken = nextPaginationToken;
-        break;
-      }
-
-      previousPaginationToken = paginationToken;
-      paginationToken = nextPaginationToken;
-
-      if (pageTransactions.length === 0) {
-        historyComplete = true;
-        break;
-      }
-    }
-
-    const burns = [];
-
-    const readBurnAmount = (info) => {
-      if (!info || typeof info !== "object") return 0;
-
-      const uiAmount = Number(
-        info?.tokenAmount?.uiAmountString ??
-        info?.tokenAmount?.uiAmount
-      );
-
-      if (Number.isFinite(uiAmount) && uiAmount > 0) {
-        return uiAmount;
-      }
-
-      const rawAmount = Number(
-        info?.tokenAmount?.amount ??
-        info?.amount ??
-        0
-      );
-
-      const decimals = Number(
-        info?.tokenAmount?.decimals ??
-        info?.decimals ??
-        supplyDecimals
-      );
-
-      if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
-        return 0;
-      }
-
-      return rawAmount /
-        Math.pow(
-          10,
-          Number.isFinite(decimals) ? decimals : 0
-        );
-    };
-
-    const inspectInstructions = (
-      instructions,
-      signature,
-      blockTime
-    ) => {
-      if (!Array.isArray(instructions)) return;
-
-      instructions.forEach(instruction => {
-        const parsed = instruction?.parsed;
-
-        if (!parsed || typeof parsed !== "object") return;
-
-        const type = String(parsed?.type || "")
-          .replace(/[^a-z]/gi, "")
-          .toLowerCase();
-
-        if (type !== "burn" && type !== "burnchecked") {
-          return;
-        }
-
-        const info = parsed?.info || {};
-
-        if (info?.mint !== contract) {
-          return;
-        }
-
-        const amount = readBurnAmount(info);
-
-        if (amount <= 0) {
-          return;
-        }
-
-        burns.push({
-          amount,
-          signature,
-          timestamp: blockTime || null,
-          authority:
-            info?.authority ||
-            info?.multisigAuthority ||
-            info?.owner ||
-            null,
-          instructionType:
-            type === "burnchecked" ? "burnChecked" : "burn"
-        });
-      });
-    };
-
-    transactions.forEach(entry => {
-      const transaction =
-        entry?.transaction?.transaction ||
-        entry?.transaction ||
-        entry;
-
-      const meta =
-        entry?.meta ||
-        entry?.transaction?.meta ||
-        null;
-
-      const signature =
-        entry?.signature ||
-        transaction?.signatures?.[0] ||
-        entry?.transaction?.signatures?.[0] ||
-        "Unknown";
-
-      const blockTime =
-        entry?.blockTime ||
-        entry?.transaction?.blockTime ||
-        null;
-
-      const message =
-        transaction?.message ||
-        entry?.message ||
-        null;
-
-      inspectInstructions(
-        message?.instructions,
-        signature,
-        blockTime
-      );
-
-      const innerInstructionGroups =
-        meta?.innerInstructions || [];
-
-      innerInstructionGroups.forEach(group => {
-        inspectInstructions(
-          group?.instructions,
-          signature,
-          blockTime
-        );
-      });
-    });
-
-    const burnMap = new Map();
-
-    burns.forEach(item => {
-      const key =
-        item.signature + "|" +
-        String(item.authority || "unknown") + "|" +
-        String(item.instructionType || "burn");
-
-      if (burnMap.has(key)) {
-        burnMap.get(key).amount += item.amount;
-      } else {
-        burnMap.set(key, { ...item });
-      }
-    });
-
-    const detectedBurns = Array.from(burnMap.values())
-      .sort(
-        (a, b) =>
-          Number(b.timestamp || 0) -
-          Number(a.timestamp || 0)
-      );
-
-    const uniqueBurnTransactions = new Set(
-      detectedBurns
-        .map(item => item.signature)
-        .filter(signature => signature !== "Unknown")
     );
 
-    const detectedBurnTransactionCount =
-      uniqueBurnTransactions.size > 0
-        ? uniqueBurnTransactions.size
-        : detectedBurns.length;
+    if (!response.ok) throw new Error(`Supply RPC HTTP ${response.status}`);
 
-    const burnedInScan = detectedBurns.reduce(
-      (total, item) =>
-        total + Number(item.amount || 0),
-      0
-    );
+    const data = await response.json();
+    if (data?.error) throw new Error(data.error?.message || data.error || "Supply RPC unavailable");
 
-    const burnedVsCurrentSupply =
-      currentSupply > 0
-        ? (burnedInScan / currentSupply) * 100
-        : 0;
+    const value = data?.result?.value;
+    if (!value) throw new Error("No supply data returned");
 
-    const formatTokenAmount = (value) =>
-      Number(value || 0).toLocaleString("en-US", {
-        maximumFractionDigits: 6
-      });
-
-    const historyCoverageHtml = historyComplete
-      ? `
-        <span style="color:#7ac943;">
-          ✅ Complete for available mint-address history
-        </span>
-      `
-      : `
-        <span style="color:#ff9f1a;">
-          ⚠️ Partial — older history still exists
-        </span>
-      `;
-
-    const recentBurnRows =
-      detectedBurns.length > 0
-        ? detectedBurns
-            .slice(0, 5)
-            .map((burn, index) => {
-              const burnTime = burn.timestamp
-                ? new Date(burn.timestamp * 1000).toLocaleString()
-                : "Time unavailable";
-
-              const shortAuthority = burn.authority
-                ? burn.authority.slice(0, 6) +
-                  "..." +
-                  burn.authority.slice(-6)
-                : "Unknown";
-
-              return `
-                <div style="
-                  padding:10px;
-                  margin-bottom:8px;
-                  background:#101010;
-                  border-radius:10px;
-                ">
-                  <div><strong>Burn #${index + 1}</strong></div>
-                  <div style="margin-top:3px;">
-                    ${formatTokenAmount(burn.amount)} tokens
-                  </div>
-                  <div style="color:#888;font-size:12px;margin-top:4px;">
-                    Type: ${burn.instructionType}
-                  </div>
-                  <div style="color:#888;font-size:12px;margin-top:4px;">
-                    Authority: ${shortAuthority}
-                  </div>
-                  <div style="color:#888;font-size:12px;margin-top:4px;">
-                    ${burnTime}
-                  </div>
-                  ${
-                    burn.signature !== "Unknown"
-                      ? `
-                        <a
-                          href="https://solscan.io/tx/${burn.signature}"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style="
-                            display:inline-block;
-                            margin-top:6px;
-                            color:#ff4d1a;
-                            text-decoration:none;
-                            font-size:13px;
-                          "
-                        >
-                          View Transaction ↗
-                        </a>
-                      `
-                      : ""
-                  }
-                </div>
-              `;
-            })
-            .join("")
-        : `
-            <div style="
-              color:#777;
-              font-size:13px;
-              margin-top:8px;
-              line-height:1.5;
-            ">
-              ${
-                historyComplete
-                  ? "No parsed SPL Token burn or burnChecked instructions were found in the available mint-address history."
-                  : "No parsed burn was found in the " +
-                    transactions.length.toLocaleString("en-US") +
-                    " transactions scanned so far. Older history still remains."
-              }
-            </div>
-          `;
-
-    const deepScanButton =
-      !historyComplete && pageLimit < 50
-        ? `
-          <button
-            onclick="analyzeBurns(50)"
-            style="
-              margin-top:14px;
-              padding:12px 14px;
-              border:0;
-              border-radius:10px;
-              width:100%;
-              font-weight:bold;
-              cursor:pointer;
-            "
-          >
-            🔎 DEEP SCAN — UP TO 5,000 TX
-          </button>
-        `
-        : "";
+    const supply = value.uiAmountString ?? String(value.uiAmount ?? "Unavailable");
+    const numeric = Number(supply);
+    const displaySupply = Number.isFinite(numeric)
+      ? numeric.toLocaleString("en-US", {
+          maximumFractionDigits: Number(value.decimals || 9)
+        })
+      : supply;
 
     burnResult.innerHTML = `
-      <div style="
-        padding:15px;
-        background:#151515;
-        border-radius:12px;
-      ">
-        <div style="
-          font-size:20px;
-          font-weight:bold;
-          margin-bottom:14px;
-        ">
-          🔥 Token Burn Tracker
+      <div>
+        <div style="padding:8px 0;">
+          <strong>Total / Current Supply</strong><br>
+          <span>${displaySupply}</span>
         </div>
 
-        <div style="margin-bottom:8px;">
-          <strong>Current Supply:</strong><br>
-          ${formatTokenAmount(currentSupply)} tokens
+        <div style="padding:10px 0;border-top:1px solid #242424;">
+          <strong>Burned Supply</strong><br>
+          <span style="color:#999;">Unavailable without historical scan</span>
         </div>
 
-        <div style="margin-bottom:8px;">
-          <strong>Transactions Scanned:</strong>
-          ${transactions.length.toLocaleString("en-US")}
+        <div style="padding:10px 0;border-top:1px solid #242424;">
+          <strong>Burn Status</strong><br>
+          <span style="color:#999;">No historical burn scan performed</span>
         </div>
 
-        <div style="margin-bottom:8px;">
-          <strong>Pages Scanned:</strong>
-          ${pagesScanned}
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <strong>History Coverage:</strong><br>
-          ${historyCoverageHtml}
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <strong>Detected Burn Transactions:</strong>
-          ${detectedBurnTransactionCount}
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <strong>🔥 Burned in Scanned History:</strong><br>
-          ${formatTokenAmount(burnedInScan)} tokens
-        </div>
-
-        <div style="margin-bottom:12px;">
-          <strong>Detected Burn / Current Supply:</strong>
-          ${burnedVsCurrentSupply.toFixed(4)}%
-        </div>
-
-        <div style="
-          margin-top:14px;
-          margin-bottom:10px;
-          font-size:18px;
-          font-weight:bold;
-        ">
-          🔥 Recent Detected Burns
-        </div>
-
-        ${recentBurnRows}
-        ${deepScanButton}
-
-        <div style="
-          margin-top:12px;
-          color:#777;
-          font-size:12px;
-          line-height:1.5;
-        ">
-          The tracker follows transaction-history pagination and checks
-          successful transactions involving the token mint for parsed
-          SPL Token burn or burnChecked instructions, including parsed
-          inner instructions. A partial scan is not a guaranteed lifetime
-          burn total.
+        <div style="margin-top:8px;color:#777;font-size:12px;line-height:1.5;">
+          Lightweight public RPC mode. No Helius credits are used for this check.
         </div>
       </div>
     `;
-
   } catch (error) {
-    console.error("Burn tracker error:", error);
-
-    burnResult.innerHTML = `
-      ⚠️ Unable to retrieve burn data.<br><br>
-      ${error.message || "Burn history could not be retrieved."}
-    `;
+    console.error("Lightweight supply analysis error:", error);
+    burnResult.innerHTML =
+      `<span style="color:#999;">Supply data unavailable.</span>`;
   }
 }
-
-
-
-
-let ANGRY_LIQUIDITY_CONTEXT = null;
-
-const PUMPSWAP_PROGRAM_ID =
-  "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
-
-const ORCA_WHIRLPOOL_PROGRAM_ID =
-  "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc";
-
-
-function liquiditySecurityEscape(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-
-function liquiditySecurityShort(value) {
-  const address = String(value || "");
-
-  if (address.length <= 18) {
-    return address || "Unknown";
-  }
-
-  return address.slice(0, 8) + "..." + address.slice(-8);
-}
-
-
-function liquiditySecurityUsd(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return "N/A";
-  }
-
-  if (number >= 1000000000) {
-    return "$" + (number / 1000000000).toFixed(2) + "B";
-  }
-
-  if (number >= 1000000) {
-    return "$" + (number / 1000000).toFixed(2) + "M";
-  }
-
-  if (number >= 1000) {
-    return "$" + number.toLocaleString("en-US", {
-      maximumFractionDigits: 2
-    });
-  }
-
-  return "$" + number.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
-
-function liquiditySecurityPercent(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return "N/A";
-  }
-
-  return number.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) + "%";
-}
-
-
-function liquiditySecurityBase58Encode(bytes) {
-  const alphabet =
-    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-
-  if (!(bytes instanceof Uint8Array) || bytes.length === 0) {
-    return "";
-  }
-
-  let value = 0n;
-
-  for (const byte of bytes) {
-    value = (value << 8n) + BigInt(byte);
-  }
-
-  let encoded = "";
-
-  while (value > 0n) {
-    const remainder = Number(value % 58n);
-    value = value / 58n;
-    encoded = alphabet[remainder] + encoded;
-  }
-
-  let leadingZeros = 0;
-
-  for (const byte of bytes) {
-    if (byte !== 0) break;
-    leadingZeros++;
-  }
-
-  return "1".repeat(leadingZeros) + (encoded || "");
-}
-
-
-function liquiditySecurityReadU16LE(bytes, offset) {
-  return bytes[offset] | (bytes[offset + 1] << 8);
-}
-
-
-function liquiditySecurityReadU64LE(bytes, offset) {
-  let value = 0n;
-
-  for (let i = 7; i >= 0; i--) {
-    value = (value << 8n) + BigInt(bytes[offset + i]);
-  }
-
-  return value;
-}
-
-
-function liquiditySecurityReadPubkey(bytes, offset) {
-  return liquiditySecurityBase58Encode(
-    bytes.slice(offset, offset + 32)
-  );
-}
-
-
-function liquiditySecurityRawTokenAmount(
-  rawAmount,
-  decimals,
-  maximumFractionDigits = 6
-) {
-  let raw;
-
-  try {
-    raw = BigInt(rawAmount);
-  } catch {
-    return "N/A";
-  }
-
-  const safeDecimals =
-    Number.isInteger(Number(decimals)) && Number(decimals) >= 0
-      ? Number(decimals)
-      : 0;
-
-  const negative = raw < 0n;
-  const absoluteRaw = negative ? -raw : raw;
-  const digits = absoluteRaw.toString();
-
-  if (safeDecimals === 0) {
-    return (negative ? "-" : "") +
-      Number(digits).toLocaleString("en-US");
-  }
-
-  const padded = digits.padStart(safeDecimals + 1, "0");
-  const integerPart =
-    padded.slice(0, padded.length - safeDecimals) || "0";
-
-  let fractionPart =
-    padded.slice(padded.length - safeDecimals)
-      .slice(0, maximumFractionDigits)
-      .replace(/0+$/, "");
-
-  let integerFormatted;
-
-  try {
-    integerFormatted =
-      BigInt(integerPart).toLocaleString("en-US");
-  } catch {
-    integerFormatted = integerPart;
-  }
-
-  return (
-    (negative ? "-" : "") +
-    integerFormatted +
-    (fractionPart ? "." + fractionPart : "")
-  );
-}
-
 
 async function liquiditySecurityRpc(method, params) {
   const rpcUrl =
@@ -4868,7 +4452,7 @@ async function analyzeLiquidity() {
           font-weight:bold;
           margin-bottom:14px;
         ">
-          💧 Liquidity Analysis
+          Liquidity Analysis
         </div>
 
         <div style="margin-bottom:9px;">
@@ -4885,11 +4469,6 @@ async function analyzeLiquidity() {
           <strong>Largest Pool:</strong><br>
           ${formatUsd(largestPool.liquidityUsd)}
           (${formatPercent(largestPoolShare)})
-        </div>
-
-        <div style="margin-bottom:9px;">
-          <strong>${escapeHtml(valuationLabel)}:</strong><br>
-          ${valuation > 0 ? formatUsd(valuation) : "N/A"}
         </div>
 
         <div style="margin-bottom:9px;">
@@ -4942,38 +4521,13 @@ async function analyzeLiquidity() {
           </div>
         </div>
 
-        <div style="
-          padding-top:10px;
-          margin-top:12px;
-          border-top:1px solid #292929;
-        ">
-          <div style="font-size:17px;font-weight:bold;margin-bottom:8px;">
-            📊 Trading Activity
-          </div>
-
-          <div style="margin-bottom:6px;">
-            <strong>Total 24h Volume:</strong>
-            ${formatUsd(totalVolume24h)}
-          </div>
-
-          <div style="margin-bottom:6px;">
-            <strong>24h Buys:</strong>
-            ${formatCount(totalBuys24h)}
-          </div>
-
-          <div style="margin-bottom:6px;">
-            <strong>24h Sells:</strong>
-            ${formatCount(totalSells24h)}
-          </div>
-
-          <div style="margin-bottom:6px;">
-            <strong>24h Volume / Liquidity:</strong>
-            ${
-              volumeToLiquidity !== null
-                ? volumeToLiquidity.toFixed(2) + "×"
-                : "N/A"
-            }
-          </div>
+        <div style="margin-bottom:9px;">
+          <strong>24h Volume / Liquidity:</strong><br>
+          ${
+            volumeToLiquidity !== null
+              ? volumeToLiquidity.toFixed(2) + "×"
+              : "N/A"
+          }
         </div>
 
         <div style="
@@ -4982,7 +4536,7 @@ async function analyzeLiquidity() {
           border-top:1px solid #292929;
         ">
           <div style="font-size:17px;font-weight:bold;margin-bottom:8px;">
-            🔄 Liquidity by DEX
+            Liquidity by DEX
           </div>
           ${dexSummary || '<div style="color:#777;">No DEX summary available.</div>'}
         </div>
@@ -4993,7 +4547,7 @@ async function analyzeLiquidity() {
           border-top:1px solid #292929;
         ">
           <div style="font-size:17px;font-weight:bold;margin-bottom:10px;">
-            🏊 Largest Indexed Pools
+            Largest Indexed Pools
           </div>
           ${poolRows}
         </div>
@@ -5004,7 +4558,7 @@ async function analyzeLiquidity() {
           background:#101010;
           border-radius:10px;
         ">
-          <strong>🔒 LP Lock / Burn Status:</strong><br>
+          <strong>LP Lock / Burn Status:</strong><br>
           <span style="color:#f2c94c;">
             🟡 Protocol-aware verification available
           </span>
@@ -5064,1260 +4618,233 @@ async function analyzeLiquidity() {
 async function analyzeHolders() {
   const contract = document.getElementById("contract").value.trim();
   const holderResult = document.getElementById("holderResult");
+  const inlineHolder = document.getElementById("angry-inline-holder");
 
-  holderResult.style.display = "block";
-
-  if (!contract) {
-    holderResult.innerHTML =
-      "⚠️ Please enter a Solana contract address first.";
-    return;
+  if (holderResult) {
+    holderResult.style.display = "none";
+    holderResult.innerHTML = "";
   }
+  if (!contract) return;
 
-  holderResult.innerHTML = "⏳ Reading Solana holder data...";
+  const render = html => {
+    const target = document.getElementById("angry-inline-holder") || inlineHolder;
+    if (target) target.innerHTML = html;
+  };
 
-    const rpcUrl =
-        HELIUS_PROXY_URL;
+  render(`
+    <div style="font-size:19px;font-weight:900;margin-bottom:8px;">Holder Analysis</div>
+    <div style="color:#888;font-size:13px;">Reading lightweight holder concentration…</div>
+  `);
 
-    try {
+  try {
+    const rpcUrl = HELIUS_PROXY_URL;
     const [largestResponse, supplyResponse] = await Promise.all([
       fetch(rpcUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "getTokenLargestAccounts",
-          params: [contract]
-        })
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({jsonrpc:"2.0",id:1,method:"getTokenLargestAccounts",params:[contract]})
       }),
-
       fetch(rpcUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: 2,
-          method: "getTokenSupply",
-          params: [contract]
-        })
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({jsonrpc:"2.0",id:2,method:"getTokenSupply",params:[contract]})
       })
     ]);
 
-    if (!largestResponse.ok) {
-      throw new Error(`Largest-holder lookup HTTP ${largestResponse.status}`);
-    }
-
-    if (!supplyResponse.ok) {
-      throw new Error(`Token-supply lookup HTTP ${supplyResponse.status}`);
-    }
-
+    if (!largestResponse.ok) throw new Error(`Holder lookup HTTP ${largestResponse.status}`);
+    if (!supplyResponse.ok) throw new Error(`Supply lookup HTTP ${supplyResponse.status}`);
     const largestData = await largestResponse.json();
     const supplyData = await supplyResponse.json();
+    if (largestData.error) throw new Error(largestData.error.message || "Holder lookup failed");
+    if (supplyData.error) throw new Error(supplyData.error.message || "Supply lookup failed");
 
-    if (largestData.error) {
-      throw new Error(largestData.error.message);
-    }
-
-    if (supplyData.error) {
-      throw new Error(supplyData.error.message);
-    }
-
-    const holders = largestData?.result?.value || [];
+    const accounts = (largestData?.result?.value || []).slice(0,20);
     const supply = Number(supplyData?.result?.value?.uiAmount || 0);
-    const holderAddresses = holders.slice(0, 20).map(h => h.address);
-const ownersResponse = await fetch(rpcUrl, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    jsonrpc: "2.0",
-    id: 3,
-    method: "getMultipleAccounts",
-    params: [
-      holderAddresses,
-      {
-        encoding: "jsonParsed"
-      }
-    ]
-  })
-});
+    if (!accounts.length || !supply) throw new Error("Holder data unavailable");
 
-const ownersData = await ownersResponse.json();
-
-const holderOwners =
-  ownersData?.result?.value?.map(account =>
-    account?.data?.parsed?.info?.owner || "Unknown"
-  ) || [];
-
-    // Cek apakah wallet holder merupakan wallet biasa atau program/PDA
-const uniqueOwners = [...new Set(
-  holderOwners.filter(owner => owner && owner !== "Unknown")
-)];
-
-let walletAccountMap = new Map();
-
-if (uniqueOwners.length > 0) {
-  const walletAccountResponse = await fetch(rpcUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 4,
-      method: "getMultipleAccounts",
-      params: [
-        uniqueOwners,
-        {
-          encoding: "jsonParsed"
-        }
-      ]
-    })
-  });
-
-  const walletAccountData = await walletAccountResponse.json();
-
-  const walletAccounts =
-    walletAccountData?.result?.value || [];
-
-  uniqueOwners.forEach((owner, index) => {
-    const account = walletAccounts[index];
-
-    walletAccountMap.set(owner, {
-      exists: !!account,
-      executable: account?.executable || false,
-      programOwner: account?.owner || null
+    // One batched account lookup converts token accounts to wallet owners.
+    const ownerResponse = await fetch(rpcUrl, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        jsonrpc:"2.0",id:3,method:"getMultipleAccounts",
+        params:[accounts.map(a=>a.address),{encoding:"jsonParsed"}]
+      })
     });
-  });
-}
+    if (!ownerResponse.ok) throw new Error(`Owner lookup HTTP ${ownerResponse.status}`);
+    const ownerData = await ownerResponse.json();
+    if (ownerData.error) throw new Error(ownerData.error.message || "Owner lookup failed");
+    const parsed = ownerData?.result?.value || [];
 
-    if (!holders.length || !supply) {
-      holderResult.innerHTML =
-        "❌ Holder data could not be found.";
-      return;
-    }
-
-    // Gabungkan token accounts berdasarkan wallet owner
-const walletMap = new Map();
-
-holders.slice(0, 20).forEach((holder, index) => {
-  const amount = Number(holder.uiAmount || 0);
-
-  // Jika owner gagal terbaca, gunakan token account sebagai fallback
-  const owner =
-    holderOwners[index] &&
-    holderOwners[index] !== "Unknown"
-      ? holderOwners[index]
-      : holder.address;
-
-  if (walletMap.has(owner)) {
-    walletMap.get(owner).amount += amount;
-  } else {
-    walletMap.set(owner, {
-      owner: owner,
-      amount: amount
+    const wallets = new Map();
+    accounts.forEach((a,i)=>{
+      const owner = parsed[i]?.data?.parsed?.info?.owner || a.address;
+      const amount = Number(a.uiAmount || 0);
+      wallets.set(owner,(wallets.get(owner)||0)+amount);
     });
-  }
-});
+    const top = [...wallets.entries()].map(([owner,amount])=>({owner,amount,pct:(amount/supply)*100}))
+      .sort((a,b)=>b.amount-a.amount).slice(0,10);
+    const top10 = top.reduce((n,w)=>n+w.pct,0);
+    const largest = top[0]?.pct || 0;
+    const above5 = top.some(w=>w.pct>5);
 
-// Urutkan wallet terbesar
-const topWallets = Array.from(walletMap.values())
-  .sort((a, b) => b.amount - a.amount)
-  .slice(0, 10);
+    const statusRow = (ok,label,value) => `
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;">
+        <span style="width:24px;height:24px;min-width:24px;border-radius:50%;border:2px solid ${ok?'#59c98b':'#ff6b5f'};color:${ok?'#59c98b':'#ff6b5f'};display:inline-flex;align-items:center;justify-content:center;font-weight:900;">${ok?'✓':'×'}</span>
+        <div style="line-height:1.45;"><div>${label}</div><div style="font-size:12px;color:#888;margin-top:2px;">${value}</div></div>
+      </div>`;
 
-const SYSTEM_PROGRAM = "11111111111111111111111111111111";
+    const rows = top.map((w,i)=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #242424;font-size:13px;"><span>#${i+1} ${w.owner.slice(0,5)}...${w.owner.slice(-5)}</span><strong>${w.pct.toFixed(2)}%</strong></div>`).join("");
 
-let top10Total = 0;
-
-const holderRows = topWallets.map((wallet, index) => {
-
-  const accountInfo = walletAccountMap.get(wallet.owner);
-
-  let accountType = "👤 Wallet";
-
-  if (
-    accountInfo &&
-    (
-      accountInfo.executable === true ||
-      (
-        accountInfo.programOwner &&
-        accountInfo.programOwner !== SYSTEM_PROGRAM
-      )
-    )
-  ) {
-    accountType = "⚙️ Program-controlled";
-  }
-
-  const percentage = (wallet.amount / supply) * 100;
-
-  // Hanya wallet biasa yang dihitung ke konsentrasi holder
-  if (accountType === "👤 Wallet") {
-    top10Total += percentage;
-  }
-
-  const shortAddress =
-    wallet.owner.slice(0, 5) +
-    "..." +
-    wallet.owner.slice(-5);
-
-  return `
-    <div style="
-      padding:10px 0;
-      border-bottom:1px solid #2a2a2a;
-    ">
-      <div>
-        <strong>#${index + 1}</strong><br>
-        ${shortAddress}
-      </div>
-
-      <div style="
-        color:#888;
-        font-size:12px;
-        margin-top:3px;
-      ">
-        ${accountType}
-      </div>
-
-      <div style="
-        color:#888;
-        font-size:12px;
-        margin-top:3px;
-        word-break:break-all;
-      ">
-        Wallet: ${wallet.owner}
-      </div>
-
-      <div style="
-        color:#aaa;
-        font-size:14px;
-        margin-top:3px;
-      ">
-        ${wallet.amount.toLocaleString("en-US", {
-          maximumFractionDigits: 2
-        })} tokens
-        — ${percentage.toFixed(2)}%
-      </div>
-    </div>
-  `;
-}).join("");;
-
-    let riskText = "🟢 Lower concentration";
-
-    if (top10Total >= 50) {
-      riskText = "🔴 High concentration";
-    } else if (top10Total >= 25) {
-      riskText = "🟠 Medium concentration";
-    }
-
-    holderResult.innerHTML = `
-      <div style="font-size:20px;font-weight:bold;margin-bottom:15px;">
-        👥 Top Holders
-      </div>
-
-      ${holderRows}
-
-      <div style="
-        margin-top:18px;
-        padding:15px;
-        background:#151515;
-        border-radius:12px;
-      ">
-        <div>
-          <strong>Top Holder Wallet Concentration:</strong>
-          ${top10Total.toFixed(2)}%
-        </div>
-
-        <div style="margin-top:8px;">
-          ${riskText}
-        </div>
-      </div>
-
-      <div style="
-        margin-top:12px;
-        font-size:12px;
-        color:#777;
-      ">
-        Note: these are the largest token accounts,
-        which may include liquidity pools, exchanges,
-        program-controlled accounts or individual holders.
-      </div>
-    `;
-
+    render(`
+      <div style="font-size:19px;font-weight:900;margin-bottom:8px;">Holder Analysis</div>
+      ${statusRow(largest<=5,"Largest holder is 5% or less",`${largest.toFixed(2)}% of current supply`)}
+      ${statusRow(!above5,"No top holder is above 5%",above5?"At least one detected holder exceeds 5%":"No detected top holder exceeds 5%")} 
+      ${statusRow(top10<=70,"Top 10 holders are 70% or less",`${top10.toFixed(2)}% combined`)}
+      <details style="margin-top:10px;">
+        <summary style="cursor:pointer;color:#aaa;text-decoration:underline;">View Holders</summary>
+        <div style="margin-top:8px;">${rows}</div>
+      </details>
+      <div style="margin-top:10px;color:#777;font-size:12px;line-height:1.5;">Lightweight concentration check. It does not scan transaction history or wallet relationships.</div>
+    `);
   } catch (error) {
     console.error(error);
-
-    holderResult.innerHTML =
-      "⚠️ Unable to retrieve Solana holder data.<br><br>" +
-      String(error?.message || "The Solana data service is temporarily busy. Please try again shortly.");
+    render(`
+      <div style="font-size:19px;font-weight:900;margin-bottom:8px;">Holder Analysis</div>
+      <div style="color:#aaa;line-height:1.55;">Unable to load holder concentration right now.</div>
+      <div style="color:#777;font-size:12px;margin-top:6px;">${String(error?.message || "Holder data service unavailable.")}</div>
+    `);
   }
 }
 
   async function analyzeCreator() {
   const contract = document.getElementById("contract").value.trim();
-  const creatorResult = document.getElementById("creatorResult");
+  const output = document.getElementById("creatorResult");
 
-  creatorResult.style.display = "block";
+  output.style.display = "block";
 
   if (!contract) {
-    creatorResult.innerHTML =
-      "⚠️ Please enter a Solana contract address first.";
+    output.innerHTML = "Please enter a Solana contract address first.";
     return;
   }
 
-  creatorResult.innerHTML = "🔎 Searching token creation transaction...";
+  output.innerHTML = "Loading creator / deployer...";
 
   try {
-    const rpcUrl =
-      HELIUS_PROXY_URL;
-
-    const response = await fetch(rpcUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 10,
-        method: "getTransactionsForAddress",
-        params: [
-          contract,
-          {
-            transactionDetails: "full",
-            sortOrder: "asc",
-            limit: 1
-          }
-        ]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Creator lookup HTTP ${response.status}`);
-    }
-
-    const rpcData = await response.json();
-
-    if (rpcData.error) {
-      throw new Error(rpcData.error.message);
-    }
-
-    const transactions =
-      rpcData.result?.transactions ||
-      rpcData.result?.data ||
-      rpcData.result ||
-      [];
-
-    if (!Array.isArray(transactions) || transactions.length === 0) {
-      throw new Error("No creation transaction found");
-    }
-
-    const tx = transactions[0];
-
-    let creator = null;
-
-    const accountKeys =
-      tx.transaction?.message?.accountKeys ||
-      tx.message?.accountKeys ||
-      [];
-
-    for (const account of accountKeys) {
-      if (
-        typeof account === "object" &&
-        account.signer === true
-      ) {
-        creator =
-          account.pubkey?.toString?.() ||
-          account.pubkey;
-        break;
-      }
-    }
-
-    if (!creator && accountKeys.length > 0) {
-      const first = accountKeys[0];
-
-      creator =
-        typeof first === "string"
-          ? first
-          : first.pubkey?.toString?.() || first.pubkey;
-    }
+    // Lightweight public mode:
+    // 1) detect the earliest relevant transaction only
+    // 2) read the creator's token account balance for this mint
+    // No creator-history scan, wallet relationships, funding path, or old-token scan.
+    const detection = await historyDetectCreatorCandidate(contract);
+    const creator = detection?.creator || "";
 
     if (!creator) {
-      throw new Error("Creator candidate could not be identified");
+      output.innerHTML = `
+        <div style="color:#999;">Unable to verify creator / deployer.</div>
+      `;
+      return;
     }
 
-    let creatorTransactions = [];
-let beforeSignature = null;
+    let creatorHoldingPercent = null;
 
-for (let page = 0; page < 10; page++) {
-    let creatorTxUrl =
-        `${HELIUS_PROXY_URL}?mode=address-transactions&address=${encodeURIComponent(creator)}&limit=100`;
+    try {
+      const [supplyResponse, accountsResponse] = await Promise.all([
+        angrySmartFetch(HELIUS_PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 71,
+            method: "getTokenSupply",
+            params: [contract]
+          })
+        }, { ttl: 30000, persist: true }),
 
-    if (beforeSignature) {
-        creatorTxUrl += `&before=${beforeSignature}`;
-    }
+        angrySmartFetch(HELIUS_PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 72,
+            method: "getTokenAccountsByOwner",
+            params: [
+              creator,
+              { mint: contract },
+              { encoding: "jsonParsed" }
+            ]
+          })
+        }, { ttl: 30000, persist: true })
+      ]);
 
-    const creatorTxResponse = await fetch(creatorTxUrl);
+      if (supplyResponse.ok && accountsResponse.ok) {
+        const supplyData = await supplyResponse.json();
+        const accountsData = await accountsResponse.json();
 
-    if (!creatorTxResponse.ok) {
-        throw new Error(`Creator transaction history HTTP ${creatorTxResponse.status}`);
-    }
+        const supplyRaw = BigInt(
+          supplyData?.result?.value?.amount ||
+          supplyData?.result?.value?.uiAmountString?.replace(".", "") ||
+          "0"
+        );
 
-    const pageTransactions = await creatorTxResponse.json();
+        let creatorRaw = 0n;
+        const accounts = Array.isArray(accountsData?.result?.value)
+          ? accountsData.result.value
+          : [];
 
-    if (!Array.isArray(pageTransactions) || pageTransactions.length === 0) {
-        break;
-    }
-
-    creatorTransactions.push(...pageTransactions);
-
-    const lastTx = pageTransactions[pageTransactions.length - 1];
-
-    beforeSignature = lastTx?.signature;
-
-    if (!beforeSignature || pageTransactions.length < 100) {
-        break;
-    }
-}
-
-    let totalSold = 0;
-let totalTransferred = 0;
-let totalStreamflow = 0;
-let detectedSellTransactions = [];
-let detectedTransferTransactions = [];
-let detectedVestingTransactions = [];
-
-const STREAMFLOW_PROGRAM_ID =
-  "strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m";
-
-const instructionsUseProgram = (instructions, programId) => {
-  if (!Array.isArray(instructions)) return false;
-
-  return instructions.some(instruction => {
-    if (!instruction || typeof instruction !== "object") return false;
-
-    if (instruction.programId === programId) {
-      return true;
-    }
-
-    return instructionsUseProgram(
-      instruction.innerInstructions,
-      programId
-    );
-  });
-};
-
-if (Array.isArray(creatorTransactions)) {
-  creatorTransactions.forEach(txItem => {
-    const tokenTransfers =
-      txItem?.tokenTransfers ||
-      txItem?.transaction?.tokenTransfers ||
-      [];
-
-    const description =
-      String(txItem?.description || "").toLowerCase();
-
-    const isStreamflowTx =
-      description.includes("streamflow") ||
-      instructionsUseProgram(
-        txItem?.instructions,
-        STREAMFLOW_PROGRAM_ID
-      ) ||
-      instructionsUseProgram(
-        txItem?.transaction?.instructions,
-        STREAMFLOW_PROGRAM_ID
-      );
-
-    const streamflowKind =
-      description.includes("vesting")
-        ? "Vesting"
-        : description.includes("lock")
-          ? "Token Lock"
-          : "Streamflow Contract";
-
-    tokenTransfers.forEach(transfer => {
-      const mint =
-        transfer?.mint ||
-        transfer?.tokenMint;
-
-      const from =
-        transfer?.fromUserAccount ||
-        transfer?.fromOwner;
-
-      const to =
-        transfer?.toUserAccount ||
-        transfer?.toOwner;
-
-      const amount =
-  Number(
-    transfer?.tokenAmount ||
-    transfer?.amount ||
-    0
-  );
-
-      if (mint !== contract) return;
-if (from !== creator) return;
-if (amount <= 0) return;
-
-      const txType = String(txItem?.type || "").toUpperCase();
-
-      const txSignature =
-        txItem?.signature ||
-        txItem?.transaction?.signatures?.[0] ||
-        "Unknown";
-
-      const txTimestamp =
-        txItem?.timestamp ||
-        txItem?.blockTime ||
-        null;
-
-      // Separate Streamflow deposits from ordinary wallet transfers.
-      // Streamflow supports vesting and token locks, so transactions that
-      // cannot be identified more precisely are shown as "Streamflow Contract".
-      if (isStreamflowTx && to && to !== creator) {
-        totalStreamflow += amount;
-
-        const existingStreamflow =
-          detectedVestingTransactions.find(
-            item => item.signature === txSignature
-          );
-
-        if (existingStreamflow && txSignature !== "Unknown") {
-          existingStreamflow.amount += amount;
-        } else {
-          detectedVestingTransactions.push({
-            amount: amount,
-            signature: txSignature,
-            timestamp: txTimestamp,
-            to: to,
-            kind: streamflowKind
-          });
+        for (const account of accounts) {
+          const amount =
+            account?.account?.data?.parsed?.info?.tokenAmount?.amount || "0";
+          try {
+            creatorRaw += BigInt(amount);
+          } catch (_) {}
         }
 
-        return;
+        if (supplyRaw > 0n) {
+          creatorHoldingPercent =
+            Number((creatorRaw * 1000000n) / supplyRaw) / 10000;
+        }
       }
-
-const nativeTransfers =
-  txItem?.nativeTransfers ||
-  txItem?.transaction?.nativeTransfers ||
-  [];
-
-const creatorReceivedSol = nativeTransfers.some(nativeTransfer => {
-  const receiver =
-    nativeTransfer?.toUserAccount ||
-    nativeTransfer?.to;
-
-  const sender =
-    nativeTransfer?.fromUserAccount ||
-    nativeTransfer?.from;
-
-  const lamports =
-    Number(nativeTransfer?.amount || 0);
-
-  return (
-    receiver === creator &&
-    sender &&
-    sender !== creator &&
-    lamports > 0
-  );
-});
-
-      const creatorReceivedPaymentToken = tokenTransfers.some(paymentTransfer => {
-  const paymentMint =
-    paymentTransfer?.mint ||
-    paymentTransfer?.tokenMint;
-
-  const paymentReceiver =
-    paymentTransfer?.toUserAccount ||
-    paymentTransfer?.toOwner;
-
-  const paymentAmount =
-    Number(
-      paymentTransfer?.tokenAmount ||
-      paymentTransfer?.amount ||
-      0
-    );
-
-  return (
-    paymentMint &&
-    paymentMint !== contract &&
-    paymentReceiver === creator &&
-    paymentAmount > 0
-  );
-});
-
-if (
-  txType === "SWAP" &&
-  (
-    creatorReceivedSol ||
-    creatorReceivedPaymentToken
-  )
-) {
-
-  totalSold += amount;
-
-const sellSignature = txSignature;
-const sellTimestamp = txTimestamp;
-
-const existingSell =
-  detectedSellTransactions.find(
-    sell => sell.signature === sellSignature
-  );
-
-if (existingSell && sellSignature !== "Unknown") {
-  existingSell.amount += amount;
-} else {
-  detectedSellTransactions.push({
-    amount: amount,
-    signature: sellSignature,
-    timestamp: sellTimestamp
-  });
-}
-
-} else if (to && to !== creator) {
-    totalTransferred += amount;
-
-    const transferSignature = txSignature;
-    const transferTimestamp = txTimestamp;
-
-    detectedTransferTransactions.push({
-        amount: amount,
-        signature: transferSignature,
-        timestamp: transferTimestamp,
-        to: to
-    });
-}
-
-
-    });
-  });
-}
-
-    // Check current creator token balance
-const balanceResponse = await fetch(rpcUrl, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    jsonrpc: "2.0",
-    id: 20,
-    method: "getTokenAccountsByOwner",
-    params: [
-      creator,
-      {
-        mint: contract
-      },
-      {
-        encoding: "jsonParsed"
-      }
-    ]
-  })
-});
-
-const balanceData = await balanceResponse.json();
-
-let creatorTokenBalance = 0;
-
-const creatorTokenAccounts =
-  balanceData?.result?.value || [];
-
-creatorTokenAccounts.forEach(tokenAccount => {
-  const amount =
-    tokenAccount?.account?.data?.parsed?.info
-      ?.tokenAmount?.uiAmount || 0;
-
-  creatorTokenBalance += Number(amount);
-});
-
-    const supplyResponse = await fetch(rpcUrl, {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 21,
-        method: "getTokenSupply",
-        params: [contract]
-    })
-});
-
-const supplyData = await supplyResponse.json();
-
-const supply =
-    Number(supplyData?.result?.value?.uiAmount) || 0;
-
-    const creatorHoldingPercent =
-    supply > 0
-        ? (creatorTokenBalance / supply) * 100
-        : 0;
-
-    let creatorStatus = "";
-
-if (creatorTokenBalance <= 0) {
-  creatorStatus = "⚪ NO TOKENS CURRENTLY HELD";
-} else {
-  creatorStatus = "🟢 STILL HOLDING";
-}
-
-    const shortCreator =
-      creator.slice(0, 6) +
-      "..." +
-      creator.slice(-6);
-
-    const blockTime =
-      tx.blockTime ||
-      tx.block_time ||
-      null;
-
-    let createdText = "Unknown";
-
-    if (blockTime) {
-      createdText =
-        new Date(blockTime * 1000).toLocaleString();
+    } catch (balanceError) {
+      console.warn("Creator holding lookup unavailable:", balanceError);
     }
 
-    creatorResult.innerHTML = `
-      <div style="
-        padding:15px;
-        background:#151515;
-        border-radius:12px;
-      ">
+    const shortCreator =
+      creator.length > 16
+        ? `${creator.slice(0, 8)}...${creator.slice(-8)}`
+        : creator;
 
-        <div style="
-          font-size:20px;
-          font-weight:bold;
-          margin-bottom:12px;
-        ">
-          🥷 Creator / Deployer Candidate
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <strong>Wallet:</strong> ${shortCreator}
-        </div>
-
-        <div style="margin-bottom:8px;">
-  <strong>Current Token Balance:</strong>
-  ${creatorTokenBalance.toLocaleString("en-US", {
-    maximumFractionDigits: 2
-  })} tokens
-</div>
-
-<div style="margin-bottom:8px;">
-  <strong>Current Holding:</strong>
-  ${creatorHoldingPercent.toFixed(4)}%
-</div>
-
-<div style="margin-bottom:8px;">
-  <strong>Status:</strong>
-  ${creatorStatus}
-</div>
-
-<div style="margin-bottom:8px;">
-  <strong>🔴 Detected Sold:</strong>
-  ${totalSold.toLocaleString("en-US", {
-    maximumFractionDigits: 2
-  })} tokens
-</div>
-
-<div style="margin-top:14px; margin-bottom:10px;">
-  <strong>🔴 Recent Detected Sells</strong>
-</div>
-
-${
-  detectedSellTransactions.length > 0
-    ? detectedSellTransactions
-        .slice(0, 5)
-        .map((sell, index) => {
-          const shortSignature =
-            sell.signature && sell.signature !== "Unknown"
-              ? sell.signature.slice(0, 8) +
-                "..." +
-                sell.signature.slice(-8)
-              : "Unknown";
-
-          const sellTime = sell.timestamp
-            ? new Date(sell.timestamp * 1000).toLocaleString()
-            : "Unknown time";
-
-          return `
-            <div style="
-              padding:10px;
-              margin-bottom:8px;
-              background:#101010;
-              border-radius:10px;
-            ">
-              <div>
-                <strong>Sell #${index + 1}</strong>
-              </div>
-
-              <div>
-                ${sell.amount.toLocaleString("en-US", {
-                  maximumFractionDigits: 2
-                })} tokens
-              </div>
-
-              <div style="
-                font-size:12px;
-                color:#888;
-                margin-top:4px;
-              ">
-                ${sellTime}
-              </div>
-
-              ${
-                sell.signature !== "Unknown"
-                  ? `
-                    <a
-                      href="https://solscan.io/tx/${sell.signature}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style="
-                        display:inline-block;
-                        margin-top:6px;
-                        color:#ff4d1a;
-                        text-decoration:none;
-                        font-size:13px;
-                      "
-                    >
-                      View Transaction ↗
-                    </a>
-                  `
-                  : `
-                    <div style="
-                      margin-top:6px;
-                      color:#777;
-                      font-size:12px;
-                    ">
-                      Signature unavailable
-                    </div>
-                  `
-              }
-            </div>
-          `;
-        })
-        .join("")
-    : `
-      <div style="
-        color:#777;
-        font-size:13px;
-        margin-bottom:10px;
-      ">
-        No detected sell transactions.
-      </div>
-    `
-}
-
-<div style="margin-bottom:8px;">
-  <strong>🔒 Detected Streamflow Vesting / Lock:</strong>
-  ${totalStreamflow.toLocaleString("en-US", {
-    maximumFractionDigits: 2
-  })} tokens
-</div>
-
-${
-  detectedVestingTransactions.length > 0
-    ? `
-      <div style="
-        margin-top:14px;
-        margin-bottom:10px;
-        font-size:18px;
-        font-weight:bold;
-      ">
-        🔒 Recent Streamflow Deposits
+    output.innerHTML = `
+      <div style="padding:10px 0;">
+        <strong>Creator:</strong><br>
+        <span style="word-break:break-all;color:#aaa;">${creator}</span>
       </div>
 
-      ${detectedVestingTransactions
-        .slice(0, 5)
-        .map((item, index) => {
-          const itemTime = item.timestamp
-            ? new Date(item.timestamp * 1000).toLocaleString()
-            : "Time unavailable";
-
-          const shortTo = item.to
-            ? item.to.slice(0, 6) + "..." + item.to.slice(-6)
-            : "Unknown";
-
-          return `
-            <div style="
-              padding:10px;
-              margin-bottom:8px;
-              background:#101010;
-              border-radius:10px;
-            ">
-              <div>
-                <strong>${item.kind} #${index + 1}</strong>
-              </div>
-
-              <div>
-                ${item.amount.toLocaleString("en-US", {
-                  maximumFractionDigits: 2
-                })} tokens
-              </div>
-
-              <div style="
-                font-size:12px;
-                color:#888;
-                margin-top:4px;
-              ">
-                To: ${shortTo}
-              </div>
-
-              <div style="
-                font-size:12px;
-                color:#888;
-                margin-top:4px;
-              ">
-                ${itemTime}
-              </div>
-
-              ${
-                item.signature !== "Unknown"
-                  ? `
-                    <a
-                      href="https://solscan.io/tx/${item.signature}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style="
-                        display:inline-block;
-                        margin-top:6px;
-                        color:#ff4d1a;
-                        text-decoration:none;
-                        font-size:13px;
-                      "
-                    >
-                      View Transaction ↗
-                    </a>
-                  `
-                  : `
-                    <div style="
-                      margin-top:6px;
-                      color:#777;
-                      font-size:12px;
-                    ">
-                      Signature unavailable
-                    </div>
-                  `
-              }
-            </div>
-          `;
-        })
-        .join("")}
-
-      <div style="
-        margin-bottom:12px;
-        color:#777;
-        font-size:12px;
-        line-height:1.5;
-      ">
-        Detected from interaction with the Streamflow mainnet program.
-        Streamflow supports vesting and token locks; entries shown as
-        "Streamflow Contract" need deeper contract decoding to identify
-        the exact schedule/type.
-      </div>
-    `
-    : `
-      <div style="
-        color:#777;
-        font-size:13px;
-        margin-bottom:10px;
-      ">
-        No Streamflow vesting/lock deposits detected.
-      </div>
-    `
-}
-
-<div style="margin-bottom:8px;">
-  <strong>🟠 Detected Transferred Out:</strong>
-  ${totalTransferred.toLocaleString("en-US", {
-    maximumFractionDigits: 2
-  })} tokens
-</div>
-
-${
-  detectedTransferTransactions.length > 0
-    ? `
-      <div style="
-        margin-top:14px;
-        margin-bottom:10px;
-        font-size:18px;
-        font-weight:bold;
-      ">
-        🟠 Recent Transfers Out
+      <div style="padding:10px 0;border-top:1px solid #242424;">
+        <strong>Creator holding:</strong><br>
+        ${
+          creatorHoldingPercent === null
+            ? "Unable to verify"
+            : creatorHoldingPercent.toLocaleString("en-US", {
+                maximumFractionDigits: 4
+              }) + "%"
+        }
       </div>
 
-      ${detectedTransferTransactions
-        .slice(0, 5)
-        .map((transfer, index) => {
-          const transferTime = transfer.timestamp
-            ? new Date(transfer.timestamp * 1000).toLocaleString()
-            : "Time unavailable";
-
-          const shortTo = transfer.to
-            ? transfer.to.slice(0, 6) + "..." + transfer.to.slice(-6)
-            : "Unknown";
-
-          return `
-            <div style="
-              padding:10px;
-              margin-bottom:8px;
-              background:#101010;
-              border-radius:10px;
-            ">
-              <div>
-                <strong>Transfer #${index + 1}</strong>
-              </div>
-
-              <div>
-                ${transfer.amount.toLocaleString("en-US", {
-                  maximumFractionDigits: 2
-                })} tokens
-              </div>
-
-              <div style="
-                font-size:12px;
-                color:#888;
-                margin-top:4px;
-              ">
-                To: ${shortTo}
-              </div>
-
-              <div style="
-                font-size:12px;
-                color:#888;
-                margin-top:4px;
-              ">
-                ${transferTime}
-              </div>
-
-              ${
-                transfer.signature !== "Unknown"
-                  ? `
-                    <a
-                      href="https://solscan.io/tx/${transfer.signature}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style="
-                        display:inline-block;
-                        margin-top:6px;
-                        color:#ff4d1a;
-                        text-decoration:none;
-                        font-size:13px;
-                      "
-                    >
-                      View Transaction ↗
-                    </a>
-                  `
-                  : `
-                    <div style="
-                      margin-top:6px;
-                      color:#777;
-                      font-size:12px;
-                    ">
-                      Signature unavailable
-                    </div>
-                  `
-              }
-            </div>
-          `;
-        })
-        .join("")}
-    `
-    : `
-      <div style="
-        color:#777;
-        font-size:13px;
-        margin-bottom:10px;
-      ">
-        No detected transfers out.
+      <div style="padding:10px 0;border-top:1px solid #242424;">
+        <strong>Status:</strong><br>
+        Creator detected
       </div>
-    `
-}
 
-        <div style="
-          color:#888;
-          font-size:12px;
-          word-break:break-all;
-          margin-bottom:10px;
-        ">
-          ${creator}
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <strong>Earliest token transaction:</strong>
-          ${createdText}
-        </div>
-
-        <div style="
-          margin-top:12px;
-          font-size:12px;
-          color:#777;
-        ">
-          This is the signer detected from the earliest transaction
-          involving the token mint. It should be treated as a
-          creator/deployer candidate, not guaranteed ownership.
-        </div>
-
+      <div style="margin-top:10px;font-size:12px;color:#777;line-height:1.5;">
+        Public mode only shows the detected creator and current holding percentage.
+        Creator history and wallet-relationship scans are not run here.
       </div>
     `;
 
   } catch (error) {
-    console.error(error);
+    console.error("Creator / deployer lightweight error:", error);
 
-    creatorResult.innerHTML = `
-      ⚠️ Unable to identify creator/deployer.<br><br>
-      ${error.message || "Transaction history could not be retrieved."}
+    output.innerHTML = `
+      <div style="color:#999;">Unable to verify creator / deployer.</div>
     `;
   }
-  }
-
-// ============================================================
-// CREATOR HISTORY / DEVELOPER REPUTATION — STAGE 1
-// Scans successful creator-wallet transactions for parsed
-// SPL Token initializeMint / initializeMint2 instructions.
-// This reports observable on-chain launch history and does not
-// label a creator or token as a scam.
-// ============================================================
-
-function historyPubkeyToString(value) {
-  if (!value) return "";
-
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "object") {
-    const pubkey = value.pubkey ?? value.address ?? value.account ?? value.key;
-
-    if (typeof pubkey === "string") {
-      return pubkey;
-    }
-
-    if (pubkey?.toString) {
-      return pubkey.toString();
-    }
-  }
-
-  return value?.toString?.() || "";
-}
-
-function historyShortAddress(address, start = 7, end = 6) {
-  if (!address || typeof address !== "string") return "Unknown";
-  if (address.length <= start + end + 3) return address;
-  return `${address.slice(0, start)}...${address.slice(-end)}`;
-}
-
-function historyCollectParsedInstructions(txItem) {
-  // Iterative traversal avoids browser call-stack overflows if a provider returns
-  // unusually deep/nested instruction structures. WeakSet also prevents revisiting
-  // the same object if a non-standard response contains repeated references.
-  const collected = [];
-  const queue = [];
-  const seen = new WeakSet();
-
-  const enqueue = instructions => {
-    if (!Array.isArray(instructions)) return;
-    for (const instruction of instructions) {
-      if (instruction && typeof instruction === "object") {
-        queue.push(instruction);
-      }
-    }
-  };
-
-  enqueue(txItem?.transaction?.message?.instructions);
-  enqueue(txItem?.message?.instructions);
-  enqueue(txItem?.instructions);
-
-  const innerGroups =
-    txItem?.meta?.innerInstructions ||
-    txItem?.transaction?.meta?.innerInstructions ||
-    [];
-
-  if (Array.isArray(innerGroups)) {
-    for (const group of innerGroups) {
-      enqueue(group?.instructions);
-    }
-  }
-
-  let cursor = 0;
-  while (cursor < queue.length) {
-    const instruction = queue[cursor++];
-    if (!instruction || typeof instruction !== "object") continue;
-    if (seen.has(instruction)) continue;
-    seen.add(instruction);
-
-    collected.push(instruction);
-    enqueue(instruction?.innerInstructions);
-    enqueue(instruction?.instructions);
-  }
-
-  return collected;
-}
-
-function historyCreatorIsSigner(txItem, creator) {
-  const accountKeys =
-    txItem?.transaction?.message?.accountKeys ||
-    txItem?.message?.accountKeys ||
-    [];
-
-  if (!Array.isArray(accountKeys)) return false;
-
-  const explicitSigner = accountKeys.some(account => {
-    if (!account || typeof account !== "object") return false;
-
-    const accountAddress = historyPubkeyToString(account);
-    return accountAddress === creator && account.signer === true;
-  });
-
-  if (explicitSigner) return true;
-
-  // In Solana transactions the first account is normally the fee payer,
-  // which must sign. This fallback covers string-only accountKeys.
-  const firstAddress = historyPubkeyToString(accountKeys[0]);
-  return firstAddress === creator;
-}
-
-function historyFindMintInitializations(txItem, creator) {
-  if (!historyCreatorIsSigner(txItem, creator)) {
-    return [];
-  }
-
-  const instructions = historyCollectParsedInstructions(txItem);
-  const matches = [];
-
-  instructions.forEach(instruction => {
-    const parsed = instruction?.parsed;
-    if (!parsed || typeof parsed !== "object") return;
-
-    const type = String(parsed?.type || "").toLowerCase();
-
-    if (type !== "initializemint" && type !== "initializemint2") {
-      return;
-    }
-
-    const info = parsed?.info || {};
-    const mint = historyPubkeyToString(info?.mint || info?.account);
-
-    if (!mint) return;
-
-    matches.push({
-      mint,
-      instructionType: type === "initializemint2"
-        ? "initializeMint2"
-        : "initializeMint",
-      mintAuthority: historyPubkeyToString(info?.mintAuthority),
-      freezeAuthority: historyPubkeyToString(info?.freezeAuthority),
-      decimals: Number.isFinite(Number(info?.decimals))
-        ? Number(info.decimals)
-        : null
-    });
-  });
-
-  return matches;
 }
 
 async function historyDetectCreatorCandidate(contract) {
@@ -11390,7 +9917,7 @@ async function angryEthCheckToken() {
       </div>
 
       <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-        <div><strong>⛓️ Network:</strong> Ethereum</div>
+        <div><strong>Network:</strong> Ethereum</div>
         <div><strong>Token standard:</strong> ${angryEthEscape(tokenInfo?.type || "ERC-20 / contract")}</div>
         <div><strong>Decimals:</strong> ${decimals}</div>
         <div><strong>Current totalSupply:</strong> ${totalSupply > 0n ? angryEthFormatUnits(totalSupply, decimals, 6) : "Unavailable"}</div>
@@ -12370,7 +10897,7 @@ async function angryBaseCheckToken() {
       </div>
 
       <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-        <div><strong>⛓️ Network:</strong> Base</div>
+        <div><strong>Network:</strong> Base</div>
         <div><strong>Token standard:</strong> ${angryBaseEscape(tokenInfo?.type || "ERC-20 / contract")}</div>
         <div><strong>Decimals:</strong> ${decimals}</div>
         <div><strong>Current totalSupply:</strong> ${totalSupply > 0n ? angryBaseFormatUnits(totalSupply, decimals, 6) : "Unavailable"}</div>
@@ -13350,7 +11877,7 @@ async function angryArbCheckToken() {
       </div>
 
       <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-        <div><strong>⛓️ Network:</strong> Arbitrum</div>
+        <div><strong>Network:</strong> Arbitrum</div>
         <div><strong>Token standard:</strong> ${angryArbEscape(tokenInfo?.type || "ERC-20 / contract")}</div>
         <div><strong>Decimals:</strong> ${decimals}</div>
         <div><strong>Current totalSupply:</strong> ${totalSupply > 0n ? angryArbFormatUnits(totalSupply, decimals, 6) : "Unavailable"}</div>
@@ -14177,7 +12704,7 @@ async function angryBscCheckToken() {
       </div>
       <div style="margin-top:10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;">${priceChanges}</div>
       <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-        <div><strong>⛓️ Network:</strong> BNB Smart Chain</div>
+        <div><strong>Network:</strong> BNB Smart Chain</div>
         <div><strong>Token standard:</strong> BEP-20 / EVM token contract</div>
         <div><strong>Decimals:</strong> ${decimals}</div>
         <div><strong>Current totalSupply:</strong> ${totalSupply > 0n ? angryBscFormatUnits(totalSupply, decimals, 6) : angryBscEscape(sec?.total_supply ?? "Unavailable")}</div>
@@ -14672,7 +13199,7 @@ async function angryRhCheckToken() {
       </div>
 
       <div style="margin-top:16px;padding:14px;background:#101010;border-radius:12px;line-height:1.7;">
-        <div><strong>⛓️ Network:</strong> Robinhood Chain</div>
+        <div><strong>Network:</strong> Robinhood Chain</div>
         <div><strong>Token standard:</strong> ${angryRhEscape(tokenInfo?.type || "ERC-20 / contract")}</div>
         <div><strong>Decimals:</strong> ${decimals}</div>
         <div><strong>Current totalSupply:</strong> ${totalSupply > 0n ? angryRhFormatUnits(totalSupply, decimals, 6) : "Unavailable"}</div>
@@ -15313,15 +13840,15 @@ function angryUpdateNetworkUi() {
     robinhood:"robinhood.jpg"
   }[ANGRY_ACTIVE_NETWORK] || "solana.svg";
 
-  if (mini) mini.innerHTML =
-    `<img class="angry-network-logo" src="../assets/networks/${logoFile}" alt="" aria-hidden="true"> ${angryEthEscape(net.label)}`;
-
   const input = document.getElementById("contract");
-  if (input) {
-    input.placeholder = isSolana
-      ? "Enter Solana contract address..."
-      : `Enter ${net.label} token contract (0x...)`;
+  const hasContract = !!input?.value?.trim();
+  if (mini) {
+    mini.innerHTML = hasContract
+      ? `<img class="angry-network-logo" src="../assets/networks/${logoFile}" alt="" aria-hidden="true"> ${angryEthEscape(net.label)}`
+      : `<span class="angry-auto-dot"></span> Auto detect`;
   }
+
+  if (input) input.placeholder = "Paste token contract address...";
 
   const crossB = document.getElementById("crossContractB");
   if (crossB) {
@@ -15463,6 +13990,167 @@ window.analyzeWalletRelationships = (...args) => angryActiveAdapter().analyzeWal
 window.analyzeRiskTimeline = (...args) => angryActiveAdapter().analyzeRiskTimeline(...args);
 window.analyzeKolPromotion = (...args) => angryActiveAdapter().analyzeKolPromotion(...args);
 window.analyzeCrossTokenRelationship = (...args) => angryActiveAdapter().analyzeCrossTokenRelationship(...args);
+
+
+let ANGRY_AUTO_SCAN_SEQ = 0;
+let ANGRY_AUTO_LAST_CA = "";
+let ANGRY_AUTO_TIMER = null;
+
+function angryAutoStatus(message, state = "") {
+  const node = document.getElementById("angryAutoStatus");
+  if (!node) return;
+  node.textContent = message;
+  node.className = `angry-auto-status${state ? ` is-${state}` : ""}`;
+}
+
+function angryLooksLikeSolanaAddress(value) {
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(String(value || "").trim());
+}
+
+function angryLooksLikeEvmAddress(value) {
+  return /^0x[0-9a-fA-F]{40}$/.test(String(value || "").trim());
+}
+
+async function angryDetectEvmNetwork(contract) {
+  const chainMap = {
+    ethereum: "ethereum",
+    base: "base",
+    arbitrum: "arbitrum",
+    bsc: "bsc",
+    robinhood: "robinhood"
+  };
+
+  // One lightweight market lookup normally identifies the chain without probing every RPC.
+  try {
+    const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${encodeURIComponent(contract)}`, {
+      headers: { "Accept": "application/json" }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const candidates = (Array.isArray(data?.pairs) ? data.pairs : [])
+        .filter(pair => chainMap[String(pair?.chainId || "").toLowerCase()])
+        .sort((a, b) => Number(b?.liquidity?.usd || 0) - Number(a?.liquidity?.usd || 0));
+      if (candidates.length) return chainMap[String(candidates[0].chainId).toLowerCase()];
+    }
+  } catch (_) {}
+
+  // New/unlisted tokens may have no DEX pair yet. Probe supported chains only as fallback.
+  const probes = [
+    ["ethereum", () => angryEthGetCode(contract)],
+    ["base", () => angryBaseGetCode(contract)],
+    ["arbitrum", () => angryArbGetCode(contract)],
+    ["bsc", () => angryBscGetCode(contract)],
+    ["robinhood", () => angryRhGetCode(contract)]
+  ];
+  const results = await Promise.all(probes.map(async ([network, fn]) => {
+    try {
+      const code = await fn();
+      return code && code !== "0x" && code !== "0x0" ? network : null;
+    } catch (_) { return null; }
+  }));
+  return results.find(Boolean) || null;
+}
+
+async function angryAutoDetectNetwork(contract) {
+  if (angryLooksLikeSolanaAddress(contract)) return "solana";
+  if (angryLooksLikeEvmAddress(contract)) return angryDetectEvmNetwork(contract);
+  return null;
+}
+
+async function angryAutoAnalyze(force = false) {
+  const input = document.getElementById("contract");
+  const contract = input?.value?.trim() || "";
+  if (!contract) {
+    angryResetAutoChecker();
+    return;
+  }
+  if (!force && contract === ANGRY_AUTO_LAST_CA) return;
+
+  const seq = ++ANGRY_AUTO_SCAN_SEQ;
+  angryAutoStatus("Detecting network…", "working");
+
+  const network = await angryAutoDetectNetwork(contract);
+  if (seq !== ANGRY_AUTO_SCAN_SEQ) return;
+
+  if (!network) {
+    angryAutoStatus("Network could not be detected. Check the contract address and try again.", "error");
+    const result = document.getElementById("result");
+    if (result) { result.innerHTML = ""; result.style.display = "none"; }
+    ANGRY_AUTO_LAST_CA = "";
+    return;
+  }
+
+  ANGRY_AUTO_LAST_CA = contract;
+
+  const kolOutput = document.getElementById("kolPromotionResult");
+  if (kolOutput) {
+    kolOutput.style.display = "none";
+    kolOutput.innerHTML = "";
+  }
+
+  angrySetNetwork(network);
+  const label = angryGetNetwork()?.label || network;
+  angryAutoStatus(`${label} detected. Loading token…`, "working");
+
+  try {
+    await angryActiveAdapter().checkToken();
+    if (seq !== ANGRY_AUTO_SCAN_SEQ) return;
+
+    angryAutoStatus(`${label} detected. Building public report…`, "working");
+    const publicChecks = [
+      ["Burn / supply", () => angryActiveAdapter().analyzeBurns()],
+      ["Liquidity", () => angryActiveAdapter().analyzeLiquidity()],
+      ["Holders", () => angryActiveAdapter().analyzeHolders()],
+      ["Creator", () => angryActiveAdapter().analyzeCreator()],
+      ...(network === "solana"
+        ? [["KOL / promotion", () => analyzeKolPromotion()]]
+        : [])
+    ];
+    for (const [name, run] of publicChecks) {
+      if (seq !== ANGRY_AUTO_SCAN_SEQ) return;
+      angryAutoStatus(`${label} detected. Loading ${name.toLowerCase()}…`, "working");
+      try { await run(); } catch (moduleError) { console.warn(`ANGRY public report: ${name} failed`, moduleError); }
+    }
+    if (seq !== ANGRY_AUTO_SCAN_SEQ) return;
+    angryAutoStatus(`${label} detected. Public report loaded.`, "ready");
+  } catch (error) {
+    if (seq !== ANGRY_AUTO_SCAN_SEQ) return;
+    angryAutoStatus(`${label} detected, but token data could not be loaded.`, "error");
+    console.error("ANGRY auto checker error:", error);
+  }
+}
+
+function angryResetAutoChecker() {
+  ANGRY_AUTO_SCAN_SEQ++;
+  ANGRY_AUTO_LAST_CA = "";
+  clearTimeout(ANGRY_AUTO_TIMER);
+  angryAutoStatus("Supports Solana, Ethereum, Base, Arbitrum, BSC and Robinhood Chain.");
+  const mini = document.querySelector(".network-mini");
+  if (mini) mini.innerHTML = `<span class="angry-auto-dot"></span> Auto detect`;
+  const input = document.getElementById("contract");
+  if (input) input.placeholder = "Paste token contract address...";
+}
+window.angryResetAutoChecker = angryResetAutoChecker;
+
+function angryScheduleAutoAnalyze() {
+  clearTimeout(ANGRY_AUTO_TIMER);
+  ANGRY_AUTO_TIMER = setTimeout(() => angryAutoAnalyze(false), 450);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("contract");
+  if (!input) return;
+  angryResetAutoChecker();
+  input.addEventListener("paste", () => setTimeout(() => angryAutoAnalyze(true), 30));
+  input.addEventListener("input", angryScheduleAutoAnalyze);
+  input.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      clearTimeout(ANGRY_AUTO_TIMER);
+      angryAutoAnalyze(true);
+    }
+  });
+});
 
 try {
   const savedNetwork = localStorage.getItem("angry:active-network");
