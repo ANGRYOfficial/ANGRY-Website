@@ -2376,6 +2376,7 @@ const formatPercent = (value) => {
         </div>
 
         <div id="angry-inline-liquidity" style="margin-top:18px;padding-top:18px;border-top:1px solid #292929;">
+          <div style="font-size:19px;font-weight:900;margin-bottom:6px;">Liquidity Analysis</div>
           <div style="color:#888;font-size:13px;line-height:1.5;">Check liquidity, pool concentration and liquidity security.</div>
           <div id="liquidityResult" style="display:none;margin-top:12px;"></div>
         </div>
@@ -4447,14 +4448,6 @@ async function analyzeLiquidity() {
         background:#151515;
         border-radius:12px;
       ">
-        <div style="
-          font-size:20px;
-          font-weight:bold;
-          margin-bottom:14px;
-        ">
-          Liquidity Analysis
-        </div>
-
         <div style="margin-bottom:9px;">
           <strong>Total Indexed Liquidity:</strong><br>
           ${formatUsd(totalLiquidity)}
