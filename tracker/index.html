@@ -2254,14 +2254,132 @@ const formatPercent = (value) => {
 
 
   // ============================================================
-  // ANGRY SMART CLIENT CACHE — V13
+  // ANGRY SMART CLIENT CACHE — V14
   // Reduces repeated Worker/API calls on the same browser while
   // keeping fast-changing on-chain data on short TTLs.
   // ============================================================
   const ANGRY_NATIVE_FETCH = window.fetch.bind(window);
-  const ANGRY_CACHE_PREFIX = "angry:v13:";
+  const ANGRY_CACHE_PREFIX = "angry:v14:";
   const ANGRY_MEMORY_CACHE = new Map();
   const ANGRY_INFLIGHT = new Map();
+
+  // ============================================================
+  // ANGRY HELIUS REQUEST GATE — V14
+  // Serializes Helius requests from the browser so several modules
+  // cannot burst the upstream API at the same time. The Worker still
+  // performs its own retry/backoff; this client gate prevents the burst
+  // from reaching the Worker in the first place.
+  // ============================================================
+  const ANGRY_HELIUS_MIN_GAP_MS = 700;
+  const ANGRY_HELIUS_MAX_ATTEMPTS = 4;
+  let ANGRY_HELIUS_QUEUE = Promise.resolve();
+  let ANGRY_HELIUS_LAST_START = 0;
+
+  function angrySleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+  }
+
+  function angryIsHeliusRequest(input) {
+    const url = typeof input === "string"
+      ? input
+      : String(input?.url || input || "");
+    return url.startsWith(HELIUS_PROXY_URL);
+  }
+
+  function angryQueueHeliusAttempt(task) {
+    const run = ANGRY_HELIUS_QUEUE.then(async () => {
+      const waitMs = Math.max(
+        0,
+        ANGRY_HELIUS_MIN_GAP_MS - (Date.now() - ANGRY_HELIUS_LAST_START)
+      );
+
+      if (waitMs > 0) await angrySleep(waitMs);
+      ANGRY_HELIUS_LAST_START = Date.now();
+      return task();
+    });
+
+    // Keep the queue alive even when one request fails.
+    ANGRY_HELIUS_QUEUE = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
+  function angryHeliusRetryDelay(response, attempt) {
+    const retryAfter = Number(response?.headers?.get?.("Retry-After") || 0);
+    if (Number.isFinite(retryAfter) && retryAfter > 0) {
+      return Math.min(retryAfter * 1000, 15000);
+    }
+
+    const steps = [1400, 2800, 5200, 9000];
+    return steps[Math.min(attempt, steps.length - 1)];
+  }
+
+  async function angryLooksLikeUsageLimit(response) {
+    if (!response) return false;
+    if (response.status === 429) return true;
+
+    if (response.status === 502 || response.status === 503 || response.status === 504) {
+      return true;
+    }
+
+    try {
+      const contentType = String(response.headers.get("Content-Type") || "").toLowerCase();
+      if (contentType.includes("application/json")) return false;
+      const text = (await response.clone().text()).trim().toLowerCase();
+      return text.includes("max usage reached") || text.includes("too many requests");
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function angryRateLimitResponse(message = "Helius rate limit reached. Please retry shortly.") {
+    return new Response(JSON.stringify({
+      error: {
+        code: 429,
+        message
+      }
+    }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "X-ANGRY-Rate-Limit": "normalized"
+      }
+    });
+  }
+
+  async function angryHeliusNetworkFetch(input, init = {}) {
+    let lastResponse = null;
+
+    for (let attempt = 0; attempt < ANGRY_HELIUS_MAX_ATTEMPTS; attempt++) {
+      const response = await angryQueueHeliusAttempt(() =>
+        ANGRY_NATIVE_FETCH(input, init)
+      );
+      lastResponse = response;
+
+      const limited = await angryLooksLikeUsageLimit(response);
+      if (!limited) return response;
+
+      if (attempt < ANGRY_HELIUS_MAX_ATTEMPTS - 1) {
+        await angrySleep(angryHeliusRetryDelay(response, attempt));
+      }
+    }
+
+    // Some upstream rate-limit responses are plain text (for example
+    // "max usage reached"). Normalize the final failure to JSON so old
+    // module code never crashes with Response.json() syntax errors.
+    if (lastResponse && await angryLooksLikeUsageLimit(lastResponse)) {
+      return angryRateLimitResponse();
+    }
+
+    return lastResponse;
+  }
+
+  async function angryNetworkFetch(input, init = {}) {
+    if (angryIsHeliusRequest(input)) {
+      return angryHeliusNetworkFetch(input, init);
+    }
+    return ANGRY_NATIVE_FETCH(input, init);
+  }
+
   const ANGRY_MAX_PERSIST_BODY = 160000;
   const ANGRY_MAX_PERSIST_ENTRIES = 30;
 
@@ -2304,6 +2422,25 @@ const formatPercent = (value) => {
     }
   }
 
+  function angryNormalizedCacheBody(url, method, body) {
+    if (method !== "POST" || !url.startsWith(HELIUS_PROXY_URL) || !body) {
+      return body;
+    }
+
+    try {
+      const parsed = JSON.parse(body);
+      // JSON-RPC id is only a response correlation field. Different modules
+      // often ask the exact same Helius question with different ids, so it
+      // must not create separate cache entries / duplicate upstream calls.
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        delete parsed.id;
+      }
+      return JSON.stringify(parsed);
+    } catch (_) {
+      return body;
+    }
+  }
+
   function angryCachePolicy(input, init = {}) {
     const { url, method, body } = angryFetchRequestParts(input, init);
 
@@ -2313,10 +2450,11 @@ const formatPercent = (value) => {
         try {
           const parsedUrl = new URL(url);
           if (parsedUrl.searchParams.get("mode") === "address-transactions") {
-            // Enhanced transaction-history pages can be very large and deeply nested.
-            // Do NOT duplicate them in the browser cache on mobile. The Cloudflare
-            // Worker still edge-caches these requests, so Helius calls remain reduced.
-            return { ttl: 0, persist: false };
+            // Reuse the same page briefly across Creator / History / Relations /
+            // Timeline. Keep it memory-only (never localStorage) because enhanced
+            // transaction pages can be large. This removes duplicate bursts while
+            // still allowing fresh data shortly afterward.
+            return { ttl: 45000, persist: false };
           }
         } catch (_) {}
 
@@ -2515,14 +2653,20 @@ const formatPercent = (value) => {
     const policy = angryCachePolicy(input, init);
 
     if (!policy.ttl) {
-      return ANGRY_NATIVE_FETCH(input, init);
+      return angryNetworkFetch(input, init);
     }
 
     const parts = angryFetchRequestParts(input, init);
+    const cacheBody = angryNormalizedCacheBody(
+      parts.url,
+      parts.method,
+      parts.body
+    );
+
     const cacheKey = [
       parts.method,
       parts.url,
-      parts.body
+      cacheBody
     ].join("\n");
 
     const memoryHit = angryReadMemory(cacheKey);
@@ -2546,7 +2690,7 @@ const formatPercent = (value) => {
     }
 
     const networkPromise = (async () => {
-      const response = await ANGRY_NATIVE_FETCH(input, init);
+      const response = await angryNetworkFetch(input, init);
       const text = await response.text();
 
       const pack = {
@@ -4963,6 +5107,14 @@ async function analyzeHolders() {
       })
     ]);
 
+    if (!largestResponse.ok) {
+      throw new Error(`Largest-holder lookup HTTP ${largestResponse.status}`);
+    }
+
+    if (!supplyResponse.ok) {
+      throw new Error(`Token-supply lookup HTTP ${supplyResponse.status}`);
+    }
+
     const largestData = await largestResponse.json();
     const supplyData = await supplyResponse.json();
 
@@ -5201,7 +5353,7 @@ const holderRows = topWallets.map((wallet, index) => {
 
     holderResult.innerHTML =
       "⚠️ Unable to retrieve Solana holder data.<br><br>" +
-      "The public Solana RPC may be busy or rate-limited. Please try again.";
+      String(error?.message || "The Solana data service is temporarily busy. Please try again shortly.");
   }
 }
 
@@ -5242,6 +5394,10 @@ const holderRows = topWallets.map((wallet, index) => {
         ]
       })
     });
+
+    if (!response.ok) {
+      throw new Error(`Creator lookup HTTP ${response.status}`);
+    }
 
     const rpcData = await response.json();
 
@@ -5307,7 +5463,7 @@ for (let page = 0; page < 10; page++) {
     const creatorTxResponse = await fetch(creatorTxUrl);
 
     if (!creatorTxResponse.ok) {
-        throw new Error("Unable to load creator transaction history");
+        throw new Error(`Creator transaction history HTTP ${creatorTxResponse.status}`);
     }
 
     const pageTransactions = await creatorTxResponse.json();
