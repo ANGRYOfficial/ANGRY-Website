@@ -990,9 +990,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
             </div>
 
             <div class="field">
-              <label for="lpFee">Liquidity Reserve (%)</label>
+              <label for="lpFee">Auto Liquidity (%)</label>
               <input id="lpFee" type="number" value="0.4" min="0" max="5" step="0.1">
-              <div class="mini-help">Collected inside the token contract. A supported DEX and active liquidity pool must be configured before automatic liquidity can operate.</div>
+              <div class="mini-help">Collected by the token contract and processed automatically after the initial liquidity pool is created on a supported DEX.</div>
             </div>
 
             <div class="field">
@@ -1081,11 +1081,10 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 <div id="liquidityReserveNotice" class="liquidity-reserve-notice">
   <div class="liquidity-reserve-icon">L</div>
   <div>
-    <b>Liquidity reserve only</b>
+    <b>Automatic Liquidity</b>
     <span>
-      The liquidity fee is currently held by the token contract.
-      It is not sent to Uniswap, PancakeSwap or another DEX automatically.
-      DEX routing will be enabled only after a supported destination and active pool are configured.
+      After the initial liquidity pool is created on a supported DEX,
+      liquidity fees are processed automatically according to the token settings.
     </span>
   </div>
 </div>
@@ -1364,8 +1363,8 @@ function updateFeeModeUI(){
   if(state.type==="liquidity"){
     if(label)label.textContent="Holder Reflection (%)";
     if(help)help.textContent="Distributed to eligible holders in the token itself.";
-    if(title)title.textContent="Liquidity reserve rules";
-    if(sub)sub.textContent="Plan reflection, liquidity reserve, true burn and creator allocation."
+    if(title)title.textContent="Auto Liquidity Rules";
+    if(sub)sub.textContent="Plan reflection, automatic liquidity, true burn and creator allocation."
   }else if(state.type==="reward"){
     if(label)label.textContent="Reward Distribution (%)";
     if(help)help.textContent="Used to generate the selected reward asset for eligible holders.";
