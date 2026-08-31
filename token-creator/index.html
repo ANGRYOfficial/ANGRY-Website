@@ -798,6 +798,132 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 }
 </style>
 
+
+<style id="angry-multiwallet-style">
+.angry-wallet-overlay{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  padding:18px;
+}
+
+.angry-wallet-overlay.open{
+  display:flex;
+}
+
+.angry-wallet-modal{
+  width:min(100%,460px);
+  background:#0c0e10;
+  border:1px solid #2b3036;
+  border-radius:24px;
+  padding:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,.55);
+}
+
+.angry-wallet-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-bottom:8px;
+}
+
+.angry-wallet-head h3{
+  margin:0;
+  font-size:22px;
+  color:#fff;
+}
+
+.angry-wallet-close{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid #30343a;
+  background:#15181c;
+  color:#fff;
+  font-size:22px;
+}
+
+.angry-wallet-sub{
+  color:#8c929b;
+  margin:0 0 16px;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.angry-wallet-list{
+  display:grid;
+  gap:10px;
+}
+
+.angry-wallet-option{
+  width:100%;
+  border:1px solid #2a2f35;
+  background:#111418;
+  color:#fff;
+  border-radius:16px;
+  padding:14px 15px;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  text-align:left;
+  font:inherit;
+}
+
+.angry-wallet-option:active{
+  transform:scale(.99);
+}
+
+.angry-wallet-option:hover{
+  border-color:#ff5a1f;
+}
+
+.angry-wallet-logo{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#20242a;
+  font-size:16px;
+  font-weight:900;
+}
+
+.angry-wallet-name{
+  flex:1;
+  min-width:0;
+}
+
+.angry-wallet-name b{
+  display:block;
+  font-size:16px;
+}
+
+.angry-wallet-name small{
+  color:#868d96;
+  display:block;
+  margin-top:3px;
+}
+
+.angry-wallet-state{
+  font-size:12px;
+  color:#55d984;
+  white-space:nowrap;
+}
+
+@media(min-width:700px){
+  .angry-wallet-overlay{
+    align-items:center;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -1442,21 +1568,52 @@ function renderPreview(){
   $("preview").innerHTML=rows.map(([k,v])=>`<div class="preview-row"><span>${k}</span><strong>${v}</strong></div>`).join("");
 }
 
+
+let ANGRY_WALLET_PROVIDER = window.ethereum || null;
+
+function angryProvider(){
+  return ANGRY_WALLET_PROVIDER || window.ethereum || null;
+}
+
+function angrySetWalletProvider(provider){
+  if(!provider) return;
+
+  ANGRY_WALLET_PROVIDER = provider;
+
+  try{
+    provider.on?.("accountsChanged", accounts=>{
+      state.account = accounts?.[0] || null;
+
+      $("walletBtn").textContent = state.account
+        ? state.account.slice(0,6)+"…"+state.account.slice(-4)
+        : "Connect Wallet";
+
+      $("projectWallet").value = state.account || "";
+      renderPreview();
+    });
+
+    provider.on?.("chainChanged", ()=>{
+      setStatus("Wallet network changed.","warn");
+    });
+  }catch(_){}
+}
+
 async function connectWallet(){
+
   const c=selectedChain();
   if(c.family!=="evm"){setStatus("Solana wallet support is Coming soon. The current Token Creator uses an EVM wallet for Ethereum, Base and Robinhood Chain test deployments.","warn");return}
-  if(!window.ethereum){setStatus("EVM wallet provider not detected. Open the hosted ANGRY Launch page inside MetaMask or another compatible EVM wallet browser.","warn");return}
-  try{const accounts=await ethereum.request({method:"eth_requestAccounts"});state.account=accounts[0];$("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("walletBtn").classList.add("wallet-connected");$("walletBtn").classList.add("wallet-connected");$("projectWallet").value=state.account;renderPreview();setStatus("EVM wallet connected. Switch to "+c.name+" before deployment.","good")}catch(e){setStatus("Wallet connection cancelled: "+(e.message||e),"bad")}
+  if(!angryProvider()){setStatus("EVM wallet provider not detected. Open the hosted ANGRY Launch page inside MetaMask or another compatible EVM wallet browser.","warn");return}
+  try{const accounts=await angryProvider().request({method:"eth_requestAccounts"});state.account=accounts[0];$("walletBtn").textContent=state.account.slice(0,6)+"…"+state.account.slice(-4);$("walletBtn").classList.add("wallet-connected");$("walletBtn").classList.add("wallet-connected");$("projectWallet").value=state.account;renderPreview();setStatus("EVM wallet connected. Switch to "+c.name+" before deployment.","good")}catch(e){setStatus("Wallet connection cancelled: "+(e.message||e),"bad")}
 }
 
 async function ensureNetwork(){
   const c=selectedChain();
   if(c.family!=="evm")throw new Error("Solana needs a separate Solana wallet + SPL Token deployment path.");
-  if(!window.ethereum)throw new Error("EVM wallet provider not detected.");
-  try{await ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:c.chainId}]});return true}
+  if(!angryProvider())throw new Error("EVM wallet provider not detected.");
+  try{await angryProvider().request({method:"wallet_switchEthereumChain",params:[{chainId:c.chainId}]});return true}
   catch(e){
     if(e.code===4902 || String(e.message||"").toLowerCase().includes("unrecognized")){
-      await ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:c.chainId,chainName:c.name,nativeCurrency:{name:c.nativeSymbol||c.native,symbol:c.nativeSymbol||c.native,decimals:18},rpcUrls:[c.rpc],blockExplorerUrls:[c.explorer]}]});return true
+      await angryProvider().request({method:"wallet_addEthereumChain",params:[{chainId:c.chainId,chainName:c.name,nativeCurrency:{name:c.nativeSymbol||c.native,symbol:c.nativeSymbol||c.native,decimals:18},rpcUrls:[c.rpc],blockExplorerUrls:[c.explorer]}]});return true
     }
     throw e;
   }
@@ -1496,7 +1653,7 @@ function buildStandardDeploymentData(){
 
 async function waitReceipt(hash){
   for(let i=0;i<90;i++){
-    const r=await ethereum.request({method:"eth_getTransactionReceipt",params:[hash]});
+    const r=await angryProvider().request({method:"eth_getTransactionReceipt",params:[hash]});
     if(r)return r;
     await new Promise(res=>setTimeout(res,2500));
   }
@@ -1805,16 +1962,16 @@ async function deployToken(){
   const btn=$("deployBtn");btn.disabled=true;
   try{
     await ensureNetwork();
-    const chainId=await ethereum.request({method:"eth_chainId"});
+    const chainId=await angryProvider().request({method:"eth_chainId"});
     if(chainId.toLowerCase()!==c.chainId.toLowerCase())throw new Error("Wallet is not on "+c.name+".");
     const data=buildDeploymentData();
     setStatus("Preparing Immutable token deployment and estimating gas on "+c.name+"…","warn");
     let gas;
-    try{gas=await ethereum.request({method:"eth_estimateGas",params:[{from:state.account,data}]})}catch(e){throw new Error("Gas estimate failed before approval: "+(e.message||e))}
+    try{gas=await angryProvider().request({method:"eth_estimateGas",params:[{from:state.account,data}]})}catch(e){throw new Error("Gas estimate failed before approval: "+(e.message||e))}
     const gasDec=parseInt(gas,16);
     const paddedGas="0x"+Math.ceil(gasDec*1.20).toString(16);
     setStatus(`Ready to deploy. Estimated gas: ${gasDec.toLocaleString()} units. Your wallet will now ask you to approve a ${c.name} TESTNET transaction.`,"warn");
-    const txHash=await ethereum.request({method:"eth_sendTransaction",params:[{from:state.account,data,gas:paddedGas}]});
+    const txHash=await angryProvider().request({method:"eth_sendTransaction",params:[{from:state.account,data,gas:paddedGas}]});
     setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
@@ -2349,6 +2506,302 @@ updateChain();setType("liquidity");renderPreview();
     });
   });
 
+})();
+</script>
+
+
+<div class="angry-wallet-overlay" id="angryWalletOverlay">
+  <div class="angry-wallet-modal" role="dialog" aria-modal="true">
+    <div class="angry-wallet-head">
+      <h3>Connect a wallet</h3>
+      <button class="angry-wallet-close" id="angryWalletClose" type="button">×</button>
+    </div>
+
+    <p class="angry-wallet-sub">
+      Choose an Ethereum wallet to connect to ANGRY Token Creator.
+    </p>
+
+    <div class="angry-wallet-list">
+      <button class="angry-wallet-option" data-wallet="metamask" type="button">
+        <span class="angry-wallet-logo">MM</span>
+        <span class="angry-wallet-name">
+          <b>MetaMask</b>
+          <small>Ethereum & EVM wallet</small>
+        </span>
+        <span class="angry-wallet-state" data-wallet-state="metamask"></span>
+      </button>
+
+      <button class="angry-wallet-option" data-wallet="trust" type="button">
+        <span class="angry-wallet-logo">TW</span>
+        <span class="angry-wallet-name">
+          <b>Trust Wallet</b>
+          <small>Mobile & browser wallet</small>
+        </span>
+        <span class="angry-wallet-state" data-wallet-state="trust"></span>
+      </button>
+
+      <button class="angry-wallet-option" data-wallet="coinbase" type="button">
+        <span class="angry-wallet-logo">CB</span>
+        <span class="angry-wallet-name">
+          <b>Coinbase Wallet</b>
+          <small>Ethereum wallet</small>
+        </span>
+        <span class="angry-wallet-state" data-wallet-state="coinbase"></span>
+      </button>
+
+      <button class="angry-wallet-option" data-wallet="rabby" type="button">
+        <span class="angry-wallet-logo">RB</span>
+        <span class="angry-wallet-name">
+          <b>Rabby Wallet</b>
+          <small>EVM wallet</small>
+        </span>
+        <span class="angry-wallet-state" data-wallet-state="rabby"></span>
+      </button>
+
+      <button class="angry-wallet-option" data-wallet="okx" type="button">
+        <span class="angry-wallet-logo">OKX</span>
+        <span class="angry-wallet-name">
+          <b>OKX Wallet</b>
+          <small>Web3 wallet</small>
+        </span>
+        <span class="angry-wallet-state" data-wallet-state="okx"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script id="angry-multiwallet-v1">
+(function(){
+  const overlay = document.getElementById("angryWalletOverlay");
+  const closeBtn = document.getElementById("angryWalletClose");
+  const walletBtn = document.getElementById("walletBtn");
+
+  const announced = [];
+
+  const keyForInfo = info=>{
+    const rdns = String(info?.rdns || "").toLowerCase();
+    const name = String(info?.name || "").toLowerCase();
+
+    if(rdns.includes("metamask") || name.includes("metamask")) return "metamask";
+    if(rdns.includes("trust") || name.includes("trust")) return "trust";
+    if(rdns.includes("coinbase") || name.includes("coinbase")) return "coinbase";
+    if(rdns.includes("rabby") || name.includes("rabby")) return "rabby";
+    if(rdns.includes("okx") || name.includes("okx")) return "okx";
+
+    return "";
+  };
+
+  function addProvider(info, provider){
+    if(!provider) return;
+
+    if(announced.some(x=>x.provider===provider)) return;
+
+    announced.push({
+      key:keyForInfo(info),
+      info,
+      provider
+    });
+
+    refreshStates();
+  }
+
+  window.addEventListener("eip6963:announceProvider", event=>{
+    const detail = event.detail || {};
+    addProvider(detail.info, detail.provider);
+  });
+
+  function collectLegacyProviders(){
+    const eth = window.ethereum;
+
+    if(!eth) return;
+
+    const list = Array.isArray(eth.providers)
+      ? eth.providers
+      : [eth];
+
+    list.forEach(provider=>{
+      let key = "";
+
+      if(provider.isMetaMask && !provider.isRabby) key="metamask";
+      if(provider.isTrust || provider.isTrustWallet) key="trust";
+      if(provider.isCoinbaseWallet) key="coinbase";
+      if(provider.isRabby) key="rabby";
+      if(provider.isOkxWallet || provider.isOKExWallet) key="okx";
+
+      addProvider(
+        {name:key,rdns:key},
+        provider
+      );
+    });
+  }
+
+  function providerFor(key){
+    const exact = announced.find(x=>x.key===key);
+    if(exact) return exact.provider;
+
+    return null;
+  }
+
+  function refreshStates(){
+    document.querySelectorAll("[data-wallet-state]").forEach(el=>{
+      const key = el.dataset.walletState;
+      el.textContent = providerFor(key) ? "Installed" : "";
+    });
+  }
+
+  function openModal(){
+    collectLegacyProviders();
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+    overlay.classList.add("open");
+
+    setTimeout(refreshStates,100);
+  }
+
+  function closeModal(){
+    overlay.classList.remove("open");
+  }
+
+  function isMobile(){
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+
+  function openMobileWallet(key){
+    const url = window.location.href;
+    const noScheme =
+      window.location.host +
+      window.location.pathname +
+      window.location.search +
+      window.location.hash;
+
+    if(key==="metamask"){
+      window.location.href =
+        "https://metamask.app.link/dapp/" + noScheme;
+      return;
+    }
+
+    if(key==="trust"){
+      window.location.href =
+        "https://link.trustwallet.com/open_url?coin_id=60&url=" +
+        encodeURIComponent(url);
+      return;
+    }
+
+    if(key==="coinbase"){
+      window.location.href =
+        "https://go.cb-w.com/dapp?cb_url=" +
+        encodeURIComponent(url);
+      return;
+    }
+
+    if(key==="rabby"){
+      window.location.href = "https://rabby.io/";
+      return;
+    }
+
+    if(key==="okx"){
+      window.location.href = "https://web3.okx.com/download";
+      return;
+    }
+  }
+
+  function openDesktopWalletSite(key){
+    const links = {
+      metamask:"https://metamask.io/download/",
+      trust:"https://trustwallet.com/download",
+      coinbase:"https://www.coinbase.com/wallet",
+      rabby:"https://rabby.io/",
+      okx:"https://web3.okx.com/download"
+    };
+
+    window.open(links[key],"_blank","noopener,noreferrer");
+  }
+
+  async function connectProvider(key, provider){
+    try{
+      angrySetWalletProvider(provider);
+
+      const accounts = await provider.request({
+        method:"eth_requestAccounts"
+      });
+
+      if(!accounts || !accounts[0]){
+        throw new Error("No wallet account returned.");
+      }
+
+      state.account = accounts[0];
+
+      $("walletBtn").textContent =
+        state.account.slice(0,6) +
+        "…" +
+        state.account.slice(-4);
+
+      $("walletBtn").classList.add("wallet-connected");
+
+      $("projectWallet").value = state.account;
+
+      renderPreview();
+
+      closeModal();
+
+      const chain = selectedChain();
+
+      setStatus(
+        "Wallet connected. Switch to " +
+        chain.name +
+        " before deployment.",
+        "good"
+      );
+
+    }catch(error){
+      setStatus(
+        "Wallet connection cancelled: " +
+        (error?.message || error),
+        "bad"
+      );
+    }
+  }
+
+  document.querySelectorAll("[data-wallet]").forEach(btn=>{
+    btn.addEventListener("click",async()=>{
+      const key = btn.dataset.wallet;
+
+      collectLegacyProviders();
+
+      const provider = providerFor(key);
+
+      if(provider){
+        await connectProvider(key,provider);
+        return;
+      }
+
+      if(isMobile()){
+        openMobileWallet(key);
+      }else{
+        openDesktopWalletSite(key);
+      }
+    });
+  });
+
+  walletBtn.addEventListener(
+    "click",
+    event=>{
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openModal();
+    },
+    true
+  );
+
+  closeBtn.addEventListener("click",closeModal);
+
+  overlay.addEventListener("click",event=>{
+    if(event.target===overlay) closeModal();
+  });
+
+  collectLegacyProviders();
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+  setTimeout(refreshStates,150);
 })();
 </script>
 
