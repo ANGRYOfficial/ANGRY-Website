@@ -1855,28 +1855,17 @@ async function deployToken(){
     if(walletChainId!==expectedChainId)throw new Error("Wallet is not on "+c.name+".");
     const data=buildDeploymentData();
     setStatus("Preparing Immutable token deployment and estimating gas on "+c.name+"…","warn");
-    let gas;
-    try{
-      if(typeof window.angryEstimateDeploymentGas!=="function"){
-        throw new Error("Reown Ethers provider is not ready")
-      }
-      gas=await window.angryEstimateDeploymentGas({
+    setStatus(
+      "Deployment prepared. Your wallet will now show the Ethereum Mainnet transaction for approval.",
+      "warn"
+    );
+
+    const txHash=await angryProvider().request({
+      method:"eth_sendTransaction",
+      params:[{
         from:state.account,
         data
-      })
-    }catch(e){
-      console.error("ANGRY estimateGas error:",e);
-      const detail=e?.shortMessage||e?.reason||e?.message||String(e);
-      throw new Error("Gas estimate failed before approval: "+detail)
-    }
-    const gasDec=Number(gas);
-    const paddedGas=BigInt(Math.ceil(gasDec*1.20));
-    setStatus(`Ready to deploy. Estimated gas: ${gasDec.toLocaleString()} units. Your wallet will now ask you to approve a ${c.name} TESTNET transaction.`,"warn");
-    if(typeof window.angrySendDeployment!=="function")throw new Error("Reown Ethers provider is not ready");
-    const txHash=await window.angrySendDeployment({
-      from:state.account,
-      data,
-      gasLimit:paddedGas
+      }]
     });
     setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
     const receipt=await waitReceipt(txHash);
