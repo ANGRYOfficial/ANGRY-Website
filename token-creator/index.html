@@ -1422,7 +1422,7 @@ function renderPreview(){
     rows.push(["Mintable","No"],["Token tax","0%"],["Admin controls","No"]);
   }else{
     if(state.type==="liquidity"){
-      rows.push(["Holder Reflection",n("holderFee")+"%"],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Burn",n("burnFee")+"%"],["Planned tax",calcFees()+"%"]);
+      rows.push(["Holder Reflection",n("holderFee")+"%"],["Auto Liquidity",n("lpFee")+"%"],["DEX liquidity","Automatic after initial pool"],["Project / Creator",n("projectFee")+"%"],["Burn",n("burnFee")+"%"],["Planned tax",calcFees()+"%"]);
     }else{
       rows.push(["Reward Distribution",n("holderFee")+"%"],["Reward asset",rewardAssetLabel()],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
       if(state.rewardAsset==="custom"){
