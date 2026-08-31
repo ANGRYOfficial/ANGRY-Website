@@ -1848,15 +1848,36 @@ async function deployToken(){
   try{
     await ensureNetwork();
     const chainId=await angryProvider().request({method:"eth_chainId"});
-    if(chainId.toLowerCase()!==c.chainId.toLowerCase())throw new Error("Wallet is not on "+c.name+".");
+    const walletChainId=typeof chainId==="string"
+      ? parseInt(chainId,16)
+      : Number(chainId);
+    const expectedChainId=parseInt(c.chainId,16);
+    if(walletChainId!==expectedChainId)throw new Error("Wallet is not on "+c.name+".");
     const data=buildDeploymentData();
     setStatus("Preparing Immutable token deployment and estimating gas on "+c.name+"…","warn");
     let gas;
-    try{gas=await angryProvider().request({method:"eth_estimateGas",params:[{from:state.account,data}]})}catch(e){throw new Error("Gas estimate failed before approval: "+(e.message||e))}
-    const gasDec=parseInt(gas,16);
-    const paddedGas="0x"+Math.ceil(gasDec*1.20).toString(16);
+    try{
+      if(typeof window.angryEstimateDeploymentGas!=="function"){
+        throw new Error("Reown Ethers provider is not ready")
+      }
+      gas=await window.angryEstimateDeploymentGas({
+        from:state.account,
+        data
+      })
+    }catch(e){
+      console.error("ANGRY estimateGas error:",e);
+      const detail=e?.shortMessage||e?.reason||e?.message||String(e);
+      throw new Error("Gas estimate failed before approval: "+detail)
+    }
+    const gasDec=Number(gas);
+    const paddedGas=BigInt(Math.ceil(gasDec*1.20));
     setStatus(`Ready to deploy. Estimated gas: ${gasDec.toLocaleString()} units. Your wallet will now ask you to approve a ${c.name} TESTNET transaction.`,"warn");
-    const txHash=await angryProvider().request({method:"eth_sendTransaction",params:[{from:state.account,data,gas:paddedGas}]});
+    if(typeof window.angrySendDeployment!=="function")throw new Error("Reown Ethers provider is not ready");
+    const txHash=await window.angrySendDeployment({
+      from:state.account,
+      data,
+      gasLimit:paddedGas
+    });
     setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
