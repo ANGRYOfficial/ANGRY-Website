@@ -1495,10 +1495,44 @@ async function ensureNetwork(){
   const c=selectedChain();
   if(c.family!=="evm")throw new Error("Solana needs a separate Solana wallet + SPL Token deployment path.");
   if(!angryProvider())throw new Error("EVM wallet provider not detected.");
-  try{await angryProvider().request({method:"wallet_switchEthereumChain",params:[{chainId:c.chainId}]});return true}
+
+  const numericChainId = c.chainId.toLowerCase().startsWith("0x")
+    ? parseInt(c.chainId,16)
+    : Number(c.chainId);
+
+  if(typeof window.angrySwitchReownNetwork === "function"){
+    try{
+      await window.angrySwitchReownNetwork(numericChainId);
+      return true;
+    }catch(reownError){
+      console.warn("Reown network switch failed, using wallet fallback:", reownError);
+    }
+  }
+
+  try{
+    await angryProvider().request({
+      method:"wallet_switchEthereumChain",
+      params:[{chainId:c.chainId}]
+    });
+    return true;
+  }
   catch(e){
     if(e.code===4902 || String(e.message||"").toLowerCase().includes("unrecognized")){
-      await angryProvider().request({method:"wallet_addEthereumChain",params:[{chainId:c.chainId,chainName:c.name,nativeCurrency:{name:c.nativeSymbol||c.native,symbol:c.nativeSymbol||c.native,decimals:18},rpcUrls:[c.rpc],blockExplorerUrls:[c.explorer]}]});return true
+      await angryProvider().request({
+        method:"wallet_addEthereumChain",
+        params:[{
+          chainId:c.chainId,
+          chainName:c.name,
+          nativeCurrency:{
+            name:c.nativeSymbol||c.native,
+            symbol:c.nativeSymbol||c.native,
+            decimals:18
+          },
+          rpcUrls:[c.rpc],
+          blockExplorerUrls:[c.explorer]
+        }]
+      });
+      return true;
     }
     throw e;
   }
