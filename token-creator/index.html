@@ -835,11 +835,15 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
       <section class="card section">
         <div class="section-head">
           <div class="step">01</div>
-          <div><div class="section-title">Choose network</div><div class="section-sub">Select the test network.</div></div>
+          <div><div class="section-title">Choose network</div><div class="section-sub">Select a network.</div></div>
           <div class="network-grid">
             <button class="network-card active" type="button" data-chain="sepolia">
   <div class="network-icon"><img src="../assets/networks/ethereum.svg" alt="" aria-hidden="true"></div>
   <div><b>Ethereum</b><span>Mainnet</span></div>
+</button>
+            <button class="network-card" type="button" data-chain="bscMainnet">
+  <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
+  <div><b>BSC</b><span>Mainnet</span></div>
 </button>
             <button class="network-card" type="button" data-chain="bscTestnet">
   <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
@@ -868,9 +872,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   <div><b>Solana</b><span>Devnet</span></div>
 </button></div>
           <div class="network-strip" id="networkHint"></div>
-          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected testnet</button>
+          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected network</button>
         </div>
-        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
+        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscMainnet">BSC Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
         <input id="nativeCoinInput" value="SepoliaETH" readonly aria-hidden="true">
       </section>
 
@@ -1118,13 +1122,14 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
     <div class="bottom-item"><i>⌁</i><div><b>Wallet controlled</b><span>The deployer wallet receives the full fixed token supply.</span></div></div>
     <div class="bottom-item"><i>⚙</i><div><b>Built in stages</b><span>More networks and token mechanics can be added later.</span></div></div>
   </div>
-  <footer class="footer"><span>© 2026 ANGRY</span><span>Testnet environment · Do not use mainnet funds.</span></footer>
+  <footer class="footer"><span>© 2026 ANGRY</span><span id="environmentNotice">Testnet environment · Do not use mainnet funds.</span></footer>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
 const CHAINS = {
   sepolia:{name:"Ethereum Mainnet",family:"evm",chainId:"0x1",chainIdDec:1,native:"ETH",nativeSymbol:"ETH",rpc:"https://ethereum-rpc.publicnode.com",explorer:"https://etherscan.io",deploy:true},
+  bscMainnet:{name:"BSC Mainnet",family:"evm",chainId:"0x38",chainIdDec:56,native:"BNB",nativeSymbol:"BNB",rpc:"https://bsc-dataseed.bnbchain.org",explorer:"https://bscscan.com",deploy:true},
   bscTestnet:{name:"BSC Testnet",family:"evm",chainId:"0x61",chainIdDec:97,native:"tBNB",nativeSymbol:"tBNB",rpc:"https://bsc-testnet-dataseed.bnbchain.org",explorer:"https://testnet.bscscan.com",deploy:true},
   baseSepolia:{name:"Base Sepolia",family:"evm",chainId:"0x14a34",chainIdDec:84532,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia.base.org",explorer:"https://sepolia.basescan.org",deploy:false},
   robinhoodTestnet:{name:"Robinhood Chain Testnet",family:"evm",chainId:"0xb626",chainIdDec:46630,native:"ETH",nativeSymbol:"ETH",rpc:"https://rpc.testnet.chain.robinhood.com",explorer:"https://explorer.testnet.chain.robinhood.com",deploy:false},
@@ -1151,6 +1156,17 @@ function updateDeploymentNetworkText(){
 
   const statusNetwork = $("statusNetworkName");
   if(statusNetwork) statusNetwork.textContent = c.name;
+
+  const environmentNotice = $("environmentNotice");
+  if(environmentNotice){
+    const isMainnet =
+      c.chainIdDec === 1 ||
+      c.chainIdDec === 56;
+
+    environmentNotice.textContent = isMainnet
+      ? "Mainnet environment · Real network fees apply."
+      : "Testnet environment · Do not use mainnet funds.";
+  }
 }
 
 $("chain")?.addEventListener("change", updateDeploymentNetworkText);
@@ -1332,7 +1348,7 @@ async function validateCustomRewardToken(){
 }
 function wrappedRewardName(){
   const key=$("chain").value;
-  if(key==="bscTestnet")return "WBNB";
+  if(key==="bscMainnet" || key==="bscTestnet")return "WBNB";
   if(key==="polygonAmoy")return "WPOL";
   return "WETH";
 }
@@ -1730,7 +1746,8 @@ function buildLiquidityDeploymentData(){
     symbolTail;
 
   const creationBytecode =
-    $("chain").value === "bscTestnet"
+    ($("chain").value === "bscMainnet" ||
+     $("chain").value === "bscTestnet")
       ? BSC_LIQUIDITY_CREATION_BYTECODE
       : LIQUIDITY_CREATION_BYTECODE;
 
@@ -1913,20 +1930,110 @@ async function deployToken(){
       : Number(c.chainId);
     if(walletChainId!==expectedChainId)throw new Error("Wallet is not on "+c.name+".");
     const data=buildDeploymentData();
-    setStatus("Preparing Immutable token deployment and estimating gas on "+c.name+"…","warn");
-    setStatus(
-      "Deployment prepared. Your wallet will now show the "+c.name+" transaction for approval.",
-      "warn"
-    );
 
-    const txHash=await angryProvider().request({
-      method:"eth_sendTransaction",
-      params:[{
-        from:state.account,
-        data
-      }]
-    });
-    setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
+      setStatus(
+        "Estimating deployment gas on "+c.name+"… No transaction has been sent.",
+        "warn"
+      );
+
+      let estimatedGas;
+      try{
+        const rpcResponse=await fetch(c.rpc,{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            jsonrpc:"2.0",
+            id:Date.now(),
+            method:"eth_estimateGas",
+            params:[{
+              from:state.account,
+              data
+            }]
+          })
+        });
+
+        if(!rpcResponse.ok){
+          throw new Error(
+            "RPC HTTP "+rpcResponse.status
+          );
+        }
+
+        const rpcResult=await rpcResponse.json();
+
+        if(rpcResult.error){
+          throw new Error(
+            rpcResult.error.message ||
+            "RPC estimateGas failed"
+          );
+        }
+
+        if(!rpcResult.result){
+          throw new Error(
+            "RPC returned no gas estimate"
+          );
+        }
+
+        estimatedGas=rpcResult.result;
+      }catch(estimateError){
+        const estimateMessage=String(
+          estimateError?.shortMessage ||
+          estimateError?.message ||
+          estimateError
+        ).split("\n")[0].slice(0,240);
+
+        throw new Error(
+          "Gas estimation failed on "+c.name+": "+
+          estimateMessage
+        );
+      }
+
+      const estimatedGasNumber=BigInt(estimatedGas).toString();
+
+      setStatus(
+        "✅ Gas estimation passed on "+c.name+
+        ".<br>Estimated gas: <b>"+estimatedGasNumber+
+        "</b><br>No transaction has been sent yet.",
+        "good"
+      );
+
+      const isMainnet=c.chainIdDec===1 || c.chainIdDec===56;
+
+      if(isMainnet){
+        const approved=window.confirm(
+          c.name+" MAINNET\n\n"+
+          "Estimated gas: "+estimatedGasNumber+"\n\n"+
+          "No transaction has been sent yet.\n"+
+          "Press OK only if you want to open the real deployment transaction."
+        );
+
+        if(!approved){
+          setStatus(
+            "✅ Mainnet gas estimation completed.<br>"+
+            "Estimated gas: <b>"+estimatedGasNumber+
+            "</b><br>Deployment cancelled. No transaction was sent.",
+            "good"
+          );
+          return;
+        }
+      }
+
+      setStatus(
+        "Gas estimation passed. Your wallet will now show the "+
+        c.name+" deployment transaction for approval.",
+        "warn"
+      );
+
+      const txHash=await angryProvider().request({
+        method:"eth_sendTransaction",
+        params:[{
+          from:state.account,
+          data
+        }]
+      });
+
+      setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
     state.lastContract=receipt.contractAddress;renderPreview();
@@ -2066,7 +2173,7 @@ async function deployToken(){
   finally{btn.disabled=false}
 }
 
-function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:$("chain").value==="sepolia"?"MAINNET":"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
+function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:(c.chainIdDec===1||c.chainIdDec===56)?"MAINNET":"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
 function downloadConfig(){const blob=new Blob([JSON.stringify(makeConfig(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${$("symbol").value||"token"}-angry-launch.json`;a.click();URL.revokeObjectURL(a.href)}
 function copyPlan(){navigator.clipboard?.writeText($("preview").textContent).then(()=>setStatus("Deployment summary copied.","good"))}
 
@@ -2629,6 +2736,6 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
-<script src="./reown-wallet.js?v=bsc-20260902-1"></script>
+<script src="./reown-wallet.js?v=bsc-mainnet-20260903-1"></script>
 </body>
 </html>
