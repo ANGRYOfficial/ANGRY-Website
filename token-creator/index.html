@@ -1398,6 +1398,7 @@ function updateChain(){
   $("networkHint").innerHTML=`<span class="live-dot"></span><b>${c.name}</b><span>•</span><span>${idText}</span><span>•</span><span>${availability}</span>`;
   document.querySelectorAll(".network-card").forEach(x=>x.classList.toggle("active",x.dataset.chain===$("chain").value));
   updateRewardUI();
+  updateDeploymentNetworkText();
   renderPreview();
 }
 function setType(type){
