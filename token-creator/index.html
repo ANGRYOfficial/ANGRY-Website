@@ -835,7 +835,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
       <section class="card section">
         <div class="section-head">
           <div class="step">01</div>
-          <div><div class="section-title">Choose network</div><div class="section-sub">Select the test network.</div></div>
+          <div><div class="section-title">Choose network</div><div class="section-sub">Select a network.</div></div>
           <div class="network-grid">
             <button class="network-card active" type="button" data-chain="sepolia">
   <div class="network-icon"><img src="../assets/networks/ethereum.svg" alt="" aria-hidden="true"></div>
@@ -843,7 +843,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 </button>
             <button class="network-card" type="button" data-chain="bscMainnet">
   <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
-  <div><b>BSC</b><span>Testnet</span></div>
+  <div><b>BSC</b><span>Mainnet</span></div>
 </button>
             <button class="network-card" type="button" data-chain="bscTestnet">
   <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
@@ -872,7 +872,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   <div><b>Solana</b><span>Devnet</span></div>
 </button></div>
           <div class="network-strip" id="networkHint"></div>
-          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected testnet</button>
+          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected network</button>
         </div>
         <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscMainnet">BSC Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
         <input id="nativeCoinInput" value="SepoliaETH" readonly aria-hidden="true">
@@ -1930,20 +1930,110 @@ async function deployToken(){
       : Number(c.chainId);
     if(walletChainId!==expectedChainId)throw new Error("Wallet is not on "+c.name+".");
     const data=buildDeploymentData();
-    setStatus("Preparing Immutable token deployment and estimating gas on "+c.name+"…","warn");
-    setStatus(
-      "Deployment prepared. Your wallet will now show the "+c.name+" transaction for approval.",
-      "warn"
-    );
 
-    const txHash=await angryProvider().request({
-      method:"eth_sendTransaction",
-      params:[{
-        from:state.account,
-        data
-      }]
-    });
-    setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
+      setStatus(
+        "Estimating deployment gas on "+c.name+"… No transaction has been sent.",
+        "warn"
+      );
+
+      let estimatedGas;
+      try{
+        const rpcResponse=await fetch(c.rpc,{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            jsonrpc:"2.0",
+            id:Date.now(),
+            method:"eth_estimateGas",
+            params:[{
+              from:state.account,
+              data
+            }]
+          })
+        });
+
+        if(!rpcResponse.ok){
+          throw new Error(
+            "RPC HTTP "+rpcResponse.status
+          );
+        }
+
+        const rpcResult=await rpcResponse.json();
+
+        if(rpcResult.error){
+          throw new Error(
+            rpcResult.error.message ||
+            "RPC estimateGas failed"
+          );
+        }
+
+        if(!rpcResult.result){
+          throw new Error(
+            "RPC returned no gas estimate"
+          );
+        }
+
+        estimatedGas=rpcResult.result;
+      }catch(estimateError){
+        const estimateMessage=String(
+          estimateError?.shortMessage ||
+          estimateError?.message ||
+          estimateError
+        ).split("\n")[0].slice(0,240);
+
+        throw new Error(
+          "Gas estimation failed on "+c.name+": "+
+          estimateMessage
+        );
+      }
+
+      const estimatedGasNumber=BigInt(estimatedGas).toString();
+
+      setStatus(
+        "✅ Gas estimation passed on "+c.name+
+        ".<br>Estimated gas: <b>"+estimatedGasNumber+
+        "</b><br>No transaction has been sent yet.",
+        "good"
+      );
+
+      const isMainnet=c.chainIdDec===1 || c.chainIdDec===56;
+
+      if(isMainnet){
+        const approved=window.confirm(
+          c.name+" MAINNET\n\n"+
+          "Estimated gas: "+estimatedGasNumber+"\n\n"+
+          "No transaction has been sent yet.\n"+
+          "Press OK only if you want to open the real deployment transaction."
+        );
+
+        if(!approved){
+          setStatus(
+            "✅ Mainnet gas estimation completed.<br>"+
+            "Estimated gas: <b>"+estimatedGasNumber+
+            "</b><br>Deployment cancelled. No transaction was sent.",
+            "good"
+          );
+          return;
+        }
+      }
+
+      setStatus(
+        "Gas estimation passed. Your wallet will now show the "+
+        c.name+" deployment transaction for approval.",
+        "warn"
+      );
+
+      const txHash=await angryProvider().request({
+        method:"eth_sendTransaction",
+        params:[{
+          from:state.account,
+          data
+        }]
+      });
+
+      setStatus(`Transaction sent: ${txHash}<br>Waiting for ${c.name} confirmation…`,"warn");
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
     state.lastContract=receipt.contractAddress;renderPreview();
@@ -2646,6 +2736,6 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
-<script src="./reown-wallet.js?v=bsc-20260902-1"></script>
+<script src="./reown-wallet.js?v=bsc-mainnet-20260903-1"></script>
 </body>
 </html>
