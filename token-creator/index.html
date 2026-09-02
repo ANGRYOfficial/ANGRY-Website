@@ -1001,6 +1001,16 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 .vesting-summary strong{
   color:#eef0f1;
 }
+
+.type.vesting-network-disabled{
+  opacity:.48;
+  cursor:not-allowed;
+}
+
+.type.vesting-network-disabled:hover{
+  border-color:#30363b;
+  box-shadow:none;
+}
 </style>
 
 </head>
@@ -1010,7 +1020,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
   <a class="angry-globalbrand" href="../index.html">
     <span class="angry-globalbrand-mark"></span>
-    <span>ANGRY</span>
+    <span><span class="notranslate" translate="no">ANGRY</span>
   </a>
 
   <nav class="angry-globalnav">
@@ -1044,37 +1054,37 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="network-grid">
             <button class="network-card active" type="button" data-chain="sepolia">
   <div class="network-icon"><img src="../assets/networks/ethereum.svg" alt="" aria-hidden="true"></div>
-  <div><b>Ethereum</b><span>Mainnet</span></div>
+  <div><b class="notranslate" translate="no">Ethereum</b><span>Mainnet</span></div>
 </button>
             <button class="network-card" type="button" data-chain="bscMainnet">
   <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
-  <div><b>BSC</b><span>Mainnet</span></div>
+  <div><b class="notranslate" translate="no">BSC</b><span>Mainnet</span></div>
 </button>
             <button class="network-card" type="button" data-chain="bscTestnet">
   <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
-  <div><b>BSC</b><span>Testnet</span></div>
+  <div><b class="notranslate" translate="no">BSC</b><span>Testnet</span></div>
 </button>
             <button class="network-card" type="button" data-chain="baseSepolia">
   <div class="network-icon"><img src="../assets/networks/base.svg" alt="" aria-hidden="true"></div>
-  <div><b>Base</b><span>Sepolia</span></div>
+  <div><b class="notranslate" translate="no">Base</b><span>Sepolia</span></div>
 </button>
             <button class="network-card" type="button" data-chain="robinhoodTestnet">
   <div class="network-icon"><img src="../assets/networks/robinhood.jpg" alt="" aria-hidden="true"></div>
-  <div><b>Robinhood Chain</b><span>Testnet</span></div>
+  <div><b class="notranslate" translate="no">Robinhood Chain</b><span>Testnet</span></div>
 </button>
             <button class="network-card" type="button" data-chain="arbSepolia">
   <div class="network-icon"><img src="../assets/networks/arbitrum.png" alt="" aria-hidden="true"></div>
-  <div><b>Arbitrum</b><span>Sepolia</span></div>
+  <div><b class="notranslate" translate="no">Arbitrum</b><span>Sepolia</span></div>
 </button>
             <button class="network-card" type="button" data-chain="polygonAmoy">
   <div class="network-icon"><img src="../assets/networks/polygon.svg" alt="" aria-hidden="true"></div>
-  <div><b>Polygon</b><span>Amoy</span></div>
+  <div><b class="notranslate" translate="no">Polygon</b><span>Amoy</span></div>
 </button>
 
             <button class="network-card planned-network" type="button" data-chain="solanaDevnet" aria-disabled="true">
   <span class="network-badge">Coming soon</span>
   <div class="network-icon"><img src="../assets/networks/solana.svg" alt="" aria-hidden="true"></div>
-  <div><b>Solana</b><span>Devnet</span></div>
+  <div><b class="notranslate" translate="no">Solana</b><span>Devnet</span></div>
 </button></div>
           <div class="network-strip" id="networkHint"></div>
           <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected network</button>
@@ -1089,8 +1099,8 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
           <div class="type-grid">
 
-            <button class="type active" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">I</span><b>Immutable Token</b></div><p>Fixed supply with optional reflection, auto liquidity, creator fee and true burn. Settings are locked after deployment.</p><span class="status-badge ready">MAINNET</span></button>
-<button class="type" id="vestingTypeCard" type="button" data-type="vesting" data-fee-usd="9.99"><div class="type-top"><span class="type-icon">V</span><b>Vesting Token</b></div><p>Fixed supply with reflection, auto liquidity, creator fee, true burn and immutable linear vesting.</p><span class="status-badge ready">BSC</span></button>
+            <button class="type active" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">I</span><b class="notranslate" translate="no">Immutable Token</b></div><p>Fixed supply with optional reflection, auto liquidity, creator fee and true burn. Settings are locked after deployment.</p><span class="status-badge ready" translate="no">MAINNET</span></button>
+<button class="type" id="vestingTypeCard" type="button" data-type="vesting" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">V</span><b class="notranslate" translate="no">Vesting Token</b></div><p>Fixed supply with reflection, auto liquidity, creator fee, true burn and immutable linear vesting.</p><span class="status-badge ready" translate="no">BSC</span></button>
             <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="status-badge">TESTNET</span></button>
           </div>
         </div>
@@ -1187,8 +1197,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
 <section class="card section vesting-section hidden" id="vestingSection">
   <div class="vesting-head">
+    <div class="step" id="vestingStep">04</div>
     <div>
-      <div class="vesting-title">Vesting Configuration</div>
+      <div class="vesting-title notranslate" translate="no">Vesting Configuration</div>
       <div class="vesting-sub">
         Configure the fixed supply allocation that will be released linearly to one permanent beneficiary.
       </div>
@@ -1212,7 +1223,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
     </div>
 
     <div class="field wide">
-      <label>Vesting allocation</label>
+      <label class="notranslate" translate="no">Vesting allocation</label>
 
       <div class="vesting-mode-row">
         <button id="vestingModePercent"
@@ -1309,7 +1320,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
     </div>
 
     <div class="field">
-      <label for="vestingCliff">Cliff (months)</label>
+      <label for="vestingCliff" class="notranslate" translate="no">Cliff (months)</label>
       <input
         id="vestingCliff"
         type="number"
@@ -1325,7 +1336,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
     <div class="field">
       <label>Release method</label>
-      <input value="Linear automatic vesting" readonly>
+      <input value="Linear automatic vesting" class="notranslate" translate="no" readonly>
       <div class="mini-help">
         Beneficiary can claim the vested amount available at that time.
       </div>
@@ -1344,33 +1355,33 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
 <section class="card section hidden" id="feeFields">
         <div class="section-head">
-          <div class="step">04</div>
+          <div class="step" id="feeStep">04</div>
           <div>
-            <div class="section-title" id="feeSectionTitle">Fee rules</div>
+            <div class="section-title notranslate" id="feeSectionTitle" translate="no">Fee rules</div>
             <div class="section-sub" id="feeSectionSub">Sepolia test deployment is available for Liquidity Core.</div>
           </div>
 
           <div class="fee-grid">
             <div class="field">
-              <label for="holderFee" id="holderFeeLabel">Holder Reflection (%)</label>
+              <label for="holderFee" id="holderFeeLabel" class="notranslate" translate="no">Holder Reflection (%)</label>
               <input id="holderFee" type="number" value="0.3" min="0" max="5" step="0.1">
               <div class="mini-help" id="holderFeeHelp">Distributed to eligible holders in the token itself.</div>
             </div>
 
             <div class="field">
-              <label for="lpFee">Auto Liquidity (%)</label>
+              <label for="lpFee" class="notranslate" translate="no">Auto Liquidity (%)</label>
               <input id="lpFee" type="number" value="0.4" min="0" max="5" step="0.1">
               <div class="mini-help">Collected by the token contract and processed automatically after the initial liquidity pool is created on a supported DEX.</div>
             </div>
 
             <div class="field">
-              <label for="projectFee">Project / Creator (%)</label>
+              <label for="projectFee" class="notranslate" translate="no">Project / Creator (%)</label>
               <input id="projectFee" type="number" value="0.3" min="0" max="5" step="0.1">
               <div class="mini-help">Allocated to the creator/project fee wallet.</div>
             </div>
 
             <div class="field">
-              <label for="burnFee">Burn (%)</label>
+              <label for="burnFee" class="notranslate" translate="no">Burn (%)</label>
               <input id="burnFee" type="number" value="0.0"
                      min="0" max="5" step="0.1"
                      oninput="renderPreview()">
@@ -1383,7 +1394,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
             <div id="rewardFields" class="reward-builder hidden">
               <div class="reward-head">
                 <div>
-                  <div class="reward-title">Reward asset</div>
+                  <div class="reward-title"><span class="notranslate" translate="no">Reward</span> asset</div>
                   <div class="reward-sub">Choose what eligible holders receive.</div>
                 </div>
                 <span class="planner-chip">TESTNET</span>
@@ -1449,7 +1460,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 <div id="liquidityReserveNotice" class="liquidity-reserve-notice">
   <div class="liquidity-reserve-icon">L</div>
   <div>
-    <b>Automatic Liquidity</b>
+    <b><span class="notranslate" translate="no">Automatic Liquidity</span></b>
     <span>
       After the initial liquidity pool is created on a supported DEX,
       liquidity fees are processed automatically according to the token settings.
@@ -1755,9 +1766,13 @@ function updateFeeModeUI(){
   const title=$("feeSectionTitle");
   const sub=$("feeSectionSub");
   if(state.type==="liquidity"){
-    if(label)label.textContent="Holder Reflection (%)";
+    if(label){
+      label.classList.add("notranslate");
+      label.setAttribute("translate","no");
+      label.textContent="Holder Reflection (%)";
+    }
     if(help)help.textContent="Distributed to eligible holders in the token itself.";
-    if(title)title.textContent="Auto Liquidity Rules";
+    if(title)title.innerHTML='<span class="notranslate" translate="no">Auto Liquidity Rules</span>';
     if(sub)sub.textContent="Plan reflection, automatic liquidity, true burn and creator allocation."
   }else if(state.type==="reward"){
     if(label)label.textContent="Reward Distribution (%)";
@@ -1779,10 +1794,32 @@ function updateChain(){
   document.querySelectorAll(".network-card").forEach(x=>x.classList.toggle("active",x.dataset.chain===$("chain").value));
   updateRewardUI();
   updateDeploymentNetworkText();
+
+  if(
+    state.type==="vesting" &&
+    !vestingSupported()
+  ){
+    setType("liquidity");
+  }
+
+  syncVestingNetworkAvailability();
   syncVestingUI();
   renderPreview();
 }
 function setType(type){
+
+  if(
+    type==="vesting" &&
+    !vestingSupported()
+  ){
+    type="liquidity";
+
+    setStatus(
+      `<span class="notranslate" translate="no">Vesting Token is currently available only on BSC.</span>`,
+      "warn"
+    );
+  }
+
   state.type=type;
   document.querySelectorAll(".type").forEach(x=>x.classList.toggle("active",x.dataset.type===type));
   $("feeFields").classList.toggle("hidden",type==="standard");
@@ -1801,6 +1838,7 @@ function setType(type){
   reward:"Create Test Token"
 };
   $("deployBtn").textContent=labels[type];
+  syncVestingNetworkAvailability();
   syncVestingUI();
   renderPreview();
 }
@@ -1811,6 +1849,26 @@ function vestingSupported(){
   return (
     key==="bscMainnet" ||
     key==="bscTestnet"
+  );
+}
+
+function syncVestingNetworkAvailability(){
+  const card=$("vestingTypeCard");
+
+  if(!card){
+    return;
+  }
+
+  const supported=vestingSupported();
+
+  card.classList.toggle(
+    "vesting-network-disabled",
+    !supported
+  );
+
+  card.setAttribute(
+    "aria-disabled",
+    supported ? "false" : "true"
   );
 }
 
@@ -2049,6 +2107,11 @@ function syncVestingUI(){
   const active=
     state.type==="vesting";
 
+  if($("feeStep")){
+    $("feeStep").textContent=
+      active ? "05" : "04";
+  }
+
   section.classList.toggle(
     "hidden",
     !active
@@ -2069,7 +2132,7 @@ function syncVestingUI(){
   if(!vestingSupported()){
     status.className="vesting-status warn";
     status.textContent=
-      "Vesting Token is currently available only on BSC.";
+      `<span class="notranslate" translate="no">Vesting Token is currently available only on BSC.</span>`;
 
     if(deployBtn){
       deployBtn.disabled=true;
@@ -2115,11 +2178,16 @@ function validateBasic(){const issues=[];const name=$("name").value.trim(),symbo
 function renderPreview(){
   feeStatus();
   const c=selectedChain();
-  const typeNames={standard:"Standard Token",liquidity:"Immutable Token",vesting:"Vesting Token",reward:"Reward Token"};
+  const typeNames={
+    standard:'<span class="notranslate" translate="no">Standard Token</span>',
+    liquidity:'<span class="notranslate" translate="no">Immutable Token</span>',
+    vesting:'<span class="notranslate" translate="no">Vesting Token</span>',
+    reward:'<span class="notranslate" translate="no">Reward Token</span>'
+  };
   const name=$("name").value||"—", symbol=$("symbol").value||"—", supply=$("supply").value||"—";
   const shortOwner=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Not connected";
   let rows=[
-    ["Network",`<span class="preview-network"><span class="mini-chain-dot ${$("chain").value}"></span>${c.name}</span>`],
+    ["Network",`<span class="preview-network notranslate" translate="no"><span class="mini-chain-dot ${$("chain").value}"></span>${c.name}</span>`],
     [c.family==="evm"?"Chain ID":"Token program",c.family==="evm"?c.chainIdDec:"SPL Token (Coming soon)"],
     ["Contract type",typeNames[state.type]],
     ["Token name",name],
@@ -2132,7 +2200,14 @@ function renderPreview(){
     rows.push(["Mintable","No"],["Token tax","0%"],["Admin controls","No"]);
   }else{
     if(state.type==="liquidity" || state.type==="vesting"){
-      rows.push(["Holder Reflection",n("holderFee")+"%"],["Auto Liquidity",n("lpFee")+"%"],["DEX liquidity","Automatic after initial pool"],["Project / Creator",n("projectFee")+"%"],["Burn",n("burnFee")+"%"],["Planned tax",calcFees()+"%"]);
+      rows.push(
+        ['<span class="notranslate" translate="no">Holder Reflection</span>',n("holderFee")+"%"],
+        ['<span class="notranslate" translate="no">Auto Liquidity</span>',n("lpFee")+"%"],
+        ['<span class="notranslate" translate="no">DEX liquidity</span>','<span class="notranslate" translate="no">Automatic after initial pool</span>'],
+        ['<span class="notranslate" translate="no">Project / Creator</span>',n("projectFee")+"%"],
+        ['<span class="notranslate" translate="no">Burn</span>',n("burnFee")+"%"],
+        ['<span class="notranslate" translate="no">Planned tax</span>',calcFees()+"%"]
+      );
     }else{
       rows.push(["Reward Distribution",n("holderFee")+"%"],["Reward asset",rewardAssetLabel()],["Liquidity reserve",n("lpFee")+"%"],["DEX destination","Not configured — reserve only"],["Project / Creator",n("projectFee")+"%"],["Planned tax",calcFees()+"%"]);
       if(state.rewardAsset==="custom"){
@@ -2173,18 +2248,18 @@ function renderPreview(){
         : "Not set";
 
     rows.push(
-      ["Vesting","Enabled"],
-      ["Vesting allocation",v.amount || "—"],
+      ["<span class=\"notranslate\" translate=\"no\">Vesting</span>","Enabled"],
+      ['<span class="notranslate" translate="no">Vesting allocation</span>',v.amount || "—"],
       ["Creator receives",creatorReceives],
       ["Beneficiary",beneficiaryShort],
-      ["Vesting duration",(v.duration || "—")+" months"],
-      ["Cliff",
+      ['<span class="notranslate" translate="no">Vesting duration</span>',(v.duration || "—")+" months"],
+      ["<span class=\"notranslate\" translate=\"no\">Cliff</span>",
         v.cliff==="0"
           ? "None"
           : (v.cliff || "—")+" months"
       ],
-      ["Release","Linear"],
-      ["Vesting controls","Immutable / non-revocable"]
+      ["<span class=\"notranslate\" translate=\"no\">Release</span>","<span class=\"notranslate\" translate=\"no\">Linear</span>"],
+      ["<span class=\"notranslate\" translate=\"no\">Vesting controls</span>","<span class=\"notranslate\" translate=\"no\">Immutable / non-revocable</span>"]
     );
   }
 
