@@ -1105,10 +1105,10 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
       <div class="preview-head"><div class="preview-title"><span class="code-icon">&lt;/&gt;</span> Deployment Preview</div><div class="preview-sub">Review your settings before deployment.</div></div>
       <div class="preview-body">
         <div id="preview" class="preview-list"></div>
-        <div class="deploy-note"><b>Ethereum Mainnet deployment.</b> Review the settings below, then confirm the deployment in your wallet.</div>
+        <div class="deploy-note"><b id="deployNetworkNote">Ethereum Mainnet deployment.</b> Review the settings below, then confirm the deployment in your wallet.</div>
         <button class="btn primary" id="deployBtn" type="button">Create Test Token</button>
         <div class="micro-actions"><button class="btn secondary" id="downloadBtn" type="button">Download config</button><button class="btn secondary" id="copyBtn" type="button">Copy summary</button></div>
-        <div id="status" class="status">Ready. Connect an EVM wallet to deploy an Immutable Token on Ethereum Mainnet.</div>
+        <div id="status" class="status">Ready. Connect an EVM wallet to deploy an Immutable Token on <span id="statusNetworkName">Ethereum Mainnet</span>.</div>
       </div>
     </aside>
   </main>
@@ -1141,6 +1141,20 @@ function n(id){const v=parseFloat($(id)?.value||"0");return Number.isFinite(v)?v
 function calcFees(){if(state.type==="standard")return 0;return n("holderFee")+n("lpFee")+n("projectFee")+n("burnFee")}
 function feeStatus(){const t=calcFees();$("totalFee").textContent=(Math.round(t*100)/100)+"%";$("totalFee").className="total "+(t<=1?"good":t<=2?"warn":"bad");$("feeMessage").textContent=t<=1?"Low-fee target.":t<=2?"Moderate fee.":"High fee — review before future deployment."}
 function selectedChain(){return CHAINS[$("chain").value]}
+
+function updateDeploymentNetworkText(){
+  const c = selectedChain();
+  if(!c) return;
+
+  const note = $("deployNetworkNote");
+  if(note) note.textContent = c.name + " deployment.";
+
+  const statusNetwork = $("statusNetworkName");
+  if(statusNetwork) statusNetwork.textContent = c.name;
+}
+
+$("chain")?.addEventListener("change", updateDeploymentNetworkText);
+updateDeploymentNetworkText();
 function isEvmAddress(value){
   return /^0x[a-fA-F0-9]{40}$/.test(String(value||"").trim());
 }
@@ -1915,6 +1929,50 @@ async function deployToken(){
     const receipt=await waitReceipt(txHash);
     if(!receipt.contractAddress)throw new Error("Confirmed transaction did not return a contract address.");
     state.lastContract=receipt.contractAddress;renderPreview();
+
+    const metadataUri =
+      document.getElementById("tokenMetadataUri")?.value?.trim() || "";
+
+    const imageUri =
+      document.getElementById("tokenImageUri")?.value?.trim() || "";
+
+    if(metadataUri.startsWith("ipfs://")){
+      try{
+        const registryRes = await fetch(
+          "https://angry-nft-storage.demiandemian147.workers.dev/registry",
+          {
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+              chainId:c.chainIdDec,
+              address:receipt.contractAddress,
+              metadataUri,
+              imageUri,
+              creator:state.account,
+              txHash
+            })
+          }
+        );
+
+        const registryData =
+          await registryRes.json().catch(() => ({}));
+
+        if(!registryRes.ok){
+          console.warn(
+            "ANGRY profile registry failed:",
+            registryData.error || registryRes.status
+          );
+        }
+      }catch(registryError){
+        console.warn(
+          "ANGRY profile registry unavailable:",
+          registryError
+        );
+      }
+    }
+
     setStatus(`✅ Token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
   }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
   finally{btn.disabled=false}
