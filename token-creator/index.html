@@ -1937,44 +1937,72 @@ async function deployToken(){
     const imageUri =
       document.getElementById("tokenImageUri")?.value?.trim() || "";
 
-    if(metadataUri.startsWith("ipfs://")){
-      try{
-        const registryRes = await fetch(
-          "https://angry-nft-storage.demiandemian147.workers.dev/registry",
-          {
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-              chainId:c.chainIdDec,
-              address:receipt.contractAddress,
-              metadataUri,
-              imageUri,
-              creator:state.account,
-              txHash
-            })
-          }
-        );
-
-        const registryData =
-          await registryRes.json().catch(() => ({}));
-
-        if(!registryRes.ok){
-          console.warn(
-            "ANGRY profile registry failed:",
-            registryData.error || registryRes.status
-          );
-        }
-      }catch(registryError){
-        console.warn(
-          "ANGRY profile registry unavailable:",
-          registryError
-        );
-      }
-    }
-
     setStatus(`✅ Token deployed on ${c.name}.<br>Contract: <b>${receipt.contractAddress}</b><br><a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,"good");
+
+    if(metadataUri.startsWith("ipfs://")){
+      void (async()=>{
+        const payload={
+          chainId:c.chainIdDec,
+          address:receipt.contractAddress,
+          metadataUri,
+          imageUri,
+          creator:state.account,
+          txHash
+        };
+
+        for(let attempt=1;attempt<=5;attempt++){
+          try{
+            const registryRes=await fetch(
+              "https://angry-nft-storage.demiandemian147.workers.dev/registry",
+              {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(payload)
+              }
+            );
+
+            const registryData=
+              await registryRes.json().catch(()=>({}));
+
+            if(registryRes.ok){
+              console.log(
+                "ANGRY profile registered successfully.",
+                registryData
+              );
+              return;
+            }
+
+            if(registryRes.status===409){
+              console.log(
+                "ANGRY profile already registered.",
+                registryData
+              );
+              return;
+            }
+
+            console.warn(
+              `ANGRY registry attempt ${attempt}/5 failed:`,
+              registryData.error || registryRes.status
+            );
+          }catch(registryError){
+            console.warn(
+              `ANGRY registry attempt ${attempt}/5 unavailable:`,
+              registryError
+            );
+          }
+
+          if(attempt<5){
+            await new Promise(resolve=>
+              setTimeout(resolve,attempt*3000)
+            );
+          }
+        }
+
+        console.warn(
+          "ANGRY profile registry failed after 5 attempts."
+        );
+      })();
+    }
   }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
   finally{btn.disabled=false}
 }
