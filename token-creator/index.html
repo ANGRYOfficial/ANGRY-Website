@@ -1941,66 +1941,125 @@ async function deployToken(){
 
     if(metadataUri.startsWith("ipfs://")){
       void (async()=>{
-        const payload={
-          chainId:c.chainIdDec,
-          address:receipt.contractAddress,
-          metadataUri,
-          imageUri,
-          creator:state.account,
-          txHash
-        };
+        try{
+          const registryMessage = [
+            "ANGRY Token Profile Registry",
+            "Version: 1",
+            `Chain ID: ${c.chainIdDec}`,
+            `Contract: ${receipt.contractAddress.toLowerCase()}`,
+            `Metadata: ${metadataUri}`,
+            `Image: ${imageUri}`,
+            `Creator: ${state.account.toLowerCase()}`,
+            `Deployment TX: ${txHash.toLowerCase()}`
+          ].join("\n");
 
-        for(let attempt=1;attempt<=5;attempt++){
-          try{
-            const registryRes=await fetch(
-              "https://angry-nft-storage.demiandemian147.workers.dev/registry",
-              {
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify(payload)
+          const registryMessageHex =
+            "0x" +
+            Array.from(
+              new TextEncoder().encode(registryMessage),
+              byte => byte.toString(16).padStart(2,"0")
+            ).join("");
+
+          setStatus(
+            `✅ Token deployed on ${c.name}.<br>` +
+            `Contract: <b>${receipt.contractAddress}</b><br>` +
+            `Confirm the gas-free profile signature in your wallet to secure the token metadata.`,
+            "good"
+          );
+
+          const signature = await angryProvider().request({
+            method:"personal_sign",
+            params:[
+              registryMessageHex,
+              state.account
+            ]
+          });
+
+          const payload={
+            chainId:c.chainIdDec,
+            address:receipt.contractAddress,
+            metadataUri,
+            imageUri,
+            creator:state.account,
+            txHash,
+            signature
+          };
+
+          for(let attempt=1;attempt<=5;attempt++){
+            try{
+              const registryRes=await fetch(
+                "https://angry-nft-storage.demiandemian147.workers.dev/registry",
+                {
+                  method:"POST",
+                  headers:{"Content-Type":"application/json"},
+                  body:JSON.stringify(payload)
+                }
+              );
+
+              const registryData=
+                await registryRes.json().catch(()=>({}));
+
+              if(registryRes.ok){
+                console.log(
+                  "ANGRY profile registered securely.",
+                  registryData
+                );
+
+                setStatus(
+                  `✅ Token deployed on ${c.name}.<br>` +
+                  `Contract: <b>${receipt.contractAddress}</b><br>` +
+                  `🔒 Token profile secured in the ANGRY registry.<br>` +
+                  `<a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,
+                  "good"
+                );
+
+                return;
               }
-            );
 
-            const registryData=
-              await registryRes.json().catch(()=>({}));
+              if(registryRes.status===409){
+                console.log(
+                  "ANGRY profile already registered.",
+                  registryData
+                );
+                return;
+              }
 
-            if(registryRes.ok){
-              console.log(
-                "ANGRY profile registered successfully.",
-                registryData
+              console.warn(
+                `ANGRY registry attempt ${attempt}/5 failed:`,
+                registryData.error || registryRes.status
               );
-              return;
+            }catch(registryError){
+              console.warn(
+                `ANGRY registry attempt ${attempt}/5 unavailable:`,
+                registryError
+              );
             }
 
-            if(registryRes.status===409){
-              console.log(
-                "ANGRY profile already registered.",
-                registryData
+            if(attempt<5){
+              await new Promise(resolve=>
+                setTimeout(resolve,attempt*3000)
               );
-              return;
             }
-
-            console.warn(
-              `ANGRY registry attempt ${attempt}/5 failed:`,
-              registryData.error || registryRes.status
-            );
-          }catch(registryError){
-            console.warn(
-              `ANGRY registry attempt ${attempt}/5 unavailable:`,
-              registryError
-            );
           }
 
-          if(attempt<5){
-            await new Promise(resolve=>
-              setTimeout(resolve,attempt*3000)
-            );
-          }
+          console.warn(
+            "ANGRY profile registry failed after 5 attempts."
+          );
+
+        }catch(signatureError){
+          console.warn(
+            "ANGRY profile signature was not completed:",
+            signatureError
+          );
+
+          setStatus(
+            `✅ Token deployed on ${c.name}.<br>` +
+            `Contract: <b>${receipt.contractAddress}</b><br>` +
+            `Profile signature was not completed. The token deployment itself is unaffected.<br>` +
+            `<a class="link" target="_blank" rel="noopener" href="${c.explorer}/address/${receipt.contractAddress}">Open network explorer</a>`,
+            "good"
+          );
         }
-
-        console.warn(
-          "ANGRY profile registry failed after 5 attempts."
-        );
       })();
     }
   }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
