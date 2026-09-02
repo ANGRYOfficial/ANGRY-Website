@@ -2187,12 +2187,31 @@ updateChain();setType("liquidity");renderPreview();
     const telegram =
       clean(document.getElementById("tokenTelegram")?.value);
 
-    if(!tokenLogoFile){
+    const selectedLogoFile =
+      tokenLogoFile || logoInput.files?.[0] || null;
+
+    if(!selectedLogoFile){
       profileStatus.className = "token-profile-status bad";
       profileStatus.textContent =
         "Choose a token image first.";
       return;
     }
+
+    if(!/^image\/(png|jpeg|webp|gif)$/i.test(selectedLogoFile.type)){
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Use PNG, JPG, WebP or GIF.";
+      return;
+    }
+
+    if(selectedLogoFile.size > 5 * 1024 * 1024){
+      profileStatus.className = "token-profile-status bad";
+      profileStatus.textContent =
+        "Image is larger than 5 MB. Choose a smaller image before uploading to IPFS.";
+      return;
+    }
+
+    tokenLogoFile = selectedLogoFile;
 
     if(!validOptionalUrl(website)){
       profileStatus.className = "token-profile-status bad";
