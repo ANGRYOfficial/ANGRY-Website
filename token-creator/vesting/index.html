@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ANGRY Vesting Manager</title>
+<meta name="theme-color" content="#08090a">
+<link rel="stylesheet" href="../../assets/ecosystem.css">
+<style>
+:root{--bg:#070809;--card:#0e1114;--line:#282d33;--muted:#858b94;--text:#f4f4f4;--orange:#ff5b25;--orange2:#ff7a50;--good:#80d39e;--bad:#ef9694}
+*{box-sizing:border-box}html{background:var(--bg);color-scheme:dark}body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(255,91,37,.08),transparent 28%),#070809;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}.notranslate{translate:no}
+.angry-globalbar{position:sticky;top:0;z-index:1000;min-height:82px;padding:13px 24px;display:flex;align-items:center;gap:18px;background:rgba(7,8,9,.97);border-bottom:1px solid #24272b;backdrop-filter:blur(16px)}
+.angry-globalbrand{display:flex;align-items:center;gap:10px;margin-right:auto;color:#fff;text-decoration:none;font-size:20px;font-weight:900}.angry-globalbrand-mark{width:52px;height:52px;display:block;overflow:hidden;border-radius:13px;background:#ff5b25}.angry-globalbrand-mark img{width:100%;height:100%;display:block;object-fit:cover}
+.angry-globalnav{display:flex;gap:5px}.angry-globalnav a{color:#9ca2aa;text-decoration:none;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:800}.angry-globalnav a:hover,.angry-globalnav a.active{background:#15181c;color:#fff}
+.wallet{min-height:46px;padding:0 16px;border:1px solid #444a52;border-radius:14px;background:#101317;color:#fff;font-weight:850;cursor:pointer}.wallet.wallet-connected{border-color:rgba(255,91,37,.72);color:#ff825a}
+.mobile-menu{display:none;width:46px;height:46px;border:1px solid #30343a;border-radius:13px;background:#121518;color:#fff;font-size:24px}
+.page{width:min(100%,1020px);margin:0 auto;padding:46px 20px 30px}
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:20px;align-items:stretch;margin-bottom:22px}
+.hero-main,.quick-card,.manager{border:1px solid var(--line);background:linear-gradient(180deg,rgba(17,20,23,.98),rgba(10,12,14,.98));border-radius:26px}
+.hero-main{padding:30px}.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--orange2);font-size:11px;font-weight:950;letter-spacing:.12em;margin-bottom:11px}
+.hero h1{font-size:36px;line-height:1.05;margin:0 0 13px;letter-spacing:-.035em}.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.7;max-width:650px}
+.quick-card{padding:24px;display:flex;flex-direction:column;justify-content:center}.quick-card b{font-size:13px;margin-bottom:10px}.quick-card span{color:var(--muted);font-size:12px;line-height:1.6}
+.quick-points{display:grid;gap:9px;margin-top:14px}.quick-point{display:flex;gap:9px;align-items:flex-start;color:#afb4bb;font-size:11px}.quick-point i{width:20px;height:20px;border-radius:7px;display:grid;place-items:center;background:rgba(255,91,37,.1);color:var(--orange2);font-style:normal;font-weight:900}
+.manager{padding:28px}.manager-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}.manager-head h2{margin:0 0 7px;font-size:22px}.manager-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+.badge{flex:0 0 auto;border:1px solid rgba(255,91,37,.38);background:rgba(255,91,37,.08);color:#ff865f;padding:9px 12px;border-radius:999px;font-size:10px;font-weight:900}
+.network-picker{margin-bottom:20px}
+.network-picker-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:10px}
+.network-picker-head b{font-size:12px}
+.network-picker-head span{color:#757c85;font-size:10px}
+.network-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.network-card{position:relative;min-height:78px;padding:12px 14px;border:1px solid #30353c;border-radius:16px;background:#090b0d;color:#fff;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+.network-card:hover{border-color:#424850}
+.network-card.active{border-color:#ff5b25;background:linear-gradient(135deg,rgba(255,91,37,.13),rgba(255,91,37,.035));box-shadow:0 0 0 1px rgba(255,91,37,.16),0 10px 28px rgba(255,91,37,.06)}
+.network-card:active{transform:scale(.99)}
+.network-icon{width:44px;height:44px;min-width:44px;border-radius:12px;display:grid;place-items:center;overflow:hidden;background:#101317}
+.network-icon img{width:34px;height:34px;object-fit:contain;display:block}
+.network-card[data-chainid="1"] .network-icon{background:#f1f1f1}
+.network-card[data-chainid="4663"] .network-icon{background:#b6ff00}
+.network-card b{display:block;font-size:13px;line-height:1.2;margin-bottom:4px}
+.network-card span{display:block;color:#7f858e;font-size:10px;font-weight:750}
+.hidden-network-select{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
+.controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}.field label{display:block;margin:0 0 8px;color:#b8bdc4;font-size:11px;font-weight:850}.field input,.field select{width:100%;height:54px;border:1px solid #30353c;border-radius:15px;background:#090b0d;color:#f3f3f3;padding:0 14px;outline:none}.field input:focus,.field select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,91,37,.08)}
+.btn{height:54px;border-radius:15px;border:1px solid #373c43;background:#121519;color:#fff;padding:0 18px;font-weight:900;cursor:pointer}.btn.primary{border-color:var(--orange);background:linear-gradient(180deg,#ff6b39,#ec4e18)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.status{margin-top:12px;border:1px solid #292e34;border-radius:14px;background:#090b0d;padding:12px 14px;color:#8e949d;font-size:11px;line-height:1.55}.status.good{color:var(--good);border-color:rgba(61,181,105,.36)}.status.warn{color:#e5ad7d;border-color:rgba(255,159,67,.36)}.status.bad{color:var(--bad);border-color:rgba(239,83,80,.36)}
+.result{margin-top:18px}.hidden{display:none!important}
+.address-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}.address-box,.stat,.time-box,.progress-card,.claim-card{border:1px solid #292e35;background:#0a0d10;border-radius:16px}.address-box{padding:13px 14px;min-width:0}.label{display:block;color:#757c85;font-size:9px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}.address-box a{color:#ececec;text-decoration:none;font-size:11px;font-weight:800;word-break:break-all}
+.stat-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.stat{padding:15px}.stat span{display:block;color:#7d838c;font-size:10px;font-weight:800;line-height:1.3;margin-bottom:8px}.stat strong{display:block;font-size:15px;line-height:1.25;word-break:break-word}.stat.claimable{border-color:rgba(255,91,37,.5);background:rgba(255,91,37,.05)}.stat.claimable strong{color:#ff8058}
+.progress-card{margin-top:10px;padding:15px}.progress-head{display:flex;justify-content:space-between;color:#8c929a;font-size:10px;font-weight:800;margin-bottom:10px}.progress{height:8px;border-radius:999px;background:#1a1e23;overflow:hidden}.progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#ff4d15,#ff8d67);border-radius:inherit}
+.time-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}.time-box{padding:13px 14px}.time-box b{font-size:11px;line-height:1.45}
+.claim-card{margin-top:12px;padding:16px;border-color:rgba(255,91,37,.25);background:rgba(255,91,37,.028)}.claim-note{color:#9298a1;font-size:10px;line-height:1.6;margin-bottom:12px}.claim-note b{color:#ff855e}.claim-card .btn{width:100%}
+.footer{display:flex;justify-content:space-between;gap:18px;margin-top:14px;padding:0 4px;color:#626871;font-size:10px}
+@media(max-width:820px){.network-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.network-card{min-height:72px;padding:10px}.network-icon{width:40px;height:40px;min-width:40px;border-radius:11px}.network-icon img{width:31px;height:31px}.angry-globalbar{min-height:68px;padding:10px 14px;gap:8px}.angry-globalbrand{font-size:18px}.angry-globalbrand-mark{width:44px;height:44px}.mobile-menu{display:inline-grid;place-items:center}.angry-globalnav{display:none;position:absolute;top:64px;left:12px;right:12px;padding:8px;background:#0b0d0f;border:1px solid #2b2f34;border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.55)}.angry-globalbar.menu-open .angry-globalnav{display:grid}.angry-globalnav a{padding:12px}.wallet{margin-left:auto;padding:0 12px;font-size:11px}.hero{grid-template-columns:1fr}.page{padding-top:26px}.hero-main{padding:24px}.hero h1{font-size:30px}.manager{padding:20px}.controls{grid-template-columns:1fr}.btn{width:100%}.address-grid{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.time-grid{grid-template-columns:1fr}.manager-head{display:block}.badge{display:inline-block;margin-top:12px}.footer{display:block;text-align:center;line-height:1.9}}
+</style>
+</head>
+<body>
+<div class="angry-globalbar">
+  <a class="angry-globalbrand" href="../../index.html">
+    <span class="angry-globalbrand-mark"><img src="../../assets/angry-vesting-logo.png" alt="ANGRY logo"></span>
+    <span class="notranslate" translate="no">ANGRY</span>
+  </a>
+  <nav class="angry-globalnav">
+    <a href="../../index.html">Home</a>
+    <a href="../../tracker/index.html">Tracker</a>
+    <a href="../index.html">Token Creator</a>
+    <a class="active notranslate" translate="no" href="./index.html">Vesting Manager</a>
+    <a href="../../nft-creator/index.html">NFT Creator</a>
+    <a href="../../docs/index.html">Docs</a>
+  </nav>
+  <button class="wallet" id="walletBtn" type="button">Connect Wallet</button>
+  <button class="mobile-menu" id="mobileMenuBtn" type="button" aria-label="Menu">☰</button>
+</div>
+
+<main class="page">
+  <section class="hero">
+    <div class="hero-main">
+      <div class="eyebrow">🔒 <span class="notranslate" translate="no">ANGRY VESTING</span></div>
+      <h1><span class="notranslate" translate="no">Vesting Manager</span></h1>
+      <p>Manage an ANGRY Vesting Token without using a block explorer. Load the token contract, see the live schedule, and release the amount that is currently claimable.</p>
+    </div>
+    <div class="quick-card">
+      <b>How it works</b>
+      <span>The permanent vesting rules stay inside the deployed contracts. This page only reads those rules and triggers the existing release function.</span>
+      <div class="quick-points">
+        <div class="quick-point"><i>1</i><span>Select the token network.</span></div>
+        <div class="quick-point"><i>2</i><span>Paste the Vesting Token contract.</span></div>
+        <div class="quick-point"><i>3</i><span>Load status and claim when available.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="manager">
+    <div class="manager-head">
+      <div>
+        <h2><span class="notranslate" translate="no">Vesting</span> status</h2>
+        <p>Connect an EVM wallet. The selected network will be used for contract reads and claim transactions.</p>
+      </div>
+      <span class="badge notranslate" translate="no" id="networkBadge">Ethereum Mainnet</span>
+    </div>
+
+    <div class="network-picker">
+      <div class="network-picker-head">
+        <b>Select Network</b>
+        <span>Mainnet EVM</span>
+      </div>
+
+      <div class="network-grid" id="vestingNetworkGrid">
+        <button class="network-card active" type="button" data-chainid="1">
+          <span class="network-icon"><img src="../../assets/networks/ethereum.svg" alt="" aria-hidden="true"></span>
+          <span><b class="notranslate" translate="no">Ethereum</b><span>Mainnet</span></span>
+        </button>
+
+        <button class="network-card" type="button" data-chainid="56">
+          <span class="network-icon"><img src="../../assets/networks/bsc.svg" alt="" aria-hidden="true"></span>
+          <span><b class="notranslate" translate="no">BSC</b><span>Mainnet</span></span>
+        </button>
+
+        <button class="network-card" type="button" data-chainid="8453">
+          <span class="network-icon"><img src="../../assets/networks/base.svg" alt="" aria-hidden="true"></span>
+          <span><b class="notranslate" translate="no">Base</b><span>Mainnet</span></span>
+        </button>
+
+        <button class="network-card" type="button" data-chainid="4663">
+          <span class="network-icon"><img src="../../assets/networks/robinhood.jpg" alt="" aria-hidden="true"></span>
+          <span><b class="notranslate" translate="no">Robinhood Chain</b><span>Mainnet</span></span>
+        </button>
+
+        <button class="network-card" type="button" data-chainid="42161">
+          <span class="network-icon"><img src="../../assets/networks/arbitrum.png" alt="" aria-hidden="true"></span>
+          <span><b class="notranslate" translate="no">Arbitrum</b><span>Mainnet</span></span>
+        </button>
+
+        <button class="network-card" type="button" data-chainid="137">
+          <span class="network-icon"><img src="../../assets/networks/polygon.svg" alt="" aria-hidden="true"></span>
+          <span><b class="notranslate" translate="no">Polygon</b><span>Mainnet</span></span>
+        </button>
+      </div>
+
+      <select id="networkSelect" class="hidden-network-select" aria-hidden="true" tabindex="-1">
+        <option value="1">Ethereum Mainnet</option>
+        <option value="56">BNB Smart Chain</option>
+        <option value="8453">Base Mainnet</option>
+        <option value="4663">Robinhood Chain Mainnet</option>
+        <option value="42161">Arbitrum One Mainnet</option>
+        <option value="137">Polygon PoS Mainnet</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label for="tokenAddress"><span class="notranslate" translate="no">Vesting Token</span> Contract</label>
+        <input id="tokenAddress" type="text" placeholder="0x..." autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn primary" id="loadBtn" type="button">Load <span class="notranslate" translate="no">Vesting</span></button>
+    </div>
+
+    <div id="status" class="status">Connect your wallet, select the correct network, then enter the ANGRY Vesting Token contract.</div>
+
+    <div id="result" class="result hidden">
+      <div class="address-grid">
+        <div class="address-box"><span class="label">Token Contract</span><a id="tokenLink" target="_blank" rel="noopener">—</a></div>
+        <div class="address-box"><span class="label notranslate" translate="no">Vesting Vault</span><a id="vaultLink" target="_blank" rel="noopener">—</a></div>
+        <div class="address-box"><span class="label">Beneficiary</span><a id="beneficiaryLink" target="_blank" rel="noopener">—</a></div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat"><span>Total <span class="notranslate" translate="no">Vesting</span></span><strong id="total">—</strong></div>
+        <div class="stat"><span>Already <span class="notranslate" translate="no">Vested</span></span><strong id="vested">—</strong></div>
+        <div class="stat"><span>Already Claimed</span><strong id="released">—</strong></div>
+        <div class="stat claimable"><span>Available to Claim</span><strong id="releasable">—</strong></div>
+        <div class="stat"><span>Remaining Locked</span><strong id="locked">—</strong></div>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-head"><span><span class="notranslate" translate="no">Vesting</span> progress</span><strong id="progressText">0%</strong></div>
+        <div class="progress"><i id="progressBar"></i></div>
+      </div>
+
+      <div class="time-grid">
+        <div class="time-box"><span class="label">Start</span><b id="startTime">—</b></div>
+        <div class="time-box"><span class="label notranslate" translate="no">Cliff / First Claim</span><b id="cliffTime">—</b></div>
+        <div class="time-box"><span class="label">Full Vesting End</span><b id="endTime">—</b></div>
+      </div>
+
+      <div class="claim-card">
+        <div class="claim-note"><b>Claim destination:</b> the contract always sends released tokens to the permanent Beneficiary shown above. Any wallet may trigger the transaction and pay the network gas fee.</div>
+        <button class="btn primary" id="claimBtn" type="button" disabled>Nothing Available to Claim</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <span>© 2026 ANGRY</span>
+    <span>Mainnet tool · Real network gas fees apply.</span>
+  </div>
+</main>
+
+<script>
+const CHAINS={
+  1:{id:1,hex:"0x1",name:"Ethereum Mainnet",explorer:"https://etherscan.io"},
+  56:{id:56,hex:"0x38",name:"BNB Smart Chain",explorer:"https://bscscan.com"},
+  8453:{id:8453,hex:"0x2105",name:"Base Mainnet",explorer:"https://basescan.org"},
+  4663:{id:4663,hex:"0x1237",name:"Robinhood Chain Mainnet",explorer:"https://robinhoodchain.blockscout.com"},
+  42161:{id:42161,hex:"0xa4b1",name:"Arbitrum One Mainnet",explorer:"https://arbiscan.io"},
+  137:{id:137,hex:"0x89",name:"Polygon PoS Mainnet",explorer:"https://polygonscan.com"}
+};
+const S={
+ token:{vault:"0xa5917baf",amount:"0x00728f76",symbol:"0x95d89b41",decimals:"0x313ce567"},
+ vault:{token:"0xfc0c546a",beneficiary:"0x38af3eed",total:"0x79203dc4",start:"0xbe9a6555",cliffDuration:"0xd85349f7",duration:"0x0fb5a6b4",released:"0x96132521",cliffTime:"0x0f1a6444",endTime:"0x3197cbb6",releasable:"0xfbccedae",release:"0x86d1a69f"}
+};
+let provider=null,account=null,current=null;
+const $=id=>document.getElementById(id);
+function selectedChain(){return CHAINS[Number($("networkSelect").value)]}
+function isAddress(v){return /^0x[0-9a-fA-F]{40}$/.test(String(v||"").trim())}
+function decodeAddress(v){const h=String(v||"").replace(/^0x/,"").padStart(64,"0"),a="0x"+h.slice(-40);return isAddress(a)?a:""}
+function uint(v){return(!v||v==="0x")?0n:BigInt(v)}
+function short(a){return isAddress(a)?a.slice(0,8)+"…"+a.slice(-6):"—"}
+function status(msg,type=""){$("status").className="status"+(type?" "+type:"");$("status").textContent=msg}
+function fmt(raw,dec=18,max=6){raw=BigInt(raw||0);dec=Number(dec);if(!Number.isInteger(dec)||dec<0||dec>255)dec=18;if(dec===0)return raw.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");const base=10n**BigInt(dec),w=raw/base,f=raw%base,g=w.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");if(f===0n)return g;const s=f.toString().padStart(dec,"0").slice(0,Math.min(dec,max)).replace(/0+$/,"");return s?g+"."+s:g}
+function dateText(s){try{const n=Number(BigInt(s));return(!Number.isFinite(n)||n<=0)?"—":new Date(n*1000).toLocaleString()}catch(_){return"—"}}
+function durationText(s){s=BigInt(s||0);const M=2592000n,D=86400n;if(s>0n&&s%M===0n){const m=s/M;return m+" month"+(m===1n?"":"s")}if(s>0n&&s%D===0n){const d=s/D;return d+" day"+(d===1n?"":"s")}return s+" sec"}
+function decodeString(data){if(!data||data==="0x")return"";const h=data.replace(/^0x/,"");try{if(h.length>=128){const off=Number(BigInt("0x"+h.slice(0,64)))*2,len=Number(BigInt("0x"+h.slice(off,off+64))),start=off+64;const bytes=new Uint8Array((h.slice(start,start+len*2).match(/.{1,2}/g)||[]).map(x=>parseInt(x,16)));return new TextDecoder().decode(bytes).replace(/\0+$/g,"").trim()}if(h.length===64){const bytes=new Uint8Array((h.match(/.{1,2}/g)||[]).map(x=>parseInt(x,16)));return new TextDecoder().decode(bytes).replace(/\0+$/g,"").trim()}}catch(_){}return""}
+function setLink(id,address){const e=$(id),c=selectedChain();e.textContent=short(address);if(isAddress(address))e.href=c.explorer+"/address/"+address}
+async function request(method,params=[]){if(!provider)throw new Error("Connect wallet first.");return provider.request({method,params})}
+async function ensureNetwork(){
+ const c=selectedChain();
+ if(typeof window.angrySwitchReownNetwork==="function"){try{await window.angrySwitchReownNetwork(c.id);return}catch(e){console.warn("Reown switch fallback:",e)}}
+ await request("wallet_switchEthereumChain",[{chainId:c.hex}]);
+}
+async function call(to,data){return request("eth_call",[{to,data},"latest"])}
+async function code(address){return request("eth_getCode",[address,"latest"])}
+async function optionalCall(to,data){try{return await call(to,data)}catch(_){return null}}
+async function waitReceipt(hash){
+ for(let i=0;i<180;i++){const r=await request("eth_getTransactionReceipt",[hash]);if(r)return r;await new Promise(res=>setTimeout(res,2000))}
+ throw new Error("Transaction confirmation timed out.")
+}
+function render(m){
+ $("result").classList.remove("hidden");setLink("tokenLink",m.token);setLink("vaultLink",m.vault);setLink("beneficiaryLink",m.beneficiary);
+ const amt=v=>fmt(v,m.decimals)+" "+m.symbol,locked=m.total>m.vested?m.total-m.vested:0n;
+ $("total").textContent=amt(m.total);$("vested").textContent=amt(m.vested);$("released").textContent=amt(m.released);$("releasable").textContent=amt(m.releasable);$("locked").textContent=amt(locked);
+ $("startTime").textContent=dateText(m.start);$("cliffTime").textContent=dateText(m.cliffTime)+" · "+durationText(m.cliffDuration);$("endTime").textContent=dateText(m.endTime)+" · "+durationText(m.duration);
+ let ph=0n;if(m.total>0n){ph=m.vested*10000n/m.total;if(ph>10000n)ph=10000n}const pct=Number(ph)/100;$("progressText").textContent=pct.toFixed(pct%1?2:0)+"%";$("progressBar").style.width=Math.min(100,pct)+"%";
+ $("claimBtn").disabled=m.releasable<=0n;$("claimBtn").textContent=m.releasable>0n?"Claim "+fmt(m.releasable,m.decimals)+" "+m.symbol:"Nothing Available to Claim";
+}
+async function loadVesting(){
+ const token=$("tokenAddress").value.trim();if(!isAddress(token)){status("Enter a complete EVM Vesting Token contract address.","bad");return}
+ if(!provider||!account){status("Connect your wallet first.","warn");return}
+ status("Switching to "+selectedChain().name+"…","warn");
+ try{
+  await ensureNetwork();$("networkBadge").textContent=selectedChain().name;
+  const tokenCode=await code(token);if(!tokenCode||tokenCode==="0x"||tokenCode==="0x0")throw new Error("No contract exists at this address on "+selectedChain().name+".");
+  const vault=decodeAddress(await call(token,S.token.vault));if(!vault||/^0x0{40}$/i.test(vault))throw new Error("This contract does not contain a valid ANGRY Vesting Vault.");
+  const vaultCode=await code(vault);if(!vaultCode||vaultCode==="0x"||vaultCode==="0x0")throw new Error("Vesting Vault contract not found.");
+  const [vt,b,total,start,cd,dur,rel,ct,et,rea,tamt,symRaw,decRaw]=await Promise.all([
+   call(vault,S.vault.token),call(vault,S.vault.beneficiary),call(vault,S.vault.total),call(vault,S.vault.start),call(vault,S.vault.cliffDuration),call(vault,S.vault.duration),call(vault,S.vault.released),call(vault,S.vault.cliffTime),call(vault,S.vault.endTime),call(vault,S.vault.releasable),optionalCall(token,S.token.amount),optionalCall(token,S.token.symbol),optionalCall(token,S.token.decimals)
+  ]);
+  if(decodeAddress(vt).toLowerCase()!==token.toLowerCase())throw new Error("Token/Vesting Vault relationship check failed.");
+  const beneficiary=decodeAddress(b);if(!beneficiary)throw new Error("Invalid beneficiary.");
+  const totalN=uint(total),released=uint(rel),releasable=uint(rea);let decimals=18;if(decRaw&&decRaw!=="0x"){const d=Number(uint(decRaw));if(Number.isInteger(d)&&d>=0&&d<=255)decimals=d}
+  let symbol="TOKEN";if(symRaw){const x=decodeString(symRaw);if(x)symbol=x}
+  if(tamt&&uint(tamt)!==totalN)throw new Error("Token vesting amount does not match Vault allocation.");
+  current={chainId:selectedChain().id,token,vault,beneficiary,total:totalN,released,releasable,vested:released+releasable,decimals,symbol,start:uint(start),cliffDuration:uint(cd),duration:uint(dur),cliffTime:uint(ct),endTime:uint(et)};
+  render(current);status(releasable>0n?"Vesting loaded. Tokens are available to claim.":"Vesting loaded. Nothing is currently available to claim.",releasable>0n?"good":"");
+ }catch(e){current=null;$("result").classList.add("hidden");status(e?.message||String(e),"bad")}
+}
+async function claim(){
+ if(!current){status("Load a Vesting Token first.","bad");return}if(current.releasable<=0n){status("Nothing is currently available to claim.","warn");return}
+ try{
+  await ensureNetwork();const tx={from:account,to:current.vault,data:S.vault.release};
+  try{const est=BigInt(await request("eth_estimateGas",[tx]));tx.gas="0x"+(est*120n/100n).toString(16)}catch(e){console.warn("Claim gas estimate skipped:",e)}
+  status("Confirm the release transaction in your wallet. Tokens will be sent to the Beneficiary.","warn");
+  const hash=await request("eth_sendTransaction",[tx]);status("Transaction sent. Waiting for confirmation…","warn");
+  const receipt=await waitReceipt(hash);if(String(receipt.status||"").toLowerCase()==="0x0")throw new Error("Claim transaction reverted.");
+  await loadVesting();status("✅ Claim confirmed. Vested tokens were released to the Beneficiary Wallet.","good");
+ }catch(e){status("Claim failed: "+(e?.message||String(e)),"bad");if(current)render(current)}
+}
+function applyAccount(address){account=address||null;$("walletBtn").textContent=account?account.slice(0,6)+"…"+account.slice(-4):"Connect Wallet";$("walletBtn").classList.toggle("wallet-connected",!!account)}
+window.angrySetWalletProvider=p=>{provider=p||window.ethereum||null};
+window.angryApplyConnectedAccount=applyAccount;
+$("walletBtn").addEventListener("click",async()=>{try{if(typeof window.angryOpenReown!=="function")throw new Error("Wallet connector is still loading.");await window.angryOpenReown()}catch(e){status(e?.message||String(e),"bad")}});
+async function applySelectedNetwork(){
+ $("networkBadge").textContent=selectedChain().name;
+ document.querySelectorAll(".network-card[data-chainid]").forEach(card=>{
+  card.classList.toggle("active",Number(card.dataset.chainid)===selectedChain().id);
+ });
+ current=null;
+ $("result").classList.add("hidden");
+ if(account){
+  try{
+   await ensureNetwork();
+   status("Wallet switched to "+selectedChain().name+".","good");
+  }catch(e){
+   status("Network switch was not completed.","warn");
+  }
+ }
+}
+$("networkSelect").addEventListener("change",applySelectedNetwork);
+document.querySelectorAll(".network-card[data-chainid]").forEach(card=>card.addEventListener("click",async()=>{
+ const id=String(card.dataset.chainid||"");
+ if(!CHAINS[Number(id)]) return;
+ $("networkSelect").value=id;
+ await applySelectedNetwork();
+}));
+$("loadBtn").addEventListener("click",loadVesting);$("tokenAddress").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();loadVesting()}});$("claimBtn").addEventListener("click",claim);
+$("mobileMenuBtn").addEventListener("click",()=>{document.querySelector(".angry-globalbar").classList.toggle("menu-open")});
+if(window.ethereum){provider=window.ethereum;ethereum.on?.("accountsChanged",a=>applyAccount(a?.[0]||null))}
+</script>
+<script src="../reown-wallet.js?v=vesting-manager-20260905-1"></script>
+</body>
+</html>
