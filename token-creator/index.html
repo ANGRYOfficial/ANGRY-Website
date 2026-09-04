@@ -2397,12 +2397,32 @@ function buildStandardDeploymentData(){
 }
 
 async function waitReceipt(hash){
+  const chainKey=$("chain").value;
+  const chain=selectedChain();
+
   for(let i=0;i<90;i++){
-    const r=await angryProvider().request({method:"eth_getTransactionReceipt",params:[hash]});
+    const r=
+      chainKey==="baseSepolia"
+        ? await rpcRequest(
+            chain,
+            "eth_getTransactionReceipt",
+            [hash]
+          )
+        : await angryProvider().request({
+            method:"eth_getTransactionReceipt",
+            params:[hash]
+          });
+
     if(r)return r;
-    await new Promise(res=>setTimeout(res,2500));
+
+    await new Promise(
+      res=>setTimeout(res,2500)
+    );
   }
-  throw new Error("Transaction was sent but the receipt is taking too long. Check the selected network explorer with the transaction hash.");
+
+  throw new Error(
+    "Transaction was sent but the receipt is taking too long. Check the selected network explorer with the transaction hash."
+  );
 }
 
 
@@ -3822,6 +3842,6 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
-<script src="./reown-wallet.js?v=bsc-mainnet-20260903-1"></script>
+<script src="./reown-wallet.js?v=base-sepolia-20260904-1"></script>
 </body>
 </html>
