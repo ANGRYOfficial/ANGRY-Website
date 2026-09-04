@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07090b">
 
-<title>ANGRY — Web3 Tools</title>
+<title>ANGRY | Web3 Tools & Community</title>
 
 <style>
 :root{
@@ -484,6 +484,301 @@ footer{
   }
 }
 </style>
+
+<style id="angry-home-redesign-v1">
+:root{
+  --ah-bg:#070809;
+  --ah-card:#0d1013;
+  --ah-card-2:#111419;
+  --ah-line:#2a2f35;
+  --ah-text:#f5f5f5;
+  --ah-muted:#8e949d;
+  --ah-orange:#ff5b25;
+  --ah-orange-2:#ff8a5d;
+}
+body{
+  background:
+    radial-gradient(circle at 8% 10%,rgba(255,91,37,.08),transparent 24rem),
+    radial-gradient(circle at 92% 34%,rgba(255,91,37,.045),transparent 28rem),
+    #070809;
+}
+.ah-home{overflow:hidden}
+.ah-shell{width:min(1180px,calc(100% - 40px));margin:0 auto}
+.ah-hero{position:relative;padding:68px 0 38px}
+.ah-hero:before{
+  content:"";position:absolute;left:50%;top:4%;width:560px;height:560px;
+  transform:translateX(8%);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,91,37,.18),rgba(255,91,37,.04) 42%,transparent 68%);
+  filter:blur(2px);pointer-events:none
+}
+.ah-hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,1.02fr) minmax(330px,.98fr);gap:42px;align-items:center}
+.ah-kicker{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px;color:#ff8c68;font-size:12px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
+.ah-kicker i{width:8px;height:8px;border-radius:50%;background:var(--ah-orange);box-shadow:0 0 18px rgba(255,91,37,.9)}
+.ah-hero h1{margin:0;max-width:780px;font-size:clamp(50px,7vw,92px);line-height:.92;letter-spacing:-.055em}
+.ah-hero h1 em{display:block;color:var(--ah-orange);font-style:normal}
+.ah-lead{max-width:720px;margin:24px 0 0;color:#a5abb2;font-size:17px;line-height:1.75}
+.ah-hello{margin-top:18px;color:#d6d8db;font-size:13px;line-height:1.7}
+.ah-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.ah-btn{min-height:52px;padding:0 20px;border:1px solid #353a41;border-radius:15px;display:inline-flex;align-items:center;justify-content:center;gap:9px;color:#fff;text-decoration:none;font-weight:900;font-size:13px;background:#111419;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.ah-btn:hover{transform:translateY(-2px);border-color:#555c66}
+.ah-btn.primary{border-color:#ff5b25;background:linear-gradient(180deg,#ff6b39,#ee4e18);box-shadow:0 12px 34px rgba(255,91,37,.18)}
+.ah-hero-art{position:relative;min-height:560px;display:grid;place-items:center}
+.ah-hero-art:before,.ah-hero-art:after{content:"";position:absolute;border:1px solid rgba(255,91,37,.16);border-radius:50%;animation:ahSpin 18s linear infinite}
+.ah-hero-art:before{width:430px;height:430px}
+.ah-hero-art:after{width:500px;height:500px;border-style:dashed;animation-direction:reverse;animation-duration:26s}
+.ah-hero-art img{position:relative;z-index:2;width:min(100%,560px);max-height:580px;object-fit:contain;filter:drop-shadow(0 28px 50px rgba(0,0,0,.55));animation:ahFloat 4.5s ease-in-out infinite}
+.ah-orbit{position:absolute;z-index:3;display:grid;place-items:center;width:54px;height:54px;border:1px solid rgba(255,91,37,.32);border-radius:18px;background:rgba(12,14,17,.82);backdrop-filter:blur(10px);box-shadow:0 12px 34px rgba(0,0,0,.34)}
+.ah-orbit.one{left:2%;top:19%;transform:rotate(-9deg)}.ah-orbit.two{right:1%;top:31%;transform:rotate(8deg)}.ah-orbit.three{right:14%;bottom:9%;transform:rotate(-4deg)}
+.ah-orbit img{width:30px;height:30px;animation:none;filter:none}
+@keyframes ahFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes ahSpin{to{transform:rotate(360deg)}}
+
+.ah-marquee-wrap{margin:18px 0 58px;border-top:1px solid #252a30;border-bottom:1px solid #252a30;background:rgba(11,13,15,.76);overflow:hidden}
+.ah-marquee-label{width:min(1180px,calc(100% - 40px));margin:0 auto;padding:14px 0 0;color:#6f757d;font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+.ah-marquee{display:flex;width:max-content;gap:12px;padding:12px 0 16px;animation:ahMarquee 25s linear infinite}
+.ah-marquee-set{display:flex;gap:12px;padding-left:12px}
+.ah-network{min-width:170px;height:58px;padding:0 16px;border:1px solid #282d33;border-radius:16px;background:#0b0e11;display:flex;align-items:center;gap:11px;color:#d9dcdf;font-size:12px;font-weight:850}
+.ah-network img{width:30px;height:30px;object-fit:contain}.ah-network small{display:block;color:#737a83;font-size:9px;font-weight:750;margin-top:2px}
+@keyframes ahMarquee{to{transform:translateX(-50%)}}
+
+.ah-section{padding:34px 0 54px}
+.ah-section-head{display:flex;justify-content:space-between;gap:26px;align-items:end;margin-bottom:24px}
+.ah-section-head .eyebrow{display:block;margin-bottom:9px;color:#ff835d;font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}
+.ah-section-head h2{margin:0;font-size:clamp(30px,4.2vw,54px);line-height:1.02;letter-spacing:-.035em}
+.ah-section-head p{max-width:520px;margin:0;color:#858b94;font-size:13px;line-height:1.65}
+
+.ah-intents{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ah-intent{position:relative;min-height:148px;padding:18px;border:1px solid #2b3036;border-radius:20px;background:linear-gradient(180deg,#101317,#0a0d10);text-decoration:none;color:#fff;overflow:hidden;transition:transform .18s ease,border-color .18s ease}
+.ah-intent:hover{transform:translateY(-3px);border-color:rgba(255,91,37,.55)}
+.ah-intent .ico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:rgba(255,91,37,.10);font-size:21px;margin-bottom:20px}
+.ah-intent strong{display:block;font-size:13px;margin-bottom:6px}.ah-intent span{display:block;color:#7d848d;font-size:10px;line-height:1.5}
+.ah-intent:after{content:"→";position:absolute;right:16px;bottom:14px;color:#ff764c;font-size:17px;font-weight:900}
+
+.ah-products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ah-product{position:relative;min-height:360px;padding:26px;border:1px solid #292e34;border-radius:26px;background:linear-gradient(145deg,#111419,#090b0d 70%);overflow:hidden;text-decoration:none;color:#fff;display:flex;flex-direction:column;transition:transform .18s ease,border-color .18s ease}
+.ah-product:hover{transform:translateY(-3px);border-color:rgba(255,91,37,.48)}
+.ah-product:before{content:"";position:absolute;inset:auto -90px -140px auto;width:330px;height:330px;border-radius:50%;background:radial-gradient(circle,rgba(255,91,37,.15),transparent 67%)}
+.ah-product-copy{position:relative;z-index:3;max-width:58%}
+.ah-product .tag{display:inline-flex;padding:7px 9px;border:1px solid rgba(255,91,37,.28);border-radius:999px;color:#ff845e;background:rgba(255,91,37,.06);font-size:9px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.ah-product h3{margin:16px 0 9px;font-size:26px;letter-spacing:-.025em}.ah-product p{margin:0;color:#858b94;font-size:12px;line-height:1.65}
+.ah-product .open{position:relative;z-index:3;margin-top:auto;font-size:11px;font-weight:900;color:#ff825b}
+.ah-product-art{position:absolute;right:-1%;bottom:-3%;width:48%;height:94%;display:flex;align-items:end;justify-content:center;pointer-events:none}
+.ah-product-art img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 20px 32px rgba(0,0,0,.45))}
+.ah-product.tracker .ah-product-art{width:51%;right:-2%}.ah-product.vesting .ah-product-art{width:44%;right:1%}
+
+.ah-manifesto{margin-top:14px;padding:34px;border:1px solid rgba(255,91,37,.28);border-radius:28px;background:linear-gradient(120deg,rgba(255,91,37,.09),rgba(12,14,17,.95) 48%,rgba(255,91,37,.035));display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.42fr);gap:28px;align-items:center}
+.ah-manifesto h3{margin:0 0 12px;font-size:32px}.ah-manifesto p{margin:0;color:#9298a0;font-size:13px;line-height:1.75}
+.ah-principles{display:grid;gap:9px}.ah-principle{padding:12px 14px;border:1px solid #2a2f35;border-radius:14px;background:#0a0d10;color:#c6c9cd;font-size:11px;font-weight:800}.ah-principle b{color:#ff7c53;margin-right:7px}
+
+.ah-community{padding:44px 0 74px}
+.ah-community-card{position:relative;min-height:410px;border:1px solid #2a2f35;border-radius:30px;background:linear-gradient(125deg,#101317,#090b0d 62%);overflow:hidden;padding:42px;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);align-items:center}
+.ah-community-card:before{content:"";position:absolute;inset:-50% auto auto -18%;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(255,91,37,.15),transparent 66%)}
+.ah-community-copy{position:relative;z-index:2;max-width:610px}.ah-community-copy .eyebrow{display:block;color:#ff835d;font-size:11px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.ah-community-copy h2{margin:0 0 15px;font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-.04em}.ah-community-copy p{margin:0;color:#969ca4;font-size:14px;line-height:1.7}
+.ah-community-art{position:absolute;right:0;bottom:-7%;height:116%;width:45%;display:flex;justify-content:center;align-items:end;pointer-events:none}
+.ah-community-art img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 26px 40px rgba(0,0,0,.5))}
+.ah-socials{position:relative;z-index:3;display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+
+@media(max-width:900px){
+  .ah-hero{padding-top:36px}.ah-hero-grid{grid-template-columns:1fr;gap:8px}.ah-hero-art{min-height:430px}.ah-hero-art:before{width:350px;height:350px}.ah-hero-art:after{width:410px;height:410px}.ah-hero-art img{max-height:455px}
+  .ah-intents{grid-template-columns:repeat(2,minmax(0,1fr))}.ah-intent:last-child{grid-column:span 2}
+  .ah-products{grid-template-columns:1fr}.ah-product{min-height:330px}
+  .ah-manifesto{grid-template-columns:1fr}
+  .ah-community-card{grid-template-columns:1fr;min-height:560px;padding:30px}.ah-community-copy{max-width:100%}.ah-community-art{width:72%;height:62%;right:-8%}
+}
+@media(max-width:560px){
+  .ah-shell{width:min(100% - 28px,1180px)}.ah-hero{padding:28px 0 20px}.ah-hero h1{font-size:48px}.ah-lead{font-size:14px;margin-top:18px}.ah-actions{display:grid;grid-template-columns:1fr 1fr}.ah-btn{padding:0 12px;font-size:11px}
+  .ah-hero-art{min-height:390px;margin-top:4px}.ah-hero-art:before{width:300px;height:300px}.ah-hero-art:after{width:350px;height:350px}.ah-orbit{width:46px;height:46px;border-radius:14px}.ah-orbit img{width:26px;height:26px}
+  .ah-marquee-wrap{margin-bottom:38px}.ah-marquee-label{width:calc(100% - 28px)}
+  .ah-section{padding:22px 0 42px}.ah-section-head{display:block}.ah-section-head p{margin-top:12px}.ah-section-head h2{font-size:36px}
+  .ah-intents{grid-template-columns:1fr 1fr;gap:8px}.ah-intent{min-height:132px;padding:14px}.ah-intent .ico{margin-bottom:15px}.ah-intent:last-child{grid-column:span 2}
+  .ah-product{min-height:300px;padding:20px}.ah-product-copy{max-width:63%}.ah-product h3{font-size:22px}.ah-product p{font-size:10px}.ah-product-art{width:49%;right:-5%}.ah-product.tracker .ah-product-art{width:52%}.ah-product.vesting .ah-product-art{width:46%}
+  .ah-manifesto{padding:22px;border-radius:22px}.ah-manifesto h3{font-size:26px}
+  .ah-community{padding-bottom:44px}.ah-community-card{padding:24px;min-height:540px;border-radius:24px}.ah-community-copy h2{font-size:39px}.ah-community-copy p{font-size:12px}.ah-community-art{width:86%;height:58%;right:-18%}
+}
+@media(prefers-reduced-motion:reduce){
+  .ah-marquee,.ah-hero-art img,.ah-hero-art:before,.ah-hero-art:after{animation:none!important}
+  .ah-btn,.ah-intent,.ah-product{transition:none!important}
+}
+</style>
+
+
+<style id="angry-home-simplified-v2">
+.ah-simple-products .ah-product{
+  min-height:215px;
+  padding:24px;
+}
+.ah-simple-products .ah-product-copy{
+  max-width:100%;
+  padding-right:72px;
+}
+.ah-simple-products .ah-product h3{
+  margin-top:14px;
+}
+.ah-product-mini-icon{
+  position:absolute;
+  right:20px;
+  top:20px;
+  z-index:3;
+  width:50px;
+  height:50px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,91,37,.20);
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(255,91,37,.09),rgba(255,91,37,.02));
+  font-size:23px;
+}
+.ah-simple-products .ah-product:after{
+  display:none;
+}
+.ah-simple-products .ah-product .open{
+  margin-top:26px;
+}
+.ah-simple-community{
+  padding-top:26px;
+}
+.ah-simple-community .ah-community-card{
+  min-height:390px;
+}
+@media(max-width:900px){
+  .ah-simple-products .ah-product{
+    min-height:205px;
+  }
+}
+@media(max-width:560px){
+  .ah-simple-products .ah-product{
+    min-height:190px;
+    padding:20px;
+  }
+  .ah-simple-products .ah-product-copy{
+    padding-right:58px;
+  }
+  .ah-product-mini-icon{
+    width:44px;
+    height:44px;
+    right:16px;
+    top:16px;
+    border-radius:14px;
+    font-size:20px;
+  }
+  .ah-simple-products .ah-product .open{
+    margin-top:20px;
+  }
+  .ah-simple-community .ah-community-card{
+    min-height:520px;
+  }
+}
+</style>
+
+
+<style id="angry-home-polish-v3">
+/* 1) Give the greeting more breathing room */
+.ah-hero .ah-kicker{
+  margin-bottom:24px;
+}
+@media(max-width:560px){
+  .ah-hero{
+    padding-top:40px;
+  }
+  .ah-hero .ah-kicker{
+    margin-bottom:22px;
+  }
+  .ah-hero h1{
+    line-height:.99;
+  }
+}
+
+/* 2) Ethereum logo needs a light contrast plate on the dark marquee */
+.ah-network img[src$="ethereum.svg"]{
+  width:32px;
+  height:32px;
+  padding:5px;
+  border-radius:10px;
+  background:#f2f2f2;
+}
+
+/* 3) Community should feel like part of the page, not another boxed product */
+.ah-simple-community .ah-community-card{
+  min-height:360px;
+  padding:34px 0 0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  overflow:visible;
+}
+.ah-simple-community .ah-community-card:before{
+  display:none;
+}
+.ah-simple-community .ah-community-copy{
+  padding-right:20px;
+}
+@media(max-width:900px){
+  .ah-simple-community .ah-community-card{
+    min-height:auto;
+    display:block;
+    padding:26px 0 0;
+  }
+  .ah-simple-community .ah-community-copy{
+    padding-right:0;
+  }
+  .ah-simple-community .ah-community-art{
+    position:relative;
+    right:auto;
+    bottom:auto;
+    width:min(100%,540px);
+    height:auto;
+    margin:24px auto 0;
+  }
+  .ah-simple-community .ah-community-art img{
+    width:100%;
+    height:auto;
+    object-fit:contain;
+    display:block;
+  }
+}
+@media(max-width:560px){
+  .ah-simple-community{
+    padding-top:14px;
+  }
+  .ah-simple-community .ah-community-card{
+    padding-top:18px;
+  }
+  .ah-simple-community .ah-community-art{
+    width:100%;
+    margin-top:18px;
+  }
+}
+</style>
+
+
+<style id="angry-home-translation-fix-v4">
+/* Keep proper names from becoming MARAH / Basis / translated product titles. */
+.notranslate[translate="no"]{
+  unicode-bidi:isolate;
+}
+
+/* Ethereum diamond needs a light plate on dark UI. */
+.ah-orbit.one{
+  background:#f2f2f2 !important;
+  border-color:rgba(255,255,255,.72) !important;
+  box-shadow:0 12px 34px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.16) !important;
+}
+.ah-orbit.one img{
+  width:30px !important;
+  height:30px !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  filter:none !important;
+}
+.ah-network img[src$="ethereum.svg"]{
+  background:#f2f2f2 !important;
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08);
+}
+</style>
+
 </head>
 
 <body>
@@ -493,15 +788,15 @@ footer{
 
     <a class="brand" href="index.html">
       <span class="logo"></span>
-      <span>ANGRY</span>
+      <span><span class="notranslate" translate="no">ANGRY</span></span>
     </a>
 
     <nav class="nav">
       <a class="active" href="index.html">Home</a>
       <a href="tracker/index.html">Tracker</a>
-      <a href="token-creator/index.html">Token Creator</a>
-      <a class="notranslate" translate="no" href="token-creator/vesting/index.html">Vesting Manager</a>
-      <a href="nft-creator/index.html">NFT Creator</a>
+      <a href="token-creator/index.html"><span class="notranslate" translate="no">Token Creator</span></a>
+      <a class="notranslate" translate="no" href="token-creator/vesting/index.html"><span class="notranslate" translate="no">Vesting Manager</span></a>
+      <a href="nft-creator/index.html"><span class="notranslate" translate="no">NFT Creator</span></a>
       <a href="docs/index.html">Docs</a>
     </nav>
 
@@ -510,9 +805,9 @@ footer{
       <div class="mobile-links">
         <a href="index.html">Home</a>
         <a href="tracker/index.html">Tracker</a>
-        <a href="token-creator/index.html">Token Creator</a>
-        <a class="notranslate" translate="no" href="token-creator/vesting/index.html">Vesting Manager</a>
-        <a href="nft-creator/index.html">NFT Creator</a>
+        <a href="token-creator/index.html"><span class="notranslate" translate="no">Token Creator</span></a>
+        <a class="notranslate" translate="no" href="token-creator/vesting/index.html"><span class="notranslate" translate="no">Vesting Manager</span></a>
+        <a href="nft-creator/index.html"><span class="notranslate" translate="no">NFT Creator</span></a>
         <a href="docs/index.html">Documentation</a>
       </div>
     </details>
@@ -520,110 +815,155 @@ footer{
   </div>
 </header>
 
-<main>
 
-  <section class="hero">
-    <div class="wrap">
-      <div class="hero-box">
 
-        <div class="kicker">ANGRY Web3 Tools</div>
+<main class="ah-home">
+  <section class="ah-hero">
+    <div class="ah-shell ah-hero-grid">
+      <div>
+        <div class="ah-kicker">
+          <i></i>
+          <span>HEY, WELCOME TO <span class="notranslate" translate="no">ANGRY</span> 👋</span>
+        </div>
 
-        <h1>
-          Build. Create.
-          <span class="orange">Explore.</span>
-        </h1>
+        <h1>How are you feeling<em>today?</em></h1>
 
-        <p>
-          Token research, token creation and NFT tools inside one simple
-          ANGRY ecosystem. Built to keep Web3 workflows clear and easy to use.
+        <p class="ah-lead">
+          Hello developers, creators, artists, builders, and anyone exploring Web3.
+          I’m <span class="notranslate" translate="no">ANGRY</span> 😡.
+          Did something make you angry today? You can tell us, friend.
+          ANGRY is a meme community built around that feeling — but everyone is welcome here.
         </p>
 
+        <p class="ah-hello">
+          Maybe you came to check a token, create a token, make an NFT, manage vesting,
+          or simply look around and try things. That is completely fine.
+          We are happy when you visit, follow the progress, and see what the community is building.
+        </p>
+      </div>
 
+      <div class="ah-hero-art" aria-hidden="true">
+        <span class="ah-orbit one"><img src="assets/networks/ethereum.svg" alt=""></span>
+        <span class="ah-orbit two"><img src="assets/networks/base.svg" alt=""></span>
+        <span class="ah-orbit three"><img src="assets/networks/polygon.svg" alt=""></span>
+        <img src="assets/home/angry-hero.webp" alt="">
       </div>
     </div>
   </section>
 
-  <section class="products-section" id="products">
-    <div class="wrap">
-
-      <div class="section-head">
-        <div class="section-label">Products</div>
-        <h2>One ecosystem. Clear tools.</h2>
-        <p>
-          Each ANGRY product has one clear purpose while sharing the same
-          simple interface and ecosystem.
-        </p>
+  <section class="ah-marquee-wrap" aria-label="Networks in the ANGRY ecosystem">
+    <div class="ah-marquee-label">Networks across the ANGRY ecosystem · support varies by product</div>
+    <div class="ah-marquee">
+      <div class="ah-marquee-set">
+        <div class="ah-network"><img src="assets/networks/ethereum.svg" alt=""><div><span class="notranslate" translate="no">Ethereum</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/bsc.svg" alt=""><div><span class="notranslate" translate="no">BSC</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/base.svg" alt=""><div><span class="notranslate" translate="no">Base</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/robinhood.jpg" alt=""><div><span class="notranslate" translate="no">Robinhood Chain</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/arbitrum.png" alt=""><div><span class="notranslate" translate="no">Arbitrum</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/polygon.svg" alt=""><div><span class="notranslate" translate="no">Polygon</span><small>Mainnet</small></div></div>
       </div>
-
-      <div class="products">
-
-        <a class="product" href="tracker/index.html">
-          <div class="icon">⌕</div>
-          <h3>ANGRY Tracker</h3>
-          <p>
-            Check token information, activity, holders, liquidity and other
-            important data from one place.
-          </p>
-          <div class="product-bottom">
-            <span class="tag">Open tool</span>
-            <span class="arrow">→</span>
-          </div>
-        </a>
-
-        <a class="product" href="token-creator/index.html">
-          <div class="icon">T</div>
-          <h3>Token Creator</h3>
-          <p>
-            Configure and create tokens with a guided interface built for
-            simpler deployment workflows.
-          </p>
-          <div class="product-bottom">
-            <span class="tag">Creator</span>
-            <span class="arrow">→</span>
-          </div>
-        </a>
-
-        <a class="product" href="nft-creator/index.html">
-          <div class="icon">N</div>
-          <h3>NFT Creator</h3>
-          <p>
-            Create individual NFTs, collections and multiple-edition digital
-            assets from one guided workspace.
-          </p>
-          <div class="product-bottom">
-            <span class="tag">Creator</span>
-            <span class="arrow">→</span>
-          </div>
-        </a>
-
-        <article class="product coming">
-          <div class="icon">M</div>
-          <h3>NFT Marketplace</h3>
-          <p>
-            A planned marketplace for exploring, listing, buying and selling
-            NFTs inside the ANGRY ecosystem.
-          </p>
-          <div class="product-bottom">
-            <span class="tag">In development</span>
-          </div>
-        </article>
-
+      <div class="ah-marquee-set" aria-hidden="true">
+        <div class="ah-network"><img src="assets/networks/ethereum.svg" alt=""><div><span class="notranslate" translate="no">Ethereum</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/bsc.svg" alt=""><div><span class="notranslate" translate="no">BSC</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/base.svg" alt=""><div><span class="notranslate" translate="no">Base</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/robinhood.jpg" alt=""><div><span class="notranslate" translate="no">Robinhood Chain</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/arbitrum.png" alt=""><div><span class="notranslate" translate="no">Arbitrum</span><small>Mainnet</small></div></div>
+        <div class="ah-network"><img src="assets/networks/polygon.svg" alt=""><div><span class="notranslate" translate="no">Polygon</span><small>Mainnet</small></div></div>
       </div>
     </div>
   </section>
 
+  <section class="ah-section" id="products">
+    <div class="ah-shell">
+      <div class="ah-section-head">
+        <div>
+          <span class="eyebrow"><span class="notranslate" translate="no">ANGRY PRODUCTS</span></span>
+          <h2>Useful Web3 tools. One ANGRY ecosystem.</h2>
+        </div>
+        <p>
+          Choose the tool you need. Each product has a clear job and its own interface,
+          so the website stays simple even as ANGRY continues to grow.
+        </p>
+      </div>
 
+      <div class="ah-products ah-simple-products">
+        <a class="ah-product" href="tracker/index.html">
+          <span class="ah-product-mini-icon">🔎</span>
+          <div class="ah-product-copy">
+            <span class="tag">Research</span>
+            <h3><span class="notranslate" translate="no">ANGRY Tracker</span></h3>
+            <p>Review token data, holders, liquidity, creator activity, relationships, and other explainable on-chain signals.</p>
+          </div>
+          <span class="open">Open Tracker →</span>
+        </a>
 
+        <a class="ah-product" href="token-creator/index.html">
+          <span class="ah-product-mini-icon">🪙</span>
+          <div class="ah-product-copy">
+            <span class="tag">Create</span>
+            <h3><span class="notranslate" translate="no">Token Creator</span></h3>
+            <p>Choose a network, configure token rules, review the setup, and deploy without manually writing the contract.</p>
+          </div>
+          <span class="open">Create Token →</span>
+        </a>
+
+        <a class="ah-product" href="token-creator/vesting/index.html">
+          <span class="ah-product-mini-icon">🔒</span>
+          <div class="ah-product-copy">
+            <span class="tag">Manage</span>
+            <h3><span class="notranslate" translate="no">Vesting Manager</span></h3>
+            <p>Load an ANGRY Vesting Token, view its fixed schedule, beneficiary, progress, and available claim amount.</p>
+          </div>
+          <span class="open">Manage Vesting →</span>
+        </a>
+
+        <a class="ah-product" href="nft-creator/index.html">
+          <span class="ah-product-mini-icon">🎨</span>
+          <div class="ah-product-copy">
+            <span class="tag">Create</span>
+            <h3><span class="notranslate" translate="no">NFT Creator</span></h3>
+            <p>Create NFTs, collections, and multiple editions through a guided interface while deployment support continues to expand.</p>
+          </div>
+          <span class="open">Create NFT →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ah-community ah-simple-community" id="community">
+    <div class="ah-shell">
+      <div class="ah-community-card">
+        <div class="ah-community-copy">
+          <span class="eyebrow">COMMUNITY</span>
+          <h2>Join the <span class="notranslate" translate="no">ANGRY</span> community.</h2>
+          <p>
+            Follow the development, share ideas, talk Web3, tell us what made you angry today,
+            or simply watch what gets built next. You do not need to buy anything to be welcome here.
+          </p>
+          <div class="ah-socials">
+            <a class="ah-btn primary" href="https://t.me/ANGRYOfficialCommunity" target="_blank" rel="noopener">Join Telegram</a>
+            <a class="ah-btn" href="https://x.com/ANGRY1c" target="_blank" rel="noopener">Follow on X</a>
+          </div>
+        </div>
+
+        <div class="ah-community-art" aria-hidden="true">
+          <img src="assets/home/angry-nft.webp" alt="">
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
+
+
 
 <footer>
   <div class="wrap footer-row">
-    <span>© 2026 ANGRY</span>
+    <span>© 2026 <span class="notranslate" translate="no">ANGRY</span></span>
 
     <div class="footer-links">
       <a href="docs/index.html">Docs</a>
       <a href="tracker/index.html">Tracker</a>
-      <a href="nft-creator/index.html">NFT Creator</a>
+      <a href="nft-creator/index.html"><span class="notranslate" translate="no">NFT Creator</span></a>
     </div>
   </div>
 </footer>
