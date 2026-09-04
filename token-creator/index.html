@@ -958,7 +958,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 .vesting-quick-btn{
   border:1px solid #30363b;
   background:#0b0e10;
-  color:#9aa2a8;
+  color:#e7eaec;
   border-radius:10px;
   min-height:40px;
   font-weight:800;
@@ -1835,9 +1835,10 @@ function setType(type){
   const labels={
   standard:"Create Test Token",
   liquidity:"Create Token",
+  vesting:"Create Vesting Token",
   reward:"Create Test Token"
 };
-  $("deployBtn").textContent=labels[type];
+  $("deployBtn").textContent=labels[type] || "Create Token";
   syncVestingNetworkAvailability();
   syncVestingUI();
   renderPreview();
