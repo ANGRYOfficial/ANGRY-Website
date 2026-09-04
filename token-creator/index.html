@@ -1133,6 +1133,98 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 }
 </style>
 
+
+<style id="angry-token-profile-collapse-ui">
+
+.token-profile-toggle{
+  width:100%;
+  min-height:58px;
+  margin-top:16px;
+  padding:0 17px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  color:#f4f4f4;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor:pointer;
+  font:inherit;
+  text-align:left;
+}
+
+.token-profile-toggle:hover{
+  border-color:rgba(255,91,37,.42);
+}
+
+.token-profile-toggle-icon{
+  width:32px;
+  height:32px;
+  min-width:32px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:rgba(255,91,37,.12);
+  color:#ff7447;
+  font-size:20px;
+  font-weight:900;
+}
+
+.token-profile-toggle-text{
+  flex:1;
+  font-weight:850;
+  font-size:13px;
+}
+
+.token-profile-toggle-arrow{
+  color:#8d929a;
+  font-size:18px;
+  transition:transform .2s ease;
+}
+
+.token-profile-content{
+  display:none;
+}
+
+.token-profile-box.profile-open .token-profile-content{
+  display:block;
+}
+
+.token-profile-box.profile-open .token-profile-toggle{
+  margin-bottom:18px;
+  border-color:rgba(255,91,37,.34);
+  background:rgba(255,91,37,.055);
+}
+
+.token-profile-box.profile-open .token-profile-toggle-icon{
+  background:#ff5b25;
+  color:#fff;
+}
+
+.token-profile-box.profile-open .token-profile-toggle-arrow{
+  transform:rotate(180deg);
+}
+
+@media(max-width:640px){
+  .token-profile-toggle{
+    min-height:54px;
+    padding:0 14px;
+    border-radius:14px;
+  }
+
+  .token-profile-toggle-text{
+    font-size:11px;
+  }
+
+  .token-profile-toggle-icon{
+    width:30px;
+    height:30px;
+    min-width:30px;
+  }
+}
+
+</style>
+
 </head>
 <body>
 
@@ -1249,10 +1341,23 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   <div class="token-profile-head">
     <div>
       <b>Token profile</b>
-      <span>Add branding and social links for your token.</span>
+      <span>Optional branding, logo and social links.</span>
     </div>
     <span class="token-profile-badge">OPTIONAL</span>
   </div>
+
+  <button
+    id="tokenProfileToggle"
+    class="token-profile-toggle"
+    type="button"
+    aria-expanded="false"
+  >
+    <span class="token-profile-toggle-icon">+</span>
+    <span class="token-profile-toggle-text">Add token profile</span>
+    <span class="token-profile-toggle-arrow">⌄</span>
+  </button>
+
+  <div class="token-profile-content" id="tokenProfileContent">
 
   <div class="token-profile-layout">
     <div class="token-logo-upload">
@@ -1317,6 +1422,8 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 
   <input id="tokenImageUri" type="hidden">
   <input id="tokenMetadataUri" type="hidden">
+
+  </div>
 </div>
           </div>
         </div>
@@ -4169,5 +4276,32 @@ window.addEventListener("unhandledrejection", function(e){
 </script>
 
 <script src="./reown-wallet.js?v=public-mainnet-only-20260905-1"></script>
+
+<script id="angry-token-profile-collapse-script">
+document.addEventListener("DOMContentLoaded",()=>{
+  const box=document.querySelector(".token-profile-box");
+  const btn=document.getElementById("tokenProfileToggle");
+  const label=btn?.querySelector(".token-profile-toggle-text");
+
+  if(!box || !btn)return;
+
+  btn.addEventListener("click",()=>{
+    const open=box.classList.toggle("profile-open");
+
+    btn.setAttribute(
+      "aria-expanded",
+      open ? "true" : "false"
+    );
+
+    if(label){
+      label.textContent=
+        open
+          ? "Hide token profile"
+          : "Add token profile";
+    }
+  });
+});
+</script>
+
 </body>
 </html>
