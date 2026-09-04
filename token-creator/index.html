@@ -71,7 +71,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 .verified-note{margin-top:8px;color:#747e77;font-size:7.8px;line-height:1.42}
 
 .feeBox{grid-column:3;border:1px solid #2b3137;background:#090b0d;border-radius:11px;padding:11px;margin-top:10px}.feeLine{display:flex;align-items:center;justify-content:space-between;gap:12px}.total{font-size:18px;font-weight:850}.total.good{color:var(--green)}.total.warn{color:var(--amber)}.total.bad{color:var(--red)}.hint{color:#8d959c;font-size:10px}.wallet-hidden{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
-.preview-card{position:sticky;top:14px;overflow:hidden}.preview-head{padding:17px;border-bottom:1px solid #22282e}.preview-title{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:840}.code-icon{color:var(--orange);font-size:20px}.preview-sub{font-size:10.5px;color:#828a91;margin-top:4px}.preview-body{padding:14px 17px 17px}.preview-list{border:1px solid #252b31;border-radius:12px;background:#090b0d;overflow:hidden}.preview-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #20252a;font-size:10.5px}.preview-row:last-child{border-bottom:0}.preview-row>span{color:#858e95}.preview-row strong{color:#e4e7e9;font-size:10.5px;font-weight:760;text-align:right;max-width:62%;word-break:break-word}.preview-network{display:inline-flex;align-items:center;gap:6px}.mini-chain-dot{width:8px;height:8px;border-radius:50%;background:#89919a}.mini-chain-dot.sepolia{background:#9da6b0}.mini-chain-dot.bscTestnet{background:#f1c40f}.mini-chain-dot.baseSepolia{background:#3685ff}.mini-chain-dot.arbSepolia{background:#45a7ff}.mini-chain-dot.polygonAmoy{background:#9a5cff}.contract-value{color:#ff966e}
+.preview-card{position:sticky;top:14px;overflow:hidden}.preview-head{padding:17px;border-bottom:1px solid #22282e}.preview-title{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:840}.code-icon{color:var(--orange);font-size:20px}.preview-sub{font-size:10.5px;color:#828a91;margin-top:4px}.preview-body{padding:14px 17px 17px}.preview-list{border:1px solid #252b31;border-radius:12px;background:#090b0d;overflow:hidden}.preview-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #20252a;font-size:10.5px}.preview-row:last-child{border-bottom:0}.preview-row>span{color:#858e95}.preview-row strong{color:#e4e7e9;font-size:10.5px;font-weight:760;text-align:right;max-width:62%;word-break:break-word}.preview-network{display:inline-flex;align-items:center;gap:6px}.mini-chain-dot{width:8px;height:8px;border-radius:50%;background:#89919a}.mini-chain-dot.sepolia{background:#9da6b0}.mini-chain-dot.bscTestnet{background:#f1c40f}.mini-chain-dot.baseMainnet{background:#0052ff}.mini-chain-dot.baseSepolia{background:#3685ff}.mini-chain-dot.arbSepolia{background:#45a7ff}.mini-chain-dot.polygonAmoy{background:#9a5cff}.contract-value{color:#ff966e}
 .deploy-note{margin-top:12px;border:1px solid rgba(255,84,28,.36);background:linear-gradient(110deg,rgba(255,84,28,.12),rgba(255,84,28,.035));border-radius:11px;padding:10px 11px;color:#e7b09c;font-size:10.5px;line-height:1.45}.deploy-note b{color:#ff986f}.btn{width:100%;border-radius:11px;min-height:46px;padding:10px 13px;font-weight:830;font-size:12px;transition:.15s}.primary{margin-top:11px;border:0;background:linear-gradient(180deg,#ff6425,#ff4d12);color:#fff;box-shadow:0 12px 28px rgba(255,84,28,.16)}.primary:hover{filter:brightness(1.04)}.secondary{margin-top:8px;border:1px solid #2b3137;background:#121519;color:#c4c9cd}.secondary:hover{background:#171b1f}.btn:disabled{opacity:.48;cursor:not-allowed}.status{margin-top:10px;border:1px solid #252b31;border-radius:10px;background:#090b0d;padding:10px;color:#808990;font-size:10px;line-height:1.48;word-break:break-word}.status.good{border-color:rgba(75,211,116,.25);color:#9ad9aa;background:rgba(75,211,116,.035)}.status.warn{border-color:rgba(242,184,75,.24);color:#d6bc85;background:rgba(242,184,75,.035)}.status.bad{border-color:rgba(255,113,104,.24);color:#efa19b;background:rgba(255,113,104,.035)}.link{color:#ff8d62;text-decoration:none;font-weight:800}.micro-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bottom-strip{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #22282e;background:#0a0c0e;border-radius:14px;overflow:hidden}.bottom-item{padding:13px 15px;display:flex;gap:9px;align-items:center;border-right:1px solid #22282e}.bottom-item:last-child{border-right:0}.bottom-item i{font-style:normal;color:#ff8458}.bottom-item b{display:block;font-size:10.5px}.bottom-item span{display:block;color:#727b82;font-size:9.5px;margin-top:2px}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 2px 0;color:#60686f;font-size:9.5px}
 #chain,#nativeCoinInput{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
@@ -1064,6 +1064,10 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   <div class="network-icon"><img src="../assets/networks/bsc.svg" alt="" aria-hidden="true"></div>
   <div><b class="notranslate" translate="no">BSC</b><span>Testnet</span></div>
 </button>
+            <button class="network-card" type="button" data-chain="baseMainnet">
+  <div class="network-icon"><img src="../assets/networks/base.svg" alt="" aria-hidden="true"></div>
+  <div><b class="notranslate" translate="no">Base</b><span>Mainnet</span></div>
+</button>
             <button class="network-card" type="button" data-chain="baseSepolia">
   <div class="network-icon"><img src="../assets/networks/base.svg" alt="" aria-hidden="true"></div>
   <div><b class="notranslate" translate="no">Base</b><span>Sepolia</span></div>
@@ -1089,7 +1093,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="network-strip" id="networkHint"></div>
           <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected network</button>
         </div>
-        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscMainnet">BSC Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
+        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscMainnet">BSC Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseMainnet">Base Mainnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbSepolia">Arbitrum Sepolia</option><option value="polygonAmoy">Polygon Amoy</option><option value="solanaDevnet">Solana Devnet</option></select>
         <input id="nativeCoinInput" value="SepoliaETH" readonly aria-hidden="true">
       </section>
 
@@ -1100,7 +1104,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div class="type-grid">
 
             <button class="type active" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">I</span><b class="notranslate" translate="no">Immutable Token</b></div><p>Fixed supply with optional reflection, auto liquidity, creator fee and true burn. Settings are locked after deployment.</p><span class="status-badge ready" translate="no">MAINNET</span></button>
-<button class="type" id="vestingTypeCard" type="button" data-type="vesting" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">V</span><b class="notranslate" translate="no">Vesting Token</b></div><p>Fixed supply with reflection, auto liquidity, creator fee, true burn and immutable linear vesting.</p><span class="status-badge ready" translate="no">BSC</span></button>
+<button class="type" id="vestingTypeCard" type="button" data-type="vesting" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">V</span><b class="notranslate" translate="no">Vesting Token</b></div><p>Fixed supply with reflection, auto liquidity, creator fee, true burn and immutable linear vesting.</p><span class="status-badge ready" translate="no">BSC + BASE</span></button>
             <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="status-badge">TESTNET</span></button>
           </div>
         </div>
@@ -1349,7 +1353,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   </div>
 
   <div class="vesting-status" id="vestingStatus">
-    Vesting is optional and currently available for BSC Immutable Token.
+    Vesting is available for supported BSC and Base networks.
   </div>
 </section>
 
@@ -1506,6 +1510,7 @@ const CHAINS = {
   sepolia:{name:"Ethereum Mainnet",family:"evm",chainId:"0x1",chainIdDec:1,native:"ETH",nativeSymbol:"ETH",rpc:"https://ethereum-rpc.publicnode.com",explorer:"https://etherscan.io",deploy:true},
   bscMainnet:{name:"BSC Mainnet",family:"evm",chainId:"0x38",chainIdDec:56,native:"BNB",nativeSymbol:"BNB",rpc:"https://bsc-dataseed.bnbchain.org",explorer:"https://bscscan.com",deploy:true},
   bscTestnet:{name:"BSC Testnet",family:"evm",chainId:"0x61",chainIdDec:97,native:"tBNB",nativeSymbol:"tBNB",rpc:"https://bsc-testnet-dataseed.bnbchain.org",explorer:"https://testnet.bscscan.com",deploy:true},
+  baseMainnet:{name:"Base Mainnet",family:"evm",chainId:"0x2105",chainIdDec:8453,native:"ETH",nativeSymbol:"ETH",rpc:"https://mainnet.base.org",explorer:"https://basescan.org",deploy:true},
   baseSepolia:{name:"Base Sepolia",family:"evm",chainId:"0x14a34",chainIdDec:84532,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia.base.org",explorer:"https://sepolia.basescan.org",deploy:true},
   robinhoodTestnet:{name:"Robinhood Chain Testnet",family:"evm",chainId:"0xb626",chainIdDec:46630,native:"ETH",nativeSymbol:"ETH",rpc:"https://rpc.testnet.chain.robinhood.com",explorer:"https://explorer.testnet.chain.robinhood.com",deploy:false},
   arbSepolia:{name:"Arbitrum Sepolia",family:"evm",chainId:"0x66eee",chainIdDec:421614,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia-rollup.arbitrum.io/rpc",explorer:"https://sepolia.arbiscan.io",deploy:false},
@@ -1536,7 +1541,8 @@ function updateDeploymentNetworkText(){
   if(environmentNotice){
     const isMainnet =
       c.chainIdDec === 1 ||
-      c.chainIdDec === 56;
+      c.chainIdDec === 56 ||
+      c.chainIdDec === 8453;
 
     environmentNotice.textContent = isMainnet
       ? "Mainnet environment · Real network fees apply."
@@ -1815,7 +1821,7 @@ function setType(type){
     type="liquidity";
 
     setStatus(
-      `<span class="notranslate" translate="no">Vesting Token is currently available only on BSC.</span>`,
+      `<span class="notranslate" translate="no">Vesting Token is currently available only on supported BSC and Base networks.</span>`,
       "warn"
     );
   }
@@ -1850,6 +1856,7 @@ function vestingSupported(){
   return (
     key==="bscMainnet" ||
     key==="bscTestnet" ||
+    key==="baseMainnet" ||
     key==="baseSepolia"
   );
 }
@@ -2134,7 +2141,7 @@ function syncVestingUI(){
   if(!vestingSupported()){
     status.className="vesting-status warn";
     status.textContent=
-      `<span class="notranslate" translate="no">Vesting Token is currently available only on BSC.</span>`;
+      `<span class="notranslate" translate="no">Vesting Token is currently available only on supported BSC and Base networks.</span>`;
 
     if(deployBtn){
       deployBtn.disabled=true;
@@ -2403,7 +2410,7 @@ async function waitReceipt(hash){
 
   for(let i=0;i<90;i++){
     const r=
-      chainKey==="baseSepolia"
+      (chainKey==="baseMainnet" || chainKey==="baseSepolia")
         ? await rpcRequest(
             chain,
             "eth_getTransactionReceipt",
@@ -2573,7 +2580,7 @@ function buildLiquidityDeploymentData(){
     chainKey === "bscTestnet"
   ){
     creationBytecode=BSC_LIQUIDITY_CREATION_BYTECODE;
-  }else if(chainKey === "baseSepolia"){
+  }else if(chainKey === "baseMainnet" || chainKey === "baseSepolia"){
     creationBytecode=BASE_LIQUIDITY_CREATION_BYTECODE;
   }
 
@@ -2719,10 +2726,11 @@ function buildVestingDeploymentData(){
   if(
     chainKey!=="bscMainnet" &&
     chainKey!=="bscTestnet" &&
+    chainKey!=="baseMainnet" &&
     chainKey!=="baseSepolia"
   ){
     throw new Error(
-      "Vesting Token is currently supported on BSC and Base Sepolia."
+      "Vesting Token is currently supported on BSC and Base."
     );
   }
 
@@ -2889,7 +2897,7 @@ function buildVestingDeploymentData(){
     symbolTail;
 
   const vestingCreationBytecode=
-    chainKey==="baseSepolia"
+    (chainKey==="baseMainnet" || chainKey==="baseSepolia")
       ? BASE_VESTING_CREATION_BYTECODE
       : BSC_VESTING_CREATION_BYTECODE;
 
@@ -3013,7 +3021,7 @@ async function deployToken(){
         "good"
       );
 
-      const isMainnet=c.chainIdDec===1 || c.chainIdDec===56;
+      const isMainnet=c.chainIdDec===1 || c.chainIdDec===56 || c.chainIdDec===8453;
 
       if(isMainnet){
         const approved=window.confirm(
@@ -3208,7 +3216,7 @@ async function deployToken(){
   finally{btn.disabled=false}
 }
 
-function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:(c.chainIdDec===1||c.chainIdDec===56)?"MAINNET":"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
+function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:(c.chainIdDec===1||c.chainIdDec===56||c.chainIdDec===8453)?"MAINNET":"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
 function downloadConfig(){const blob=new Blob([JSON.stringify(makeConfig(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${$("symbol").value||"token"}-angry-launch.json`;a.click();URL.revokeObjectURL(a.href)}
 function copyPlan(){navigator.clipboard?.writeText($("preview").textContent).then(()=>setStatus("Deployment summary copied.","good"))}
 
@@ -3847,6 +3855,6 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
-<script src="./reown-wallet.js?v=base-sepolia-20260904-1"></script>
+<script src="./reown-wallet.js?v=base-mainnet-20260904-1"></script>
 </body>
 </html>
