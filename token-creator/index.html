@@ -85,7 +85,7 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 .network-card.planned-network{position:relative;opacity:.68;border-style:dashed}
 .network-card.planned-network:hover{border-color:#30363d}
 .network-badge{position:absolute;top:5px;right:5px;border:1px solid rgba(242,184,75,.28);background:rgba(242,184,75,.06);color:#d7b873;border-radius:999px;padding:2px 5px;font-size:6px!important;font-weight:900;line-height:1;text-transform:uppercase;letter-spacing:.03em}
-.mini-chain-dot.robinhoodTestnet{background:#2a8d62}.mini-chain-dot.solanaDevnet{background:#8a4dff}
+.mini-chain-dot.robinhoodMainnet{background:#ccff00}.mini-chain-dot.robinhoodTestnet{background:#2a8d62}.mini-chain-dot.solanaDevnet{background:#8a4dff}
 
 </style>
 <link rel="stylesheet" href="../assets/ecosystem.css">
@@ -1013,6 +1013,126 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
 }
 </style>
 
+
+<style id="angry-public-mainnet-only">
+/* Public UI: keep test networks available internally, but hide them from visitors */
+.network-card[data-chain="bscTestnet"],
+.network-card[data-chain="baseSepolia"],
+.network-card[data-chain="robinhoodTestnet"]{
+  display:none !important;
+}
+</style>
+
+
+<style id="angry-public-contract-type-cleanup">
+/* Public UI only — contract mechanics and JS hooks are unchanged */
+
+.type-grid{
+  gap:12px !important;
+}
+
+.type{
+  min-height:132px !important;
+  padding:15px !important;
+  text-align:left !important;
+}
+
+.type-top{
+  gap:10px !important;
+}
+
+.type-icon{
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  border-radius:11px !important;
+}
+
+.type b{
+  font-size:13px !important;
+}
+
+.type p{
+  margin-top:11px !important;
+  font-size:10px !important;
+  line-height:1.55 !important;
+}
+
+.status-badge{
+  margin-top:11px !important;
+  padding:4px 8px !important;
+  font-size:7.5px !important;
+}
+
+@media(max-width:640px){
+  .type-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:10px !important;
+  }
+
+  .type{
+    min-height:150px !important;
+    padding:12px !important;
+  }
+
+  .type-top{
+    align-items:center !important;
+  }
+
+  .type-icon{
+    width:34px !important;
+    height:34px !important;
+    min-width:34px !important;
+  }
+
+  .type b{
+    font-size:11.5px !important;
+    line-height:1.25 !important;
+  }
+
+  .type p{
+    font-size:9px !important;
+    line-height:1.48 !important;
+  }
+}
+</style>
+
+
+<style id="angry-auto-network-switch-ui">
+
+/* Fallback action when wallet still needs to change network */
+#switchBtn.network-switch-needed{
+  border:1px solid rgba(255,84,28,.78) !important;
+  background:linear-gradient(180deg,rgba(255,92,32,.20),rgba(255,69,16,.11)) !important;
+  color:#ff9a73 !important;
+  box-shadow:0 10px 28px rgba(255,84,28,.10) !important;
+}
+
+/* While wallet is processing the request */
+#switchBtn.network-switching{
+  border-color:rgba(242,184,75,.42) !important;
+  background:rgba(242,184,75,.07) !important;
+  color:#e8c77e !important;
+  cursor:wait !important;
+}
+
+/* Wallet is already on the selected network */
+#switchBtn.network-switch-ok{
+  border-color:rgba(75,211,116,.34) !important;
+  background:rgba(75,211,116,.055) !important;
+  color:#87dc9d !important;
+  cursor:default !important;
+}
+
+@media(max-width:640px){
+  #switchBtn{
+    min-height:48px !important;
+    font-size:11px !important;
+    font-weight:850 !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -1072,6 +1192,10 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   <div class="network-icon"><img src="../assets/networks/base.svg" alt="" aria-hidden="true"></div>
   <div><b class="notranslate" translate="no">Base</b><span>Sepolia</span></div>
 </button>
+            <button class="network-card" type="button" data-chain="robinhoodMainnet">
+  <div class="network-icon"><img src="../assets/networks/robinhood.jpg" alt="" aria-hidden="true"></div>
+  <div><b class="notranslate" translate="no">Robinhood Chain</b><span>Mainnet</span></div>
+</button>
             <button class="network-card" type="button" data-chain="robinhoodTestnet">
   <div class="network-icon"><img src="../assets/networks/robinhood.jpg" alt="" aria-hidden="true"></div>
   <div><b class="notranslate" translate="no">Robinhood Chain</b><span>Testnet</span></div>
@@ -1091,9 +1215,9 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
   <div><b class="notranslate" translate="no">Solana</b><span>Devnet</span></div>
 </button></div>
           <div class="network-strip" id="networkHint"></div>
-          <button class="switch-btn" id="switchBtn" type="button">Switch wallet to selected network</button>
+          <button class="switch-btn" id="switchBtn" type="button" style="display:none">Switch wallet to selected network</button>
         </div>
-        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscMainnet">BSC Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseMainnet">Base Mainnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbMainnet">Arbitrum One Mainnet</option><option value="polygonMainnet">Polygon Mainnet</option><option value="solanaDevnet">Solana Devnet</option></select>
+        <select id="chain" aria-hidden="true"><option value="sepolia">Ethereum Mainnet</option><option value="bscMainnet">BSC Mainnet</option><option value="bscTestnet">BSC Testnet</option><option value="baseMainnet">Base Mainnet</option><option value="baseSepolia">Base Sepolia</option><option value="robinhoodMainnet">Robinhood Chain Mainnet</option><option value="robinhoodTestnet">Robinhood Chain Testnet</option><option value="arbMainnet">Arbitrum One Mainnet</option><option value="polygonMainnet">Polygon Mainnet</option><option value="solanaDevnet">Solana Devnet</option></select>
         <input id="nativeCoinInput" value="SepoliaETH" readonly aria-hidden="true">
       </section>
 
@@ -1103,8 +1227,8 @@ button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{d
           <div><div class="section-title">Contract type</div><div class="section-sub">Choose the token mechanics.</div></div>
           <div class="type-grid">
 
-            <button class="type active" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">I</span><b class="notranslate" translate="no">Immutable Token</b></div><p>Fixed supply with optional reflection, auto liquidity, creator fee and true burn. Settings are locked after deployment.</p><span class="status-badge ready" translate="no">MAINNET</span></button>
-<button class="type" id="vestingTypeCard" type="button" data-type="vesting" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">V</span><b class="notranslate" translate="no">Vesting Token</b></div><p>Fixed supply with reflection, auto liquidity, creator fee, true burn and immutable linear vesting.</p><span class="status-badge ready" translate="no">ETHEREUM + BSC + BASE + ROBINHOOD + ARBITRUM + POLYGON</span></button>
+            <button class="type active" type="button" data-type="liquidity" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">I</span><b class="notranslate" translate="no">Immutable Token</b></div><p>Fixed supply with optional fees, auto liquidity and true burn. Contract settings are locked after deployment.</p><span class="status-badge ready" translate="no">READY</span></button>
+<button class="type" id="vestingTypeCard" type="button" data-type="vesting" data-fee-usd="9.99"><div class="type-top"><span class="type-icon notranslate" translate="no">V</span><b class="notranslate" translate="no">Vesting Token</b></div><p>Immutable token mechanics plus locked allocations that are released automatically over time.</p><span class="status-badge ready" translate="no">READY</span></button>
             <button class="type" type="button" data-type="reward" data-fee-usd="14.99"><div class="type-top"><span class="type-icon">R</span><b>Reward</b></div><p>Sepolia Reward Core testing currently supports a verified custom ERC-20 reward token.</p><span class="status-badge">TESTNET</span></button>
           </div>
         </div>
@@ -1512,6 +1636,7 @@ const CHAINS = {
   bscTestnet:{name:"BSC Testnet",family:"evm",chainId:"0x61",chainIdDec:97,native:"tBNB",nativeSymbol:"tBNB",rpc:"https://bsc-testnet-dataseed.bnbchain.org",explorer:"https://testnet.bscscan.com",deploy:true},
   baseMainnet:{name:"Base Mainnet",family:"evm",chainId:"0x2105",chainIdDec:8453,native:"ETH",nativeSymbol:"ETH",rpc:"https://mainnet.base.org",explorer:"https://basescan.org",deploy:true},
   baseSepolia:{name:"Base Sepolia",family:"evm",chainId:"0x14a34",chainIdDec:84532,native:"ETH",nativeSymbol:"ETH",rpc:"https://sepolia.base.org",explorer:"https://sepolia.basescan.org",deploy:true},
+  robinhoodMainnet:{name:"Robinhood Chain Mainnet",family:"evm",chainId:"0x1237",chainIdDec:4663,native:"ETH",nativeSymbol:"ETH",rpc:"https://rpc.mainnet.chain.robinhood.com",explorer:"https://robinhoodchain.blockscout.com",deploy:true},
   robinhoodTestnet:{name:"Robinhood Chain Testnet",family:"evm",chainId:"0xb626",chainIdDec:46630,native:"ETH",nativeSymbol:"ETH",rpc:"https://rpc.testnet.chain.robinhood.com",explorer:"https://explorer.testnet.chain.robinhood.com",deploy:true},
   arbMainnet:{name:"Arbitrum One Mainnet",family:"evm",chainId:"0xa4b1",chainIdDec:42161,native:"ETH",nativeSymbol:"ETH",rpc:"https://arb1.arbitrum.io/rpc",explorer:"https://arbiscan.io",deploy:true},
   polygonMainnet:{name:"Polygon PoS Mainnet",family:"evm",chainId:"0x89",chainIdDec:137,native:"POL",nativeSymbol:"POL",rpc:"https://polygon-bor-rpc.publicnode.com",explorer:"https://polygonscan.com",deploy:true},
@@ -1543,6 +1668,7 @@ function updateDeploymentNetworkText(){
       c.chainIdDec === 1 ||
       c.chainIdDec === 56 ||
       c.chainIdDec === 8453 ||
+      c.chainIdDec === 4663 ||
       c.chainIdDec === 42161 ||
       c.chainIdDec === 137;
 
@@ -1813,6 +1939,7 @@ function updateChain(){
   syncVestingNetworkAvailability();
   syncVestingUI();
   renderPreview();
+  refreshNetworkSwitchButton();
 }
 function setType(type){
 
@@ -1861,6 +1988,7 @@ function vestingSupported(){
     key==="bscTestnet" ||
     key==="baseMainnet" ||
     key==="baseSepolia" ||
+    key==="robinhoodMainnet" ||
     key==="robinhoodTestnet" ||
     key==="arbMainnet" ||
     key==="polygonMainnet"
@@ -2310,6 +2438,7 @@ function angryApplyConnectedAccount(address){
   }
 
   renderPreview();
+  refreshNetworkSwitchButton();
 }
 
 window.angrySetWalletProvider = angrySetWalletProvider;
@@ -2328,6 +2457,145 @@ async function connectWallet(){
       "Wallet connection failed: "+(e?.message || e),
       "bad"
     );
+  }
+}
+
+
+let NETWORK_FALLBACK_NEEDED=false;
+
+function setNetworkSwitchButton(mode="needed"){
+  const btn=$("switchBtn");
+  const c=selectedChain();
+
+  if(!btn || !c)return;
+
+  btn.classList.remove(
+    "network-switch-needed",
+    "network-switching",
+    "network-switch-ok"
+  );
+
+  if(c.family!=="evm"){
+    btn.style.display="none";
+    btn.disabled=true;
+    return;
+  }
+
+  if(!state.account){
+    btn.style.display="none";
+    btn.disabled=true;
+    return;
+  }
+
+  if(mode==="switching"){
+    btn.style.display="";
+    btn.classList.add("network-switching");
+    btn.textContent="Switching wallet to "+c.name+"…";
+    btn.disabled=true;
+    return;
+  }
+
+  if(mode==="ok"){
+    btn.style.display="none";
+    btn.disabled=true;
+    return;
+  }
+
+  btn.style.display="";
+  btn.style.display="";
+  btn.classList.add("network-switch-needed");
+  btn.textContent="Switch wallet to "+c.name;
+  btn.disabled=false;
+}
+
+async function refreshNetworkSwitchButton(){
+  const c=selectedChain();
+
+  if(!c || c.family!=="evm"){
+    setNetworkSwitchButton("needed");
+    return;
+  }
+
+  const provider=angryProvider();
+
+  if(!provider || !state.account){
+    setNetworkSwitchButton("needed");
+    return;
+  }
+
+  try{
+    const raw=await provider.request({
+      method:"eth_chainId"
+    });
+
+    const current=
+      typeof raw==="string"
+        ? parseInt(raw,16)
+        : Number(raw);
+
+    if(current===Number(c.chainIdDec)){
+      NETWORK_FALLBACK_NEEDED=false;
+      setNetworkSwitchButton("ok");
+    }else{
+      setNetworkSwitchButton(
+        NETWORK_FALLBACK_NEEDED
+          ? "needed"
+          : "ok"
+      );
+    }
+  }catch(e){
+    setNetworkSwitchButton("needed");
+  }
+}
+
+async function switchSelectedNetwork(isAutomatic=false){
+  const c=selectedChain();
+
+  if(!state.account){
+    setNetworkSwitchButton("needed");
+
+    if(!isAutomatic){
+      setStatus(
+        "Connect your wallet first, then switch to "+c.name+".",
+        "warn"
+      );
+    }
+
+    return false;
+  }
+
+  NETWORK_FALLBACK_NEEDED=false;
+  setNetworkSwitchButton("switching");
+
+  try{
+    await ensureNetwork();
+
+    NETWORK_FALLBACK_NEEDED=false;
+    setNetworkSwitchButton("ok");
+
+    setStatus(
+      "Wallet connected to "+c.name+".",
+      "good"
+    );
+
+    return true;
+  }catch(e){
+    NETWORK_FALLBACK_NEEDED=true;
+    setNetworkSwitchButton("needed");
+
+    if(isAutomatic){
+      setStatus(
+        "Automatic network switch was not completed. Tap the orange button below to switch to "+c.name+".",
+        "warn"
+      );
+    }else{
+      setStatus(
+        "Network switch failed: "+(e?.message || e),
+        "bad"
+      );
+    }
+
+    return false;
   }
 }
 
@@ -2595,7 +2863,10 @@ function buildLiquidityDeploymentData(){
     creationBytecode=BSC_LIQUIDITY_CREATION_BYTECODE;
   }else if(chainKey === "baseMainnet" || chainKey === "baseSepolia"){
     creationBytecode=BASE_LIQUIDITY_CREATION_BYTECODE;
-  }else if(chainKey === "robinhoodTestnet"){
+  }else if(
+    chainKey === "robinhoodMainnet" ||
+    chainKey === "robinhoodTestnet"
+  ){
     creationBytecode=ROBINHOOD_LIQUIDITY_CREATION_BYTECODE;
   }else if(chainKey === "arbMainnet"){
     creationBytecode=ARBITRUM_LIQUIDITY_CREATION_BYTECODE;
@@ -2748,6 +3019,7 @@ function buildVestingDeploymentData(){
     chainKey!=="bscTestnet" &&
     chainKey!=="baseMainnet" &&
     chainKey!=="baseSepolia" &&
+    chainKey!=="robinhoodMainnet" &&
     chainKey!=="robinhoodTestnet" &&
     chainKey!=="arbMainnet" &&
     chainKey!=="polygonMainnet"
@@ -2926,7 +3198,7 @@ function buildVestingDeploymentData(){
         ? POLYGON_VESTING_CREATION_BYTECODE
         : chainKey==="arbMainnet"
           ? ARBITRUM_VESTING_CREATION_BYTECODE
-          : chainKey==="robinhoodTestnet"
+          : (chainKey==="robinhoodMainnet" || chainKey==="robinhoodTestnet")
             ? ROBINHOOD_VESTING_CREATION_BYTECODE
             : (chainKey==="baseMainnet" || chainKey==="baseSepolia")
               ? BASE_VESTING_CREATION_BYTECODE
@@ -3052,7 +3324,7 @@ async function deployToken(){
         "good"
       );
 
-      const isMainnet=c.chainIdDec===1 || c.chainIdDec===56 || c.chainIdDec===8453 || c.chainIdDec===42161 || c.chainIdDec===137;
+      const isMainnet=c.chainIdDec===1 || c.chainIdDec===56 || c.chainIdDec===8453 || c.chainIdDec===4663 || c.chainIdDec===42161 || c.chainIdDec===137;
 
       if(isMainnet){
         const approved=window.confirm(
@@ -3247,19 +3519,29 @@ async function deployToken(){
   finally{btn.disabled=false}
 }
 
-function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:(c.chainIdDec===1||c.chainIdDec===56||c.chainIdDec===8453||c.chainIdDec===42161||c.chainIdDec===137)?"MAINNET":"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
+function makeConfig(){const c=selectedChain();return{app:"ANGRY Launch Beta",version:"0.6.3",mode:(c.chainIdDec===1||c.chainIdDec===56||c.chainIdDec===8453||c.chainIdDec===4663||c.chainIdDec===42161||c.chainIdDec===137)?"MAINNET":"TESTNET",network:$("chain").value,networkName:c.name,chainId:c.chainIdDec,tokenType:state.type,token:{name:$("name").value.trim(),symbol:$("symbol").value.trim().toUpperCase(),supply:$("supply").value.trim(),decimals:18},fees:state.type==="standard"?{total:0}:{holderOrReward:n("holderFee"),autoLiquidity:n("lpFee"),project:n("projectFee"),burn:n("burnFee"),total:calcFees()},reward:state.type==="reward"?{asset:rewardAssetLabel(),customContract:state.rewardAsset==="custom"?$("rewardToken").value.trim():"",validation:state.rewardAsset==="custom"?{status:state.customReward.status,network:state.customReward.chainKey,meta:state.customReward.meta}:null}:null,projectWallet:state.account||"",lastContract:state.lastContract||""}}
 function downloadConfig(){const blob=new Blob([JSON.stringify(makeConfig(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${$("symbol").value||"token"}-angry-launch.json`;a.click();URL.revokeObjectURL(a.href)}
 function copyPlan(){navigator.clipboard?.writeText($("preview").textContent).then(()=>setStatus("Deployment summary copied.","good"))}
 
-document.querySelectorAll(".network-card").forEach(card=>card.addEventListener("click",()=>{
+document.querySelectorAll(".network-card").forEach(card=>card.addEventListener("click",async()=>{
   const key=card.dataset.chain;
   const next=CHAINS[key];
+
   if(next?.family==="solana"){
     setStatus("Solana Devnet has been added to the ANGRY Launch network roadmap, but it is not active yet. A professional Solana token creator needs SPL Token instructions and a Solana wallet connector, so it is not routed through the current ERC-20/MetaMask deployment code.","warn");
     return;
   }
+
   $("chain").value=key;
   updateChain();
+
+  if(next?.family==="evm"){
+    if(state.account){
+      await switchSelectedNetwork(true);
+    }else{
+      setNetworkSwitchButton("needed");
+    }
+  }
 }));
 document.querySelectorAll(".reward-asset").forEach(btn=>btn.addEventListener("click",()=>{
   state.rewardAsset=btn.dataset.reward;
@@ -3349,8 +3631,8 @@ $("supply")?.addEventListener(
   }
 );
 
-$("walletBtn").addEventListener("click",connectWallet);$("switchBtn").addEventListener("click",async()=>{try{await ensureNetwork();setStatus("Wallet switched to "+selectedChain().name+".","good")}catch(e){setStatus("Network switch failed: "+(e.message||e),"bad")}});$("deployBtn").addEventListener("click",deployToken);$("downloadBtn").addEventListener("click",downloadConfig);$("copyBtn").addEventListener("click",copyPlan);$("chain").addEventListener("change",updateChain);document.querySelectorAll(".type").forEach(x=>x.addEventListener("click",()=>setType(x.dataset.type)));document.addEventListener("input",renderPreview);
-if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect Wallet";$("projectWallet").value=state.account||"";renderPreview()});ethereum.on?.("chainChanged",()=>setStatus("Wallet network changed.","warn"))}
+$("walletBtn").addEventListener("click",connectWallet);$("switchBtn").addEventListener("click",async()=>{await switchSelectedNetwork(false)});$("deployBtn").addEventListener("click",deployToken);$("downloadBtn").addEventListener("click",downloadConfig);$("copyBtn").addEventListener("click",copyPlan);$("chain").addEventListener("change",updateChain);document.querySelectorAll(".type").forEach(x=>x.addEventListener("click",()=>setType(x.dataset.type)));document.addEventListener("input",renderPreview);
+if(window.ethereum){ethereum.on?.("accountsChanged",a=>{state.account=a?.[0]||null;$("walletBtn").textContent=state.account?state.account.slice(0,6)+"…"+state.account.slice(-4):"Connect Wallet";$("projectWallet").value=state.account||"";renderPreview();refreshNetworkSwitchButton()});ethereum.on?.("chainChanged",()=>{refreshNetworkSwitchButton();setStatus("Wallet network changed.","warn")})}
 updateChain();setType("liquidity");renderPreview();
 </script>
 
@@ -3886,6 +4168,6 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
-<script src="./reown-wallet.js?v=polygon-mainnet-20260904-1"></script>
+<script src="./reown-wallet.js?v=public-mainnet-only-20260905-1"></script>
 </body>
 </html>
