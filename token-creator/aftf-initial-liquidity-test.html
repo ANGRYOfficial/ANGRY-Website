@@ -1,0 +1,461 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AFTF Initial Liquidity Test</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+body{margin:0;background:#08090a;color:#eee;font-family:Arial,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:24px 16px}
+.card{background:#101214;border:1px solid #292d31;border-radius:18px;padding:20px}
+h1{color:#ff641f;margin-top:0}
+p{color:#aaa;line-height:1.5}
+.row{padding:11px 0;border-bottom:1px solid #282c30}
+.row b{display:block;margin-top:5px;word-break:break-all}
+input{width:100%;box-sizing:border-box;padding:13px;margin-top:7px;border:1px solid #343a40;border-radius:10px;background:#090b0d;color:#fff}
+button{width:100%;padding:14px;margin-top:12px;border:0;border-radius:12px;font-weight:700}
+.primary{background:#ff641f;color:#fff}
+.secondary{background:#23272b;color:#fff}
+button:disabled{opacity:.45}
+#status{margin-top:15px;padding:14px;border:1px solid #292d31;border-radius:12px;line-height:1.55;word-break:break-word}
+.good{color:#61d881}.warn{color:#ffc45c}.bad{color:#ff6b6b}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+
+<h1>AFTF Initial Liquidity Test</h1>
+
+<p>
+BSC Testnet only. Membuat initial liquidity untuk mengaktifkan
+Auto Liquidity pada AFTF.
+</p>
+
+<div class="row">
+Token
+<b>0xc1e6a6d75c5faD05D4E4aCeF3Ac7431bcF52Ce68</b>
+</div>
+
+<div class="row">
+PancakeSwap V2 Router
+<b>0xD99D1c33F9fC3444f8101754aBC46c52416550D1</b>
+</div>
+
+<div class="row">
+AFTF untuk initial LP
+<input id="tokenAmount" value="50000">
+</div>
+
+<div class="row">
+tBNB untuk initial LP
+<input id="bnbAmount" value="0.001">
+</div>
+
+<button id="connect" class="secondary">Connect MetaMask</button>
+<button id="read" class="secondary" disabled>Check Before LP</button>
+<button id="approve" class="secondary" disabled>1. Approve 50,000 AFTF</button>
+<button id="add" class="primary" disabled>2. Add Initial Liquidity</button>
+<button id="checkAfter" class="secondary" disabled>3. Check After LP</button>
+
+<div id="status">Connect Account 1 terlebih dahulu.</div>
+
+</div></div>
+
+<script>
+const TOKEN="0xc1e6a6d75c5faD05D4E4aCeF3Ac7431bcF52Ce68";
+const ROUTER="0xD99D1c33F9fC3444f8101754aBC46c52416550D1";
+
+const RPCS=[
+ "https://bsc-testnet-dataseed.bnbchain.org",
+ "https://bsc-testnet.bnbchain.org",
+ "https://bsc-prebsc-dataseed.bnbchain.org"
+];
+
+const TOKEN_ABI=[
+ "function approve(address,uint256) returns(bool)",
+ "function allowance(address,address) view returns(uint256)",
+ "function balanceOf(address) view returns(uint256)",
+ "function currentLiquidityPair() view returns(address)",
+ "function autoLiquidityReady() view returns(bool)",
+ "function plannedTotalFeeBps() view returns(uint256)",
+ "function totalFeeBps() view returns(uint256)",
+ "function liquidityReserveBalance() view returns(uint256)",
+ "function pendingProjectTokens() view returns(uint256)"
+];
+
+const ROUTER_ABI=[
+ "function addLiquidityETH(address token,uint256 amountTokenDesired,uint256 amountTokenMin,uint256 amountETHMin,address to,uint256 deadline) payable returns(uint256 amountToken,uint256 amountETH,uint256 liquidity)"
+];
+
+const tokenI=new ethers.utils.Interface(TOKEN_ABI);
+const routerI=new ethers.utils.Interface(ROUTER_ABI);
+
+let account=null;
+let approved=false;
+let addSent=false;
+
+const $=id=>document.getElementById(id);
+
+function stat(msg,cls=""){
+ $("status").className=cls;
+ $("status").innerHTML=msg;
+}
+
+async function rpc(method,params=[]){
+ let last;
+ for(const url of RPCS){
+  try{
+   const r=await fetch(url,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({jsonrpc:"2.0",id:Date.now(),method,params})
+   });
+   const j=await r.json();
+   if(j.error)throw new Error(j.error.message);
+   return j.result;
+  }catch(e){last=e}
+ }
+ throw last||new Error("RPC failed");
+}
+
+async function callToken(fn,args=[]){
+ const data=tokenI.encodeFunctionData(fn,args);
+ const raw=await rpc("eth_call",[{to:TOKEN,data},"latest"]);
+ return tokenI.decodeFunctionResult(fn,raw)[0];
+}
+
+async function ensure97(){
+ let raw=await ethereum.request({method:"eth_chainId"});
+
+ if(parseInt(raw,16)!==97){
+  await ethereum.request({
+   method:"wallet_switchEthereumChain",
+   params:[{chainId:"0x61"}]
+  });
+ }
+
+ raw=await ethereum.request({method:"eth_chainId"});
+
+ if(parseInt(raw,16)!==97){
+  throw new Error("BSC Testnet Chain ID 97 required.");
+ }
+}
+
+async function waitReceipt(hash){
+ for(let i=0;i<100;i++){
+  const r=await rpc("eth_getTransactionReceipt",[hash]);
+  if(r)return r;
+  await new Promise(x=>setTimeout(x,2500));
+ }
+ throw new Error("Receipt timeout.");
+}
+
+async function state(){
+ const pair=await callToken("currentLiquidityPair");
+ const ready=await callToken("autoLiquidityReady");
+ const planned=await callToken("plannedTotalFeeBps");
+ const active=await callToken("totalFeeBps");
+ const reserve=await callToken("liquidityReserveBalance");
+ const pendingProject=await callToken("pendingProjectTokens");
+ const bal=await callToken("balanceOf",[account]);
+ const allowance=await callToken("allowance",[account,ROUTER]);
+
+ return {
+  pair,
+  ready,
+  planned:Number(planned.toString())/100,
+  active:Number(active.toString())/100,
+  reserve,
+  pendingProject,
+  balance:bal,
+  allowance
+ };
+}
+
+function display(s,title){
+ return `
+ <b>${title}</b><br><br>
+ Pair:<br><b>${s.pair}</b><br>
+ Auto Liquidity ready: <b>${s.ready ? "YES ✅":"NO"}</b><br>
+ Planned fee: <b>${s.planned}%</b><br>
+ Active fee: <b>${s.active}%</b><br>
+ Pending liquidity: <b>${ethers.utils.formatUnits(s.reserve,18)} AFTF</b><br>
+ Pending project: <b>${ethers.utils.formatUnits(s.pendingProject,18)} AFTF</b><br>
+ Account 1 balance: <b>${ethers.utils.formatUnits(s.balance,18)} AFTF</b><br>
+ Router allowance: <b>${ethers.utils.formatUnits(s.allowance,18)} AFTF</b>
+ `;
+}
+
+$("connect").onclick=async()=>{
+ try{
+  if(!window.ethereum)throw new Error("MetaMask not found.");
+
+  await ensure97();
+
+  const a=await ethereum.request({
+   method:"eth_requestAccounts"
+  });
+
+  account=a[0];
+
+  $("read").disabled=false;
+
+  stat(
+   "✅ Connected:<br><b>"+account+"</b><br>"+
+   "Tekan Check Before LP.",
+   "good"
+  );
+
+ }catch(e){
+  stat("Connection failed: "+e.message,"bad");
+ }
+};
+
+$("read").onclick=async()=>{
+ try{
+  const s=await state();
+
+  if(s.ready){
+   $("approve").disabled=true;
+   $("add").disabled=true;
+   $("checkAfter").disabled=false;
+
+   stat(
+    display(s,"CURRENT STATE")+
+    "<br><br>⚠️ Pool already has liquidity. Do not create another initial LP.",
+    "warn"
+   );
+   return;
+  }
+
+  $("approve").disabled=false;
+
+  stat(
+   display(s,"BEFORE INITIAL LP")+
+   "<br><br>Expected: Pair zero/empty, Auto Liquidity NO, Active fee 0.3%.",
+   "good"
+  );
+
+ }catch(e){
+  stat("Read failed: "+e.message,"bad");
+ }
+};
+
+$("approve").onclick=async()=>{
+ try{
+  await ensure97();
+
+  const amount=
+    ethers.utils.parseUnits(
+      $("tokenAmount").value,
+      18
+    );
+
+  if(amount.lte(0))throw new Error("Token amount invalid.");
+
+  const data=
+    tokenI.encodeFunctionData(
+      "approve",
+      [ROUTER,amount]
+    );
+
+  const gasHex=await rpc(
+    "eth_estimateGas",
+    [{
+      from:account,
+      to:TOKEN,
+      data
+    }]
+  );
+
+  const gas=(BigInt(gasHex)*120n)/100n;
+
+  if(!confirm(
+    "Approve "+$("tokenAmount").value+
+    " AFTF to PancakeSwap V2 Router on BSC Testnet?"
+  ))return;
+
+  $("approve").disabled=true;
+
+  stat("⏳ Waiting for MetaMask approval transaction…","warn");
+
+  const hash=await ethereum.request({
+   method:"eth_sendTransaction",
+   params:[{
+    from:account,
+    to:TOKEN,
+    data,
+    gas:"0x"+gas.toString(16)
+   }]
+  });
+
+  stat(
+   "Approval sent:<br><b>"+hash+"</b><br>Waiting…",
+   "warn"
+  );
+
+  const receipt=await waitReceipt(hash);
+
+  if(receipt.status!=="0x1"){
+   throw new Error("Approval transaction reverted.");
+  }
+
+  approved=true;
+  $("add").disabled=false;
+
+  const s=await state();
+
+  stat(
+   "✅ APPROVAL SUCCESS.<br><br>"+
+   display(s,"AFTER APPROVAL")+
+   "<br><br>Sekarang boleh tekan Add Initial Liquidity.",
+   "good"
+  );
+
+ }catch(e){
+  $("approve").disabled=false;
+  stat("Approval failed: "+(e?.message||e),"bad");
+ }
+};
+
+$("add").onclick=async()=>{
+ try{
+  if(addSent){
+   throw new Error("Liquidity request already sent.");
+  }
+
+  await ensure97();
+
+  const tokenAmount=
+    ethers.utils.parseUnits(
+      $("tokenAmount").value,
+      18
+    );
+
+  const bnbAmount=
+    ethers.utils.parseEther(
+      $("bnbAmount").value
+    );
+
+  const allowance=
+    await callToken(
+      "allowance",
+      [account,ROUTER]
+    );
+
+  if(allowance.lt(tokenAmount)){
+   throw new Error(
+    "Router allowance is below token amount. Approve first."
+   );
+  }
+
+  const deadline=
+    Math.floor(Date.now()/1000)+1200;
+
+  const data=
+    routerI.encodeFunctionData(
+      "addLiquidityETH",
+      [
+       TOKEN,
+       tokenAmount,
+       0,
+       0,
+       account,
+       deadline
+      ]
+    );
+
+  const tx={
+   from:account,
+   to:ROUTER,
+   value:ethers.utils.hexValue(bnbAmount),
+   data
+  };
+
+  const gasHex=
+    await rpc("eth_estimateGas",[tx]);
+
+  const gas=(BigInt(gasHex)*120n)/100n;
+
+  if(!confirm(
+   "Create initial AFTF/tBNB liquidity?\n\n"+
+   "AFTF: "+$("tokenAmount").value+"\n"+
+   "tBNB: "+$("bnbAmount").value+"\n\n"+
+   "BSC TESTNET ONLY."
+  ))return;
+
+  addSent=true;
+  $("add").disabled=true;
+
+  stat(
+   "⏳ Waiting for MetaMask initial liquidity confirmation…",
+   "warn"
+  );
+
+  const hash=await ethereum.request({
+   method:"eth_sendTransaction",
+   params:[{
+    ...tx,
+    gas:"0x"+gas.toString(16)
+   }]
+  });
+
+  stat(
+   "Liquidity transaction sent:<br><b>"+
+   hash+
+   "</b><br>Waiting for confirmation…",
+   "warn"
+  );
+
+  const receipt=await waitReceipt(hash);
+
+  if(receipt.status!=="0x1"){
+   throw new Error("Liquidity transaction reverted.");
+  }
+
+  $("checkAfter").disabled=false;
+
+  const s=await state();
+
+  stat(
+   "✅ INITIAL LIQUIDITY TRANSACTION CONFIRMED.<br><br>"+
+   display(s,"AFTER INITIAL LP")+
+   "<br><br>"+
+   (
+    s.ready
+    ? "✅ Auto Liquidity is now ready."
+    : "⚠️ Transaction succeeded but Auto Liquidity is not ready yet."
+   ),
+   s.ready ? "good":"warn"
+  );
+
+ }catch(e){
+  addSent=false;
+  $("add").disabled=false;
+  stat("Add liquidity failed: "+(e?.message||e),"bad");
+ }
+};
+
+$("checkAfter").onclick=async()=>{
+ try{
+  const s=await state();
+
+  stat(
+   display(s,"CURRENT STATE")+
+   "<br><br>"+
+   (
+    s.ready
+    ? "✅ Pair has real liquidity. Auto Liquidity is active."
+    : "❌ Auto Liquidity is still not ready."
+   ),
+   s.ready ? "good":"bad"
+  );
+
+ }catch(e){
+  stat("Check failed: "+e.message,"bad");
+ }
+};
+</script>
+</body>
+</html>

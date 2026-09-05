@@ -1,0 +1,759 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANGRY Factory Token Test</title>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+<style>
+body{
+  margin:0;background:#08090a;color:#eee;
+  font-family:Arial,sans-serif
+}
+.wrap{max-width:680px;margin:auto;padding:24px 16px}
+.card{
+  background:#101214;border:1px solid #292d31;
+  border-radius:18px;padding:20px
+}
+h1{margin:0 0 10px;color:#ff641f}
+p{color:#aab0b5;line-height:1.5}
+.row{
+  padding:11px 0;border-bottom:1px solid #24282c
+}
+.row b{
+  display:block;color:#fff;margin-top:5px;
+  word-break:break-all
+}
+input{
+  width:100%;box-sizing:border-box;margin-top:7px;
+  padding:12px;border-radius:10px;border:1px solid #343a40;
+  background:#090b0d;color:#fff
+}
+button{
+  width:100%;padding:14px;margin-top:12px;border:0;
+  border-radius:12px;font-weight:700
+}
+.primary{background:#ff641f;color:#fff}
+.secondary{background:#202429;color:#fff}
+button:disabled{opacity:.45}
+#status{
+  margin-top:15px;padding:14px;background:#090b0d;
+  border:1px solid #292d31;border-radius:12px;
+  line-height:1.55;word-break:break-word
+}
+.good{color:#61d881}
+.warn{color:#ffc45c}
+.bad{color:#ff6b6b}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<div class="card">
+
+<h1>ANGRY Token Factory Test</h1>
+
+<p>
+BSC Testnet only · Chain ID 97.<br>
+Tes ini membuat satu Immutable Token melalui ANGRY Factory.
+</p>
+
+<div class="row">
+Factory
+<b>0x74bca3748eb5ec4c77b95903e8a1cce8c2739afc</b>
+</div>
+
+<div class="row">
+Platform fee
+<b id="fee">Checking...</b>
+</div>
+
+<div class="row">
+Fee recipient
+<b id="recipient">Checking...</b>
+</div>
+
+<div class="row">
+Wallet
+<b id="account">Not connected</b>
+</div>
+
+<div class="row">
+Token name
+<input id="name" value="ANGRY All Features Test">
+</div>
+
+<div class="row">
+Symbol
+<input id="symbol" value="AFTF">
+</div>
+
+<div class="row">
+Supply
+<input id="supply" type="number" value="1000000">
+</div>
+
+<div class="row">
+Token fees
+<b>
+Holder 0.1% · Auto Liquidity 0.1% · Creator 0.1% · Burn 0.1%
+</b>
+</div>
+
+<button id="connectBtn" class="secondary">
+Connect Wallet
+</button>
+
+<button id="checkBtn" class="secondary" disabled>
+Check Token Deployment
+</button>
+
+<button id="deployBtn" class="primary" disabled>
+Create Test Token
+</button>
+
+<div id="status">
+Ready. Connect wallet first.
+</div>
+
+</div>
+</div>
+
+<script>
+const FACTORY =
+  "0x74bca3748eb5ec4c77b95903e8a1cce8c2739afc";
+
+const TARGET_CHAIN = 97;
+
+const FACTORY_ABI = [
+  "function PLATFORM_FEE() view returns(uint256)",
+  "function feeRecipient() view returns(address)",
+  "function createToken(string name_,string symbol_,uint256 supply_,address projectWallet_,uint16 holderFeeBps_,uint16 liquidityFeeBps_,uint16 projectFeeBps_,uint16 burnFeeBps_) payable returns(address tokenAddress)",
+  "event TokenCreated(address indexed creator,address indexed token,address indexed projectWallet,uint256 platformFee)"
+];
+
+const TOKEN_ABI = [
+  "function name() view returns(string)",
+  "function symbol() view returns(string)",
+  "function totalSupply() view returns(uint256)",
+  "function balanceOf(address) view returns(uint256)"
+];
+
+const factoryInterface =
+  new ethers.utils.Interface(FACTORY_ABI);
+
+const tokenInterface =
+  new ethers.utils.Interface(TOKEN_ABI);
+
+const RPCS = [
+  "https://bsc-testnet-dataseed.bnbchain.org",
+  "https://bsc-testnet.bnbchain.org",
+  "https://bsc-prebsc-dataseed.bnbchain.org"
+];
+
+let PROVIDER = null;
+let ACCOUNT = null;
+let PLATFORM_FEE = null;
+let GAS_LIMIT = null;
+let GAS_PRICE = null;
+let PREFLIGHT_OK = false;
+let REQUEST_SENT = false;
+
+const $ = id => document.getElementById(id);
+
+function setStatus(msg,cls=""){
+  $("status").className=cls;
+  $("status").innerHTML=msg;
+}
+
+async function rpc(method,params=[]){
+  let last=null;
+
+  for(const url of RPCS){
+    try{
+      const res=await fetch(url,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          jsonrpc:"2.0",
+          id:Date.now(),
+          method,
+          params
+        })
+      });
+
+      if(!res.ok)throw new Error("HTTP "+res.status);
+
+      const data=await res.json();
+
+      if(data.error){
+        throw new Error(
+          data.error.message || "RPC error"
+        );
+      }
+
+      return data.result;
+    }catch(e){
+      last=e;
+    }
+  }
+
+  throw new Error(
+    "BSC Testnet RPC failed: "+
+    (last?.message||last)
+  );
+}
+
+window.angrySetWalletProvider=function(p){
+  PROVIDER=p||window.ethereum||null;
+};
+
+window.angryApplyConnectedAccount=function(a){
+  ACCOUNT=a||null;
+  $("account").textContent=
+    ACCOUNT||"Not connected";
+
+  $("checkBtn").disabled=!ACCOUNT;
+  $("deployBtn").disabled=true;
+  PREFLIGHT_OK=false;
+};
+
+async function ensureAccount(){
+  if(!PROVIDER){
+    PROVIDER=window.ethereum||null;
+  }
+
+  if(!PROVIDER){
+    throw new Error("Wallet provider unavailable.");
+  }
+
+  const accounts=await PROVIDER.request({
+    method:"eth_accounts"
+  });
+
+  if(accounts?.[0]){
+    window.angryApplyConnectedAccount(accounts[0]);
+  }
+
+  if(!ACCOUNT){
+    throw new Error("Wallet not connected.");
+  }
+}
+
+async function ensureChain97(){
+  if(typeof window.angrySwitchReownNetwork==="function"){
+    await window.angrySwitchReownNetwork(97);
+  }
+
+  const raw=await PROVIDER.request({
+    method:"eth_chainId"
+  });
+
+  const id=parseInt(raw,16);
+
+  if(id!==97){
+    throw new Error(
+      "Wallet is not on BSC Testnet Chain ID 97."
+    );
+  }
+}
+
+async function loadFactoryInfo(){
+  const code=await rpc(
+    "eth_getCode",
+    [FACTORY,"latest"]
+  );
+
+  if(!code || code==="0x"){
+    throw new Error(
+      "Factory contract not found."
+    );
+  }
+
+  const feeData=
+    factoryInterface.encodeFunctionData(
+      "PLATFORM_FEE"
+    );
+
+  const recipientData=
+    factoryInterface.encodeFunctionData(
+      "feeRecipient"
+    );
+
+  const feeRaw=await rpc(
+    "eth_call",
+    [{to:FACTORY,data:feeData},"latest"]
+  );
+
+  const recipientRaw=await rpc(
+    "eth_call",
+    [{to:FACTORY,data:recipientData},"latest"]
+  );
+
+  PLATFORM_FEE=
+    factoryInterface.decodeFunctionResult(
+      "PLATFORM_FEE",
+      feeRaw
+    )[0];
+
+  const recipient=
+    factoryInterface.decodeFunctionResult(
+      "feeRecipient",
+      recipientRaw
+    )[0];
+
+  $("fee").textContent=
+    ethers.utils.formatEther(PLATFORM_FEE)+
+    " tBNB";
+
+  $("recipient").textContent=recipient;
+}
+
+function deploymentData(){
+  const name=$("name").value.trim();
+  const symbol=$("symbol").value.trim();
+  const supply=$("supply").value.trim();
+
+  if(!name)throw new Error("Token name required.");
+  if(!symbol)throw new Error("Symbol required.");
+
+  if(!supply || BigInt(supply)<=0n){
+    throw new Error("Supply must be above zero.");
+  }
+
+  return factoryInterface.encodeFunctionData(
+    "createToken",
+    [
+      name,
+      symbol,
+      supply,
+      ACCOUNT,
+      10,
+      10,
+      10,
+      10
+    ]
+  );
+}
+
+async function preflight(){
+  PREFLIGHT_OK=false;
+  $("deployBtn").disabled=true;
+
+  await ensureAccount();
+  await ensureChain97();
+  await loadFactoryInfo();
+
+  const data=deploymentData();
+
+  setStatus(
+    "Checking one-transaction token deployment…",
+    "warn"
+  );
+
+  const tx={
+    from:ACCOUNT,
+    to:FACTORY,
+    value:ethers.utils.hexValue(PLATFORM_FEE),
+    data
+  };
+
+  const gasHex=await rpc(
+    "eth_estimateGas",
+    [tx]
+  );
+
+  const gasPriceHex=await rpc(
+    "eth_gasPrice",
+    []
+  );
+
+  const balanceHex=await rpc(
+    "eth_getBalance",
+    [ACCOUNT,"latest"]
+  );
+
+  const gas=BigInt(gasHex);
+  const gasPrice=BigInt(gasPriceHex);
+  const buffered=(gas*120n)/100n;
+  const gasCost=buffered*gasPrice;
+
+  const balance=BigInt(balanceHex);
+  const fee=BigInt(
+    PLATFORM_FEE.toString()
+  );
+
+  const required=fee+gasCost;
+
+  GAS_LIMIT=
+    "0x"+buffered.toString(16);
+
+  GAS_PRICE=
+    "0x"+gasPrice.toString(16);
+
+  const balanceEth=
+    Number(balance)/1e18;
+
+  const gasEth=
+    Number(gasCost)/1e18;
+
+  const feeEth=
+    Number(fee)/1e18;
+
+  const requiredEth=
+    Number(required)/1e18;
+
+  const enough=balance>=required;
+
+  setStatus(
+    "✅ Token deployment preflight passed.<br>"+
+    "Estimated gas: <b>"+gas.toString()+"</b><br>"+
+    "Platform fee: <b>"+feeEth.toFixed(6)+" tBNB</b><br>"+
+    "Buffered gas estimate: <b>"+gasEth.toFixed(6)+" tBNB</b><br>"+
+    "Approx. required upfront: <b>"+
+      requiredEth.toFixed(6)+" tBNB</b><br>"+
+    "Wallet balance: <b>"+
+      balanceEth.toFixed(6)+" tBNB</b><br><br>"+
+    (
+      enough
+      ? "Wallet has enough tBNB. No transaction has been sent yet."
+      : "Not enough tBNB. No transaction was sent."
+    ),
+    enough ? "good":"bad"
+  );
+
+  if(enough){
+    PREFLIGHT_OK=true;
+    $("deployBtn").disabled=false;
+  }
+}
+
+async function waitReceipt(hash){
+  for(let i=0;i<120;i++){
+    const r=await rpc(
+      "eth_getTransactionReceipt",
+      [hash]
+    );
+
+    if(r)return r;
+
+    await new Promise(
+      resolve=>setTimeout(resolve,2500)
+    );
+  }
+
+  throw new Error(
+    "Receipt timeout. Check BscScan: "+hash
+  );
+}
+
+async function verifyToken(token){
+  const code=await rpc(
+    "eth_getCode",
+    [token,"latest"]
+  );
+
+  if(!code || code==="0x"){
+    throw new Error(
+      "Token contract code not found."
+    );
+  }
+
+  const totalRaw=await rpc(
+    "eth_call",
+    [{
+      to:token,
+      data:tokenInterface.encodeFunctionData(
+        "totalSupply"
+      )
+    },"latest"]
+  );
+
+  const userRaw=await rpc(
+    "eth_call",
+    [{
+      to:token,
+      data:tokenInterface.encodeFunctionData(
+        "balanceOf",
+        [ACCOUNT]
+      )
+    },"latest"]
+  );
+
+  const factoryRaw=await rpc(
+    "eth_call",
+    [{
+      to:token,
+      data:tokenInterface.encodeFunctionData(
+        "balanceOf",
+        [FACTORY]
+      )
+    },"latest"]
+  );
+
+  const total=
+    tokenInterface.decodeFunctionResult(
+      "totalSupply",
+      totalRaw
+    )[0];
+
+  const userBalance=
+    tokenInterface.decodeFunctionResult(
+      "balanceOf",
+      userRaw
+    )[0];
+
+  const factoryBalance=
+    tokenInterface.decodeFunctionResult(
+      "balanceOf",
+      factoryRaw
+    )[0];
+
+  return {
+    total,
+    userBalance,
+    factoryBalance,
+    allSupply:
+      total.eq(userBalance),
+    factoryEmpty:
+      factoryBalance.eq(0)
+  };
+}
+
+$("connectBtn").onclick=async()=>{
+  try{
+    setStatus(
+      "Opening wallet connection…",
+      "warn"
+    );
+
+    if(
+      window.ethereum?.isMetaMask &&
+      !PROVIDER
+    ){
+      PROVIDER=window.ethereum;
+
+      const accounts=
+        await PROVIDER.request({
+          method:"eth_requestAccounts"
+        });
+
+      if(accounts?.[0]){
+        window.angryApplyConnectedAccount(
+          accounts[0]
+        );
+      }
+    }else{
+      if(
+        typeof window.angryOpenReown!=="function"
+      ){
+        throw new Error(
+          "Reown connector still loading."
+        );
+      }
+
+      await window.angryOpenReown(97);
+
+      await new Promise(
+        r=>setTimeout(r,500)
+      );
+    }
+
+    await ensureAccount();
+    await ensureChain97();
+    await loadFactoryInfo();
+
+    setStatus(
+      "✅ Wallet connected to BSC Testnet.<br>"+
+      "Factory contract found.<br>"+
+      "Run Check Token Deployment.",
+      "good"
+    );
+
+  }catch(e){
+    setStatus(
+      "Connection failed: "+
+      (e?.message||e),
+      "bad"
+    );
+  }
+};
+
+$("checkBtn").onclick=async()=>{
+  try{
+    await preflight();
+  }catch(e){
+    setStatus(
+      "Preflight failed: "+
+      (e?.message||e),
+      "bad"
+    );
+  }
+};
+
+$("deployBtn").onclick=async()=>{
+  try{
+    if(REQUEST_SENT){
+      throw new Error(
+        "A token deployment request was already sent. Do not send another."
+      );
+    }
+
+    if(!PREFLIGHT_OK){
+      throw new Error(
+        "Run preflight first."
+      );
+    }
+
+    if(!confirm(
+      "Create ONE token through ANGRY Factory on BSC Testnet?\n\n"+
+      "Platform fee: 0.001 tBNB\n"+
+      "Token tax: Holder 0.1% + Liquidity 0.1% + Creator 0.1% + Burn 0.1%\n"+
+      "This is a REAL TESTNET transaction."
+    )){
+      return;
+    }
+
+    REQUEST_SENT=true;
+    $("deployBtn").disabled=true;
+
+    const data=deploymentData();
+
+    const tx={
+      from:ACCOUNT,
+      to:FACTORY,
+      value:ethers.utils.hexValue(
+        PLATFORM_FEE
+      ),
+      data,
+      gas:GAS_LIMIT,
+      gasPrice:GAS_PRICE
+    };
+
+    setStatus(
+      "⏳ ONE token deployment request has been sent to the wallet.<br><br>"+
+      "Open MetaMask manually if it does not open automatically.<br>"+
+      "<b>Do not press Create Test Token again.</b>",
+      "warn"
+    );
+
+    let hash;
+
+    if(
+      PROVIDER?.request
+    ){
+      try{
+        hash=await PROVIDER.request(
+          {
+            method:"eth_sendTransaction",
+            params:[tx]
+          },
+          "eip155:97"
+        );
+      }catch(e){
+        if(
+          String(e?.message||"")
+          .toLowerCase()
+          .includes("chain")
+        ){
+          hash=await PROVIDER.request({
+            method:"eth_sendTransaction",
+            params:[tx]
+          });
+        }else{
+          throw e;
+        }
+      }
+    }
+
+    if(!hash){
+      throw new Error(
+        "Wallet did not return a transaction hash."
+      );
+    }
+
+    setStatus(
+      "✅ Transaction submitted.<br>"+
+      "Hash:<br><b>"+hash+"</b><br><br>"+
+      "Waiting for BSC Testnet confirmation…",
+      "warn"
+    );
+
+    const receipt=await waitReceipt(hash);
+
+    if(
+      receipt.status!=="0x1" &&
+      receipt.status!==1
+    ){
+      throw new Error(
+        "Transaction reverted."
+      );
+    }
+
+    let tokenAddress=null;
+
+    for(const log of receipt.logs||[]){
+      try{
+        const parsed=
+          factoryInterface.parseLog(log);
+
+        if(parsed?.name==="TokenCreated"){
+          tokenAddress=parsed.args.token;
+          break;
+        }
+      }catch(_){}
+    }
+
+    if(!tokenAddress){
+      throw new Error(
+        "TokenCreated event was not found."
+      );
+    }
+
+    const check=
+      await verifyToken(tokenAddress);
+
+    const factoryNative=
+      BigInt(
+        await rpc(
+          "eth_getBalance",
+          [FACTORY,"latest"]
+        )
+      );
+
+    setStatus(
+      "✅ ANGRY FACTORY TOKEN TEST SUCCESS.<br><br>"+
+      "Token:<br><b>"+tokenAddress+"</b><br><br>"+
+      "100% supply in creator wallet: <b>"+
+        (check.allSupply?"YES ✅":"NO ❌")+
+      "</b><br>"+
+      "Token balance held by Factory: <b>"+
+        ethers.utils.formatUnits(
+          check.factoryBalance,
+          18
+        )+
+      "</b><br>"+
+      "Factory native balance after fee forwarding: <b>"+
+        (Number(factoryNative)/1e18).toFixed(6)+
+        " tBNB</b><br><br>"+
+      '<a target="_blank" style="color:#ff8a50" href="https://testnet.bscscan.com/address/'+tokenAddress+'">Open token on BscScan</a>',
+      check.allSupply && check.factoryEmpty
+        ? "good":"bad"
+    );
+
+  }catch(e){
+    setStatus(
+      "Token deployment failed: "+
+      (e?.message||e),
+      "bad"
+    );
+  }
+};
+</script>
+
+<script src="./reown-wallet.js?v=factory-token-test-20260906-1"></script>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANGRY AFTF Feature Audit</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+body{margin:0;background:#08090a;color:#eee;font-family:Arial,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:24px 16px}
+.card{background:#101214;border:1px solid #292d31;border-radius:18px;padding:20px}
+h1{color:#ff641f;margin-top:0}
+.row{padding:11px 0;border-bottom:1px solid #282c30}
+.row b{display:block;margin-top:5px;word-break:break-all}
+input{width:100%;box-sizing:border-box;padding:13px;margin-top:7px;border:1px solid #343a40;border-radius:10px;background:#090b0d;color:white}
+button{width:100%;padding:14px;margin-top:12px;border:0;border-radius:12px;font-weight:700}
+.primary{background:#ff641f;color:white}
+.secondary{background:#23272b;color:white}
+button:disabled{opacity:.45}
+#status{margin-top:15px;padding:14px;border:1px solid #292d31;border-radius:12px;line-height:1.55;word-break:break-word}
+.good{color:#61d881}.warn{color:#ffc45c}.bad{color:#ff6b6b}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>AFTF Feature Audit</h1>
+
+<div class="row">Token<b>0xc1e6a6d75c5faD05D4E4aCeF3Ac7431bcF52Ce68</b></div>
+<div class="row">Network<b>BSC Testnet · Chain ID 97</b></div>
+<div class="row">Configured tax<b>Holder 0.1% · Liquidity 0.1% · Creator 0.1% · Burn 0.1%</b></div>
+
+<div class="row">
+Recipient — gunakan alamat Account 2
+<input id="recipient" placeholder="0x...">
+</div>
+
+<div class="row">
+Test transfer
+<input id="amount" value="100000">
+</div>
+
+<button id="connect" class="secondary">Connect MetaMask</button>
+<button id="read" class="secondary" disabled>Read Current Features</button>
+<button id="send" class="primary" disabled>Send 100,000 AFTF Test</button>
+
+<div id="status">Gunakan Account 1 sebagai pengirim dan Account 2 sebagai penerima.</div>
+</div></div>
+
+<script>
+const TOKEN="0xc1e6a6d75c5faD05D4E4aCeF3Ac7431bcF52Ce68";
+const RPCS=[
+ "https://bsc-testnet-dataseed.bnbchain.org",
+ "https://bsc-testnet.bnbchain.org",
+ "https://bsc-prebsc-dataseed.bnbchain.org"
+];
+
+const ABI=[
+ "function transfer(address,uint256) returns(bool)",
+ "function balanceOf(address) view returns(uint256)",
+ "function totalSupply() view returns(uint256)",
+ "function totalHolderFees() view returns(uint256)",
+ "function totalLiquidityReserved() view returns(uint256)",
+ "function totalProjectFees() view returns(uint256)",
+ "function totalBurned() view returns(uint256)",
+ "function liquidityReserveBalance() view returns(uint256)",
+ "function plannedTotalFeeBps() view returns(uint256)",
+ "function totalFeeBps() view returns(uint256)",
+ "function autoLiquidityReady() view returns(bool)",
+ "function currentLiquidityPair() view returns(address)",
+ "function projectWallet() view returns(address)"
+];
+
+const iface=new ethers.utils.Interface(ABI);
+let account=null;
+let before=null;
+let sent=false;
+
+const $=id=>document.getElementById(id);
+
+function stat(msg,cls=""){
+ $("status").className=cls;
+ $("status").innerHTML=msg;
+}
+
+async function rpc(method,params=[]){
+ let last;
+ for(const url of RPCS){
+  try{
+   const r=await fetch(url,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({jsonrpc:"2.0",id:Date.now(),method,params})
+   });
+   const j=await r.json();
+   if(j.error)throw new Error(j.error.message);
+   return j.result;
+  }catch(e){last=e}
+ }
+ throw last||new Error("RPC failed");
+}
+
+async function call(fn,args=[]){
+ const data=iface.encodeFunctionData(fn,args);
+ const out=await rpc("eth_call",[{to:TOKEN,data},"latest"]);
+ return iface.decodeFunctionResult(fn,out)[0];
+}
+
+const fmt=v=>ethers.utils.formatUnits(v,18);
+
+async function snapshot(){
+ const recipient=$("recipient").value.trim();
+
+ return {
+  supply:await call("totalSupply"),
+  holder:await call("totalHolderFees"),
+  liquidity:await call("totalLiquidityReserved"),
+  project:await call("totalProjectFees"),
+  burn:await call("totalBurned"),
+  reserve:await call("liquidityReserveBalance"),
+  planned:Number((await call("plannedTotalFeeBps")).toString()),
+  active:Number((await call("totalFeeBps")).toString()),
+  ready:await call("autoLiquidityReady"),
+  pair:await call("currentLiquidityPair"),
+  projectWallet:await call("projectWallet"),
+  creator:await call("balanceOf",[account]),
+  recipient:
+    ethers.utils.isAddress(recipient)
+      ? await call("balanceOf",[recipient])
+      : null
+ };
+}
+
+function show(s,title){
+ return `<b>${title}</b><br>
+ Planned fee: ${s.planned/100}%<br>
+ Active fee now: ${s.active/100}%<br>
+ Auto Liquidity ready: <b>${s.ready?"YES":"NO"}</b><br>
+ Pair: ${s.pair}<br>
+ Project wallet: <b>${s.projectWallet}</b><br>
+ Connected Account 1: <b>${account}</b><br>
+ Project wallet matches Account 1: <b>${
+   s.projectWallet.toLowerCase()===account.toLowerCase()
+     ? "YES ✅"
+     : "NO ❌"
+ }</b><br>
+ Total supply: ${fmt(s.supply)}<br>
+ Holder fees total: ${fmt(s.holder)}<br>
+ Liquidity reserved total: ${fmt(s.liquidity)}<br>
+ Creator fees total: ${fmt(s.project)}<br>
+ Burned total: ${fmt(s.burn)}<br>
+ Pending liquidity: ${fmt(s.reserve)}<br>
+ Creator / Account 1 balance: <b>${fmt(s.creator)} AFTF</b><br>
+ Account 2 balance: <b>${s.recipient ? fmt(s.recipient)+" AFTF" : "Masukkan alamat Account 2"}</b>`;
+}
+
+async function ensure97(){
+ let raw=await ethereum.request({method:"eth_chainId"});
+ if(parseInt(raw,16)===97)return;
+
+ await ethereum.request({
+  method:"wallet_switchEthereumChain",
+  params:[{chainId:"0x61"}]
+ });
+
+ raw=await ethereum.request({method:"eth_chainId"});
+ if(parseInt(raw,16)!==97)throw new Error("BSC Testnet Chain ID 97 required.");
+}
+
+$("connect").onclick=async()=>{
+ try{
+  if(!window.ethereum)throw new Error("MetaMask provider not found.");
+  await ensure97();
+  const a=await ethereum.request({method:"eth_requestAccounts"});
+  account=a[0];
+  $("read").disabled=false;
+  stat("✅ Connected: "+account+"<br>Tekan Read Current Features.","good");
+ }catch(e){stat(e.message,"bad")}
+};
+
+$("read").onclick=async()=>{
+ try{
+  await ensure97();
+  before=await snapshot();
+  $("send").disabled=false;
+  stat(
+   show(before,"BEFORE TRANSFER")+
+   "<br><br>Expected before initial LP:<br>"+
+   "Active fee ≈ <b>0.3%</b>, because Auto Liquidity is not active yet.",
+   "good"
+  );
+ }catch(e){stat("Read failed: "+e.message,"bad")}
+};
+
+$("send").onclick=async()=>{
+ try{
+  if(sent)throw new Error("Test request already sent. Do not send twice.");
+  if(!before)throw new Error("Read Current Features first.");
+
+  const recipient=$("recipient").value.trim();
+  if(!ethers.utils.isAddress(recipient))throw new Error("Invalid Account 2 address.");
+  if(recipient.toLowerCase()===account.toLowerCase())
+   throw new Error("Recipient must be a DIFFERENT wallet/account.");
+
+  const amount=ethers.utils.parseUnits($("amount").value,18);
+  const data=iface.encodeFunctionData("transfer",[recipient,amount]);
+
+  const gasHex=await rpc("eth_estimateGas",[{
+   from:account,to:TOKEN,data
+  }]);
+
+  const buffered=(BigInt(gasHex)*120n)/100n;
+
+  if(!confirm(
+   "Send "+$("amount").value+" AFTF to Account 2 on BSC Testnet?\n\n"+
+   "This will test Holder Reflection + Creator Fee + Burn.\n"+
+   "Auto Liquidity is expected to remain inactive until initial LP exists."
+  ))return;
+
+  sent=true;
+  $("send").disabled=true;
+
+  stat("⏳ Waiting for MetaMask confirmation…","warn");
+
+  const hash=await ethereum.request({
+   method:"eth_sendTransaction",
+   params:[{
+    from:account,
+    to:TOKEN,
+    data,
+    gas:"0x"+buffered.toString(16)
+   }]
+  });
+
+  stat("Transaction sent:<br><b>"+hash+"</b><br>Waiting for confirmation…","warn");
+
+  let receipt=null;
+  for(let i=0;i<80;i++){
+   receipt=await rpc("eth_getTransactionReceipt",[hash]);
+   if(receipt)break;
+   await new Promise(r=>setTimeout(r,2500));
+  }
+  if(!receipt)throw new Error("Receipt timeout.");
+  if(receipt.status!=="0x1")throw new Error("Transaction reverted.");
+
+  const after=await snapshot();
+
+  const delta=(a,b)=>fmt(a.sub(b));
+  const supplyBurn=fmt(before.supply.sub(after.supply));
+
+  stat(
+   "✅ TRANSFER CONFIRMED<br><br>"+
+   show(after,"AFTER TRANSFER")+
+   "<br><br><b>CHANGES FROM THIS TEST</b><br>"+
+   "Holder fees added: <b>"+delta(after.holder,before.holder)+" AFTF</b><br>"+
+   "Liquidity reserved added: <b>"+delta(after.liquidity,before.liquidity)+" AFTF</b><br>"+
+   "Creator fees added: <b>"+delta(after.project,before.project)+" AFTF</b><br>"+
+   "Burned added: <b>"+delta(after.burn,before.burn)+" AFTF</b><br>"+
+   "Total supply reduced: <b>"+supplyBurn+" AFTF</b><br><br>"+
+   "Expected before initial LP for a 100,000 transfer:<br>"+
+   "Holder ≈ 100 · Liquidity = 0 · Creator ≈ 100 · Burn ≈ 100.",
+   "good"
+  );
+
+ }catch(e){
+  sent=false;
+  $("send").disabled=false;
+  stat("Test failed: "+(e?.message||e),"bad");
+ }
+};
+</script>
+</body>
+</html>

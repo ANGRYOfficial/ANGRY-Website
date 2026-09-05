@@ -1,0 +1,511 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AFTF Final Fee Audit</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+body{margin:0;background:#08090a;color:#eee;font-family:Arial,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:24px 16px}
+.card{background:#101214;border:1px solid #292d31;border-radius:18px;padding:20px}
+h1{color:#ff641f}
+.row{padding:11px 0;border-bottom:1px solid #282c30}
+.row b{display:block;margin-top:5px;word-break:break-all}
+input{width:100%;box-sizing:border-box;padding:13px;margin-top:7px;border:1px solid #343a40;border-radius:10px;background:#090b0d;color:white}
+button{width:100%;padding:14px;margin-top:12px;border:0;border-radius:12px;font-weight:700}
+.primary{background:#ff641f;color:white}
+.secondary{background:#23272b;color:white}
+button:disabled{opacity:.45}
+#status{margin-top:15px;padding:14px;border:1px solid #292d31;border-radius:12px;line-height:1.6;word-break:break-word}
+.good{color:#61d881}.warn{color:#ffc45c}.bad{color:#ff6b6b}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+
+<h1>AFTF Final Fee Audit</h1>
+
+<div class="row">
+Token
+<b>0xc1e6a6d75c5faD05D4E4aCeF3Ac7431bcF52Ce68</b>
+</div>
+
+<div class="row">
+Network
+<b>BSC Testnet · Chain ID 97</b>
+</div>
+
+<div class="row">
+Recipient — Account 2
+<input id="recipient" placeholder="0x...">
+</div>
+
+<div class="row">
+Transfer amount
+<input id="amount" value="100000">
+</div>
+
+<button id="connect" class="secondary">Connect Account 1</button>
+<button id="read" class="secondary" disabled>Read State</button>
+<button id="send" class="primary" disabled>Send ONE 100,000 AFTF Test</button>
+
+<div id="status">
+Masukkan alamat Account 2. Jangan kirim transaksi lebih dari satu kali.
+</div>
+
+</div></div>
+
+<script>
+const TOKEN="0xc1e6a6d75c5faD05D4E4aCeF3Ac7431bcF52Ce68";
+
+const RPCS=[
+ "https://bsc-testnet-dataseed.bnbchain.org",
+ "https://bsc-testnet.bnbchain.org",
+ "https://bsc-prebsc-dataseed.bnbchain.org"
+];
+
+const ABI=[
+ "function transfer(address,uint256) returns(bool)",
+ "function currentLiquidityPair() view returns(address)",
+ "function autoLiquidityReady() view returns(bool)",
+ "function totalFeeBps() view returns(uint256)",
+ "function pendingLiquidityTokens() view returns(uint256)",
+ "function pendingProjectTokens() view returns(uint256)",
+ "function totalAutoLiquidityTokensUsed() view returns(uint256)",
+ "function totalNativeAddedToLiquidity() view returns(uint256)",
+ "function totalLpCreated() view returns(uint256)",
+ "function totalProjectTokensSwapped() view returns(uint256)",
+ "function totalProjectNativePaid() view returns(uint256)",
+ "function pendingProjectNative() view returns(uint256)",
+ "function totalHolderFees() view returns(uint256)",
+ "function totalProjectFees() view returns(uint256)",
+ "function totalBurned() view returns(uint256)",
+ "function projectWallet() view returns(address)"
+];
+
+const PAIR_ABI=[
+ "function balanceOf(address) view returns(uint256)",
+ "function getReserves() view returns(uint112,uint112,uint32)",
+ "function token0() view returns(address)",
+ "function token1() view returns(address)"
+];
+
+const I=new ethers.utils.Interface(ABI);
+const PI=new ethers.utils.Interface(PAIR_ABI);
+
+let account=null;
+let before=null;
+let sent=false;
+
+const $=x=>document.getElementById(x);
+
+function stat(m,c=""){
+ $("status").className=c;
+ $("status").innerHTML=m;
+}
+
+async function rpc(method,params=[]){
+ let last;
+ for(const url of RPCS){
+  try{
+   const r=await fetch(url,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+     jsonrpc:"2.0",
+     id:Date.now(),
+     method,
+     params
+    })
+   });
+
+   const j=await r.json();
+   if(j.error)throw new Error(j.error.message);
+   return j.result;
+  }catch(e){last=e}
+ }
+ throw last||new Error("RPC failed");
+}
+
+async function call(addr,iface,fn,args=[]){
+ const data=iface.encodeFunctionData(fn,args);
+ const raw=await rpc(
+  "eth_call",
+  [{to:addr,data},"latest"]
+ );
+ return iface.decodeFunctionResult(fn,raw);
+}
+
+const f=v=>ethers.utils.formatUnits(v,18);
+
+async function snapshot(){
+ const pair=(await call(
+  TOKEN,I,"currentLiquidityPair"
+ ))[0];
+
+ const projectWallet=(await call(
+  TOKEN,I,"projectWallet"
+ ))[0];
+
+ let lpBalance=ethers.constants.Zero;
+ let reserve0=ethers.constants.Zero;
+ let reserve1=ethers.constants.Zero;
+ let token0=ethers.constants.AddressZero;
+
+ if(pair!==ethers.constants.AddressZero){
+  lpBalance=(await call(
+   pair,PI,"balanceOf",[projectWallet]
+  ))[0];
+
+  const reserves=await call(
+   pair,PI,"getReserves"
+  );
+
+  reserve0=reserves[0];
+  reserve1=reserves[1];
+
+  token0=(await call(
+   pair,PI,"token0"
+  ))[0];
+ }
+
+ return {
+  pair,
+  projectWallet,
+  ready:(await call(
+   TOKEN,I,"autoLiquidityReady"
+  ))[0],
+
+  active:Number(
+   (await call(TOKEN,I,"totalFeeBps"))[0].toString()
+  ),
+
+  pendingL:(await call(
+   TOKEN,I,"pendingLiquidityTokens"
+  ))[0],
+
+  pendingP:(await call(
+   TOKEN,I,"pendingProjectTokens"
+  ))[0],
+
+  autoUsed:(await call(
+   TOKEN,I,"totalAutoLiquidityTokensUsed"
+  ))[0],
+
+  nativeLP:(await call(
+   TOKEN,I,"totalNativeAddedToLiquidity"
+  ))[0],
+
+  lpCreated:(await call(
+   TOKEN,I,"totalLpCreated"
+  ))[0],
+
+  projectSwapped:(await call(
+   TOKEN,I,"totalProjectTokensSwapped"
+  ))[0],
+
+  projectNative:(await call(
+   TOKEN,I,"totalProjectNativePaid"
+  ))[0],
+
+  projectNativePending:(await call(
+   TOKEN,I,"pendingProjectNative"
+  ))[0],
+
+  holder:(await call(
+   TOKEN,I,"totalHolderFees"
+  ))[0],
+
+  projectFees:(await call(
+   TOKEN,I,"totalProjectFees"
+  ))[0],
+
+  burned:(await call(
+   TOKEN,I,"totalBurned"
+  ))[0],
+
+  lpBalance,
+  reserve0,
+  reserve1,
+  token0
+ };
+}
+
+function show(s,title){
+ return `
+ <b>${title}</b><br><br>
+
+ Pair:<br><b>${s.pair}</b><br>
+ Auto Liquidity ready: <b>${s.ready?"YES ✅":"NO ❌"}</b><br>
+ Active fee: <b>${s.active/100}%</b><br><br>
+
+ Pending Liquidity:
+ <b>${f(s.pendingL)} AFTF</b><br>
+
+ Pending Project:
+ <b>${f(s.pendingP)} AFTF</b><br><br>
+
+ Total Auto Liquidity tokens used:
+ <b>${f(s.autoUsed)} AFTF</b><br>
+
+ Total native added to liquidity:
+ <b>${f(s.nativeLP)} tBNB</b><br>
+
+ Total LP created:
+ <b>${f(s.lpCreated)}</b><br>
+
+ LP held by Project Wallet:
+ <b>${f(s.lpBalance)}</b><br><br>
+
+ Project tokens swapped:
+ <b>${f(s.projectSwapped)} AFTF</b><br>
+
+ Project native paid:
+ <b>${f(s.projectNative)} tBNB</b><br>
+
+ Project native pending:
+ <b>${f(s.projectNativePending)} tBNB</b><br><br>
+
+ Holder fees total:
+ <b>${f(s.holder)} AFTF</b><br>
+
+ Project fees total:
+ <b>${f(s.projectFees)} AFTF</b><br>
+
+ Burned total:
+ <b>${f(s.burned)} AFTF</b><br><br>
+
+ Pair reserve0:
+ <b>${f(s.reserve0)}</b><br>
+
+ Pair reserve1:
+ <b>${f(s.reserve1)}</b>
+ `;
+}
+
+function diff(after,before,key){
+ if(after[key].gte(before[key])){
+  return f(after[key].sub(before[key]));
+ }
+
+ return "-"+f(before[key].sub(after[key]));
+}
+
+async function ensure97(){
+ let c=await ethereum.request({
+  method:"eth_chainId"
+ });
+
+ if(parseInt(c,16)!==97){
+  await ethereum.request({
+   method:"wallet_switchEthereumChain",
+   params:[{chainId:"0x61"}]
+  });
+ }
+
+ c=await ethereum.request({
+  method:"eth_chainId"
+ });
+
+ if(parseInt(c,16)!==97){
+  throw new Error("BSC Testnet required.");
+ }
+}
+
+async function waitReceipt(hash){
+ for(let i=0;i<100;i++){
+  const r=await rpc(
+   "eth_getTransactionReceipt",
+   [hash]
+  );
+
+  if(r)return r;
+
+  await new Promise(
+   x=>setTimeout(x,2500)
+  );
+ }
+
+ throw new Error("Receipt timeout.");
+}
+
+$("connect").onclick=async()=>{
+ try{
+  if(!window.ethereum){
+   throw new Error("MetaMask not found.");
+  }
+
+  await ensure97();
+
+  const a=await ethereum.request({
+   method:"eth_requestAccounts"
+  });
+
+  account=a[0];
+
+  $("read").disabled=false;
+
+  stat(
+   "✅ Account 1 connected:<br><b>"+
+   account+
+   "</b><br>Tekan Read State.",
+   "good"
+  );
+
+ }catch(e){
+  stat(e.message,"bad");
+ }
+};
+
+$("read").onclick=async()=>{
+ try{
+  const recipient=$("recipient").value.trim();
+
+  if(!ethers.utils.isAddress(recipient)){
+   throw new Error(
+    "Masukkan alamat Account 2 yang valid."
+   );
+  }
+
+  before=await snapshot();
+
+  $("send").disabled=false;
+
+  stat(
+   show(before,"BEFORE NEXT TRANSFER")+
+   "<br><br>✅ Snapshot tersimpan. Belum ada transaksi dikirim.",
+   "good"
+  );
+
+ }catch(e){
+  stat("Read failed: "+e.message,"bad");
+ }
+};
+
+$("send").onclick=async()=>{
+ try{
+  if(sent){
+   throw new Error(
+    "Satu request sudah dikirim. Jangan tekan dua kali."
+   );
+  }
+
+  if(!before){
+   throw new Error("Read State terlebih dahulu.");
+  }
+
+  const recipient=$("recipient").value.trim();
+
+  if(!ethers.utils.isAddress(recipient)){
+   throw new Error("Invalid Account 2.");
+  }
+
+  const amount=ethers.utils.parseUnits(
+   $("amount").value,
+   18
+  );
+
+  const data=I.encodeFunctionData(
+   "transfer",
+   [recipient,amount]
+  );
+
+  const gasHex=await rpc(
+   "eth_estimateGas",
+   [{
+    from:account,
+    to:TOKEN,
+    data
+   }]
+  );
+
+  const gas=
+   (BigInt(gasHex)*120n)/100n;
+
+  if(!confirm(
+   "Send ONE "+$("amount").value+
+   " AFTF transaction?\n\n"+
+   "BSC TESTNET ONLY.\n"+
+   "Do not send twice."
+  ))return;
+
+  sent=true;
+  $("send").disabled=true;
+
+  stat(
+   "⏳ ONE transaction request sent to MetaMask.",
+   "warn"
+  );
+
+  const hash=await ethereum.request({
+   method:"eth_sendTransaction",
+   params:[{
+    from:account,
+    to:TOKEN,
+    data,
+    gas:"0x"+gas.toString(16)
+   }]
+  });
+
+  const receipt=await waitReceipt(hash);
+
+  if(receipt.status!=="0x1"){
+   throw new Error("Transaction reverted.");
+  }
+
+  const after=await snapshot();
+
+  stat(
+   "✅ TRANSACTION CONFIRMED<br><br>"+
+   show(after,"AFTER TRANSFER")+
+   "<br><br><b>CHANGES IN THIS TRANSACTION</b><br>"+
+
+   "Pending Liquidity change: <b>"+
+   diff(after,before,"pendingL")+" AFTF</b><br>"+
+
+   "Pending Project change: <b>"+
+   diff(after,before,"pendingP")+" AFTF</b><br>"+
+
+   "Auto Liquidity tokens used: <b>+"+
+   diff(after,before,"autoUsed")+" AFTF</b><br>"+
+
+   "Native added to liquidity: <b>+"+
+   diff(after,before,"nativeLP")+" tBNB</b><br>"+
+
+   "LP created: <b>+"+
+   diff(after,before,"lpCreated")+"</b><br>"+
+
+   "Project LP balance change: <b>+"+
+   diff(after,before,"lpBalance")+"</b><br>"+
+
+   "Project tokens swapped: <b>+"+
+   diff(after,before,"projectSwapped")+" AFTF</b><br>"+
+
+   "Project native paid: <b>+"+
+   diff(after,before,"projectNative")+" tBNB</b><br>"+
+
+   "Holder fees added: <b>+"+
+   diff(after,before,"holder")+" AFTF</b><br>"+
+
+   "Project fees added: <b>+"+
+   diff(after,before,"projectFees")+" AFTF</b><br>"+
+
+   "Burn added: <b>+"+
+   diff(after,before,"burned")+" AFTF</b>",
+   "good"
+  );
+
+ }catch(e){
+  sent=false;
+  $("send").disabled=false;
+
+  stat(
+   "Test failed: "+(e?.message||e),
+   "bad"
+  );
+ }
+};
+</script>
+</body>
+</html>
