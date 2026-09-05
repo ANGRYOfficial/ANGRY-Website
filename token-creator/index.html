@@ -2559,7 +2559,7 @@ async function connectWallet(){
   }
 
   try{
-    await window.angryOpenReown();
+    await window.angryOpenReown(selectedChain()?.chainIdDec);
   }catch(e){
     setStatus(
       "Wallet connection failed: "+(e?.message || e),
@@ -2719,7 +2719,22 @@ async function ensureNetwork(){
   if(typeof window.angrySwitchReownNetwork === "function"){
     try{
       await window.angrySwitchReownNetwork(numericChainId);
-      return true;
+
+      const reownChainId=await angryProvider().request({method:"eth_chainId"});
+      const reownChainIdDec=typeof reownChainId==="string"
+        ? (reownChainId.toLowerCase().startsWith("0x")
+            ? parseInt(reownChainId,16)
+            : Number(reownChainId))
+        : Number(reownChainId);
+
+      if(reownChainIdDec===numericChainId){
+        return true;
+      }
+
+      console.warn(
+        "Reown switch returned but provider is still on chain:",
+        reownChainIdDec
+      );
     }catch(reownError){
       console.warn("Reown network switch failed, using wallet fallback:", reownError);
     }
@@ -2730,6 +2745,18 @@ async function ensureNetwork(){
       method:"wallet_switchEthereumChain",
       params:[{chainId:c.chainId}]
     });
+
+    const switchedChainId=await angryProvider().request({method:"eth_chainId"});
+    const switchedChainIdDec=typeof switchedChainId==="string"
+      ? (switchedChainId.toLowerCase().startsWith("0x")
+          ? parseInt(switchedChainId,16)
+          : Number(switchedChainId))
+      : Number(switchedChainId);
+
+    if(switchedChainIdDec!==numericChainId){
+      throw new Error("Wallet is still not on "+c.name+".");
+    }
+
     return true;
   }
   catch(e){
@@ -3423,7 +3450,8 @@ async function deployToken(){
         );
       }
 
-      const estimatedGasNumber=BigInt(estimatedGas).toString();
+      const estimatedGasBigInt=BigInt(estimatedGas);
+      const estimatedGasNumber=estimatedGasBigInt.toString();
 
       setStatus(
         "✅ Gas estimation passed on "+c.name+
@@ -3435,6 +3463,38 @@ async function deployToken(){
       const isMainnet=c.chainIdDec===1 || c.chainIdDec===56 || c.chainIdDec===8453 || c.chainIdDec===4663 || c.chainIdDec===42161 || c.chainIdDec===137;
 
       if(isMainnet){
+        try{
+          const [balanceHex,gasPriceHex]=await Promise.all([
+            rpcRequest(c,"eth_getBalance",[state.account,"latest"]),
+            rpcRequest(c,"eth_gasPrice",[])
+          ]);
+
+          const balanceWei=BigInt(balanceHex||"0x0");
+          const gasPriceWei=BigInt(gasPriceHex||"0x0");
+          const bufferedGasForCost=estimatedGasBigInt*120n/100n;
+          const estimatedCostWei=bufferedGasForCost*gasPriceWei;
+
+          if(balanceWei===0n || (estimatedCostWei>0n && balanceWei<estimatedCostWei)){
+            const balanceNative=Number(balanceWei)/1e18;
+            const estimatedCostNative=Number(estimatedCostWei)/1e18;
+
+            setStatus(
+              "✅ Mainnet gas estimation completed on "+c.name+".<br>"+
+              "Estimated gas: <b>"+estimatedGasNumber+"</b><br>"+
+              "Wallet balance: <b>"+balanceNative.toFixed(6)+" "+c.nativeSymbol+"</b><br>"+
+              "Approx. buffered gas cost: <b>"+estimatedCostNative.toFixed(6)+" "+c.nativeSymbol+"</b><br>"+
+              "Not enough "+c.nativeSymbol+" for a real deployment. No transaction was sent.",
+              "warn"
+            );
+            return;
+          }
+        }catch(balanceCheckError){
+          console.warn(
+            "Mainnet balance pre-check unavailable; wallet will do the final fee check:",
+            balanceCheckError
+          );
+        }
+
         const approved=window.confirm(
           c.name+" MAINNET\n\n"+
           "Estimated gas: "+estimatedGasNumber+"\n\n"+
@@ -3451,6 +3511,18 @@ async function deployToken(){
           );
           return;
         }
+      }
+
+      if(
+        typeof window.angryReownChainApproved==="function" &&
+        !window.angryReownChainApproved(c.chainIdDec)
+      ){
+        setStatus(
+          "WalletConnect session does not currently approve "+c.name+
+          " (eip155:"+c.chainIdDec+"). Disconnect and reconnect the wallet while this network is selected, then try again. No transaction was sent.",
+          "warn"
+        );
+        return;
       }
 
       setStatus(
@@ -3623,7 +3695,22 @@ async function deployToken(){
         }
       })();
     }
-  }catch(e){setStatus("Deploy failed: "+(e.message||e),"bad")}
+  }catch(e){
+    const deployMessage=String(e?.message||e||"Unknown deployment error");
+
+    if(
+      deployMessage.includes("request() chainId: eip155:") ||
+      deployMessage.toLowerCase().includes("missing or invalid") &&
+      deployMessage.toLowerCase().includes("chainid")
+    ){
+      setStatus(
+        "WalletConnect session is not authorized for "+c.name+". Disconnect and reconnect the wallet while "+c.name+" is selected, then try again. No ANGRY deployment transaction was sent.",
+        "warn"
+      );
+    }else{
+      setStatus("Deploy failed: "+deployMessage,"bad");
+    }
+  }
   finally{btn.disabled=false}
 }
 
@@ -4276,7 +4363,7 @@ window.addEventListener("unhandledrejection", function(e){
 });
 </script>
 
-<script src="./reown-wallet.js?v=public-mainnet-only-20260905-1"></script>
+<script src="./reown-wallet.js?v=bsc-mainnet-session-fix-20260905-1"></script>
 
 <script id="angry-token-profile-collapse-script">
 document.addEventListener("DOMContentLoaded",()=>{
