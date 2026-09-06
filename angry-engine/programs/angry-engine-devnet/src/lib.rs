@@ -133,6 +133,20 @@ pub mod angry_engine_devnet {
 
         vault.accounted_balance = spendable_balance;
 
+        let timestamp = Clock::get()?.unix_timestamp;
+
+        emit!(FeesSynced {
+            config: ctx.accounts.config.key(),
+            vault: vault.key(),
+            new_fees,
+            buyback_burn_amount,
+            liquidity_amount,
+            development_amount,
+            total_received: vault.total_received,
+            total_processed: vault.total_processed,
+            timestamp,
+        });
+
         msg!("ANGRY Engine processed new creator fees");
         msg!("New fees: {} lamports", new_fees);
         msg!("Buyback & Burn reserve: {}", buyback_burn_amount);
@@ -148,6 +162,23 @@ fn calculate_bps(amount: u64, bps: u16) -> Result<u64> {
         .checked_mul(bps as u64)
         .and_then(|value| value.checked_div(BPS_DENOMINATOR as u64))
         .ok_or(AngryEngineError::MathOverflow.into())
+}
+
+#[event]
+pub struct FeesSynced {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+
+    pub new_fees: u64,
+
+    pub buyback_burn_amount: u64,
+    pub liquidity_amount: u64,
+    pub development_amount: u64,
+
+    pub total_received: u64,
+    pub total_processed: u64,
+
+    pub timestamp: i64,
 }
 
 #[derive(Accounts)]
