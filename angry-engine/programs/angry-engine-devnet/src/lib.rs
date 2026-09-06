@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("11111111111111111111111111111111");
+declare_id!("Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt");
 
 const BPS_DENOMINATOR: u16 = 10_000;
 const BUYBACK_BURN_BPS: u16 = 4_000; // 40%
