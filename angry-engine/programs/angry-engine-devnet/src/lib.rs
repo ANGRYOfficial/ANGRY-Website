@@ -23,9 +23,11 @@ pub mod angry_engine_devnet {
         );
 
         let config = &mut ctx.accounts.config;
+        let vault = &mut ctx.accounts.vault;
 
         config.authority = ctx.accounts.authority.key();
         config.development_wallet = ctx.accounts.development_wallet.key();
+        config.vault = vault.key();
 
         config.buyback_burn_bps = BUYBACK_BURN_BPS;
         config.liquidity_bps = LIQUIDITY_BPS;
@@ -34,7 +36,19 @@ pub mod angry_engine_devnet {
         config.paused = false;
         config.bump = ctx.bumps.config;
 
+        vault.config = config.key();
+
+        // Accounting starts at zero.
+        // No SOL is processed during initialization.
+        vault.total_received = 0;
+        vault.buyback_burn_reserve = 0;
+        vault.liquidity_reserve = 0;
+        vault.development_reserve = 0;
+        vault.total_processed = 0;
+        vault.bump = ctx.bumps.vault;
+
         msg!("ANGRY Engine initialized");
+        msg!("ANGRY Engine Vault: {}", vault.key());
         msg!("Buyback & Burn: {} bps", BUYBACK_BURN_BPS);
         msg!("Liquidity: {} bps", LIQUIDITY_BPS);
         msg!("Development: {} bps", DEVELOPMENT_BPS);
@@ -48,7 +62,8 @@ pub struct InitializeEngine<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    /// CHECK: Stored only as the development recipient address.
+    /// CHECK:
+    /// Stored only as the development recipient address.
     pub development_wallet: UncheckedAccount<'info>,
 
     #[account(
@@ -60,6 +75,15 @@ pub struct InitializeEngine<'info> {
     )]
     pub config: Account<'info, EngineConfig>,
 
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + EngineVault::LEN,
+        seeds = [b"angry-engine-vault"],
+        bump
+    )]
+    pub vault: Account<'info, EngineVault>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -67,6 +91,7 @@ pub struct InitializeEngine<'info> {
 pub struct EngineConfig {
     pub authority: Pubkey,
     pub development_wallet: Pubkey,
+    pub vault: Pubkey,
 
     pub buyback_burn_bps: u16,
     pub liquidity_bps: u16,
@@ -78,13 +103,41 @@ pub struct EngineConfig {
 
 impl EngineConfig {
     pub const LEN: usize =
-        32 +
-        32 +
-        2 +
-        2 +
-        2 +
-        1 +
-        1;
+        32 + // authority
+        32 + // development_wallet
+        32 + // vault
+        2 +  // buyback_burn_bps
+        2 +  // liquidity_bps
+        2 +  // development_bps
+        1 +  // paused
+        1;   // bump
+}
+
+#[account]
+pub struct EngineVault {
+    pub config: Pubkey,
+
+    // These fields are accounting records.
+    // The actual SOL stays inside this PDA account
+    // until future processing instructions are executed.
+    pub total_received: u64,
+    pub buyback_burn_reserve: u64,
+    pub liquidity_reserve: u64,
+    pub development_reserve: u64,
+    pub total_processed: u64,
+
+    pub bump: u8,
+}
+
+impl EngineVault {
+    pub const LEN: usize =
+        32 + // config
+        8 +  // total_received
+        8 +  // buyback_burn_reserve
+        8 +  // liquidity_reserve
+        8 +  // development_reserve
+        8 +  // total_processed
+        1;   // bump
 }
 
 #[error_code]
