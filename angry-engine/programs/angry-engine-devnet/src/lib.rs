@@ -4,8 +4,8 @@ declare_id!("Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt");
 
 const BPS_DENOMINATOR: u16 = 10_000;
 const BUYBACK_BURN_BPS: u16 = 4_000; // 40%
-const LIQUIDITY_BPS: u16 = 4_000;    // 40%
-const DEVELOPMENT_BPS: u16 = 2_000;  // 20%
+const LIQUIDITY_BPS: u16 = 4_000; // 40%
+const DEVELOPMENT_BPS: u16 = 2_000; // 20%
 
 #[program]
 pub mod angry_engine_devnet {
@@ -42,8 +42,10 @@ pub mod angry_engine_devnet {
         vault.buyback_burn_reserve = 0;
         vault.liquidity_reserve = 0;
         vault.development_reserve = 0;
+
         vault.total_processed = 0;
         vault.accounted_balance = 0;
+
         vault.bump = ctx.bumps.vault;
 
         msg!("ANGRY Engine initialized");
@@ -155,6 +157,112 @@ pub mod angry_engine_devnet {
 
         Ok(())
     }
+
+    pub fn settle_development(
+        ctx: Context<SettleDevelopment>,
+    ) -> Result<()> {
+        require!(
+            !ctx.accounts.config.paused,
+            AngryEngineError::EnginePaused
+        );
+
+        let amount = ctx.accounts.vault.development_reserve;
+
+        require!(
+            amount > 0,
+            AngryEngineError::NoDevelopmentReserve
+        );
+
+        let vault_info = ctx.accounts.vault.to_account_info();
+        let development_info =
+            ctx.accounts.development_wallet.to_account_info();
+
+        let rent = Rent::get()?;
+        let rent_minimum =
+            rent.minimum_balance(8 + EngineVault::LEN);
+
+        let current_vault_lamports = vault_info.lamports();
+
+        let spendable_balance = current_vault_lamports
+            .checked_sub(rent_minimum)
+            .ok_or(AngryEngineError::InvalidVaultBalance)?;
+
+        require!(
+            spendable_balance >= amount,
+            AngryEngineError::InvalidVaultBalance
+        );
+
+        require!(
+            ctx.accounts.vault.accounted_balance >= amount,
+            AngryEngineError::InvalidVaultBalance
+        );
+
+        let new_vault_lamports = current_vault_lamports
+            .checked_sub(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        let new_development_lamports = development_info
+            .lamports()
+            .checked_add(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        let new_accounted_balance = ctx
+            .accounts
+            .vault
+            .accounted_balance
+            .checked_sub(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        // Transfer lamports directly because the Vault PDA is owned
+        // by this ANGRY Engine program.
+        {
+            let mut vault_lamports =
+                vault_info.try_borrow_mut_lamports()?;
+            **vault_lamports = new_vault_lamports;
+        }
+
+        {
+            let mut development_lamports =
+                development_info.try_borrow_mut_lamports()?;
+            **development_lamports = new_development_lamports;
+        }
+
+        let vault = &mut ctx.accounts.vault;
+
+        vault.development_reserve = 0;
+        vault.accounted_balance = new_accounted_balance;
+
+        let timestamp = Clock::get()?.unix_timestamp;
+
+        emit!(DevelopmentSettled {
+            config: ctx.accounts.config.key(),
+            vault: vault.key(),
+            development_wallet:
+                ctx.accounts.development_wallet.key(),
+            amount,
+            remaining_development_reserve:
+                vault.development_reserve,
+            accounted_balance: vault.accounted_balance,
+            timestamp,
+        });
+
+        msg!("ANGRY Engine development reserve settled");
+        msg!("Development amount: {} lamports", amount);
+        msg!(
+            "Development wallet: {}",
+            ctx.accounts.development_wallet.key()
+        );
+        msg!(
+            "Remaining development reserve: {}",
+            vault.development_reserve
+        );
+        msg!(
+            "Accounted balance after settlement: {}",
+            vault.accounted_balance
+        );
+
+        Ok(())
+    }
 }
 
 fn calculate_bps(amount: u64, bps: u16) -> Result<u64> {
@@ -177,6 +285,19 @@ pub struct FeesSynced {
 
     pub total_received: u64,
     pub total_processed: u64,
+
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct DevelopmentSettled {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub development_wallet: Pubkey,
+
+    pub amount: u64,
+    pub remaining_development_reserve: u64,
+    pub accounted_balance: u64,
 
     pub timestamp: i64,
 }
@@ -230,6 +351,32 @@ pub struct SyncFees<'info> {
     pub vault: Account<'info, EngineVault>,
 }
 
+#[derive(Accounts)]
+pub struct SettleDevelopment<'info> {
+    #[account(
+        seeds = [b"angry-engine-config"],
+        bump = config.bump,
+        has_one = vault @ AngryEngineError::InvalidVault,
+        has_one = development_wallet
+            @ AngryEngineError::InvalidDevelopmentWallet
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    #[account(
+        mut,
+        seeds = [b"angry-engine-vault"],
+        bump = vault.bump,
+        constraint = vault.config == config.key()
+            @ AngryEngineError::InvalidConfig
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    /// CHECK:
+    /// Must exactly match development_wallet stored in EngineConfig.
+    #[account(mut)]
+    pub development_wallet: UncheckedAccount<'info>,
+}
+
 #[account]
 pub struct EngineConfig {
     pub authority: Pubkey,
@@ -261,7 +408,6 @@ pub struct EngineVault {
     pub config: Pubkey,
 
     pub total_received: u64,
-
     pub buyback_burn_reserve: u64,
     pub liquidity_reserve: u64,
     pub development_reserve: u64,
@@ -269,7 +415,7 @@ pub struct EngineVault {
     pub total_processed: u64,
 
     // Current spendable SOL balance already recognized by the Engine.
-    // Future outgoing instructions will reduce this value accordingly.
+    // Every outgoing settlement must reduce this value too.
     pub accounted_balance: u64,
 
     pub bump: u8,
@@ -309,4 +455,10 @@ pub enum AngryEngineError {
 
     #[msg("Invalid vault balance.")]
     InvalidVaultBalance,
+
+    #[msg("No Development reserve is available to settle.")]
+    NoDevelopmentReserve,
+
+    #[msg("Invalid Development wallet.")]
+    InvalidDevelopmentWallet,
 }
