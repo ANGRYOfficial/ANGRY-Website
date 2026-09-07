@@ -1,5 +1,16 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Burn, Mint, Token, TokenAccount};
+use anchor_lang::solana_program::{
+    program::invoke_signed,
+    system_instruction,
+};
+use anchor_spl::token::{
+    self,
+    Burn,
+    Mint,
+    SyncNative,
+    Token,
+    TokenAccount,
+};
 
 declare_id!("Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt");
 
@@ -380,6 +391,110 @@ pub mod angry_engine_devnet {
         Ok(())
     }
 
+    pub fn prepare_buyback_wsol(
+        ctx: Context<PrepareBuybackWsol>,
+        amount: u64,
+    ) -> Result<()> {
+        require!(
+            !ctx.accounts.config.paused,
+            AngryEngineError::EnginePaused
+        );
+
+        require!(
+            amount > 0,
+            AngryEngineError::InvalidBuybackAmount
+        );
+
+        let buyback_sol_info =
+            ctx.accounts.buyback_sol_vault.to_account_info();
+
+        require!(
+            buyback_sol_info.lamports() >= amount,
+            AngryEngineError::BuybackAmountExceedsStagedSol
+        );
+
+        let buyback_sol_bump =
+            ctx.bumps.buyback_sol_vault;
+
+        let buyback_sol_seeds: &[&[u8]] = &[
+            b"angry-engine-buyback-sol",
+            &[buyback_sol_bump],
+        ];
+
+        let signer_seeds = &[buyback_sol_seeds];
+
+        let transfer_instruction =
+            system_instruction::transfer(
+                &ctx.accounts.buyback_sol_vault.key(),
+                &ctx.accounts.buyback_wsol_account.key(),
+                amount,
+            );
+
+        invoke_signed(
+            &transfer_instruction,
+            &[
+                ctx.accounts
+                    .buyback_sol_vault
+                    .to_account_info(),
+                ctx.accounts
+                    .buyback_wsol_account
+                    .to_account_info(),
+                ctx.accounts
+                    .system_program
+                    .to_account_info(),
+            ],
+            signer_seeds,
+        )?;
+
+        let sync_accounts = SyncNative {
+            account: ctx
+                .accounts
+                .buyback_wsol_account
+                .to_account_info(),
+        };
+
+        let sync_ctx = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            sync_accounts,
+        );
+
+        token::sync_native(sync_ctx)?;
+
+        ctx.accounts.buyback_wsol_account.reload()?;
+
+        let remaining_staged_sol =
+            ctx.accounts.buyback_sol_vault.lamports();
+
+        let timestamp = Clock::get()?.unix_timestamp;
+
+        emit!(BuybackWsolPrepared {
+            config: ctx.accounts.config.key(),
+            vault: ctx.accounts.vault.key(),
+            buyback_sol_vault:
+                ctx.accounts.buyback_sol_vault.key(),
+            buyback_wsol_account:
+                ctx.accounts.buyback_wsol_account.key(),
+            amount,
+            remaining_staged_sol,
+            wsol_balance:
+                ctx.accounts.buyback_wsol_account.amount,
+            timestamp,
+        });
+
+        msg!("ANGRY Engine Buyback WSOL prepared");
+        msg!("Wrapped amount: {} lamports", amount);
+        msg!(
+            "Remaining staged SOL: {}",
+            remaining_staged_sol
+        );
+        msg!(
+            "Buyback WSOL balance: {}",
+            ctx.accounts.buyback_wsol_account.amount
+        );
+
+        Ok(())
+    }
+
     pub fn burn_engine_tokens(
         mut ctx: Context<BurnEngineTokens>,
         amount: u64,
@@ -503,6 +618,20 @@ pub struct BuybackSolStaged {
     pub remaining_buyback_burn_reserve: u64,
     pub staged_buyback_sol_balance: u64,
     pub accounted_balance: u64,
+
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct BuybackWsolPrepared {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub buyback_sol_vault: Pubkey,
+    pub buyback_wsol_account: Pubkey,
+
+    pub amount: u64,
+    pub remaining_staged_sol: u64,
+    pub wsol_balance: u64,
 
     pub timestamp: i64,
 }
@@ -636,6 +765,66 @@ pub struct StageBuybackSol<'info> {
 }
 
 #[derive(Accounts)]
+pub struct PrepareBuybackWsol<'info> {
+    #[account(
+        seeds = [b"angry-engine-config"],
+        bump = config.bump,
+        has_one = authority @ AngryEngineError::InvalidAuthority,
+        has_one = vault @ AngryEngineError::InvalidVault
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    pub authority: Signer<'info>,
+
+    #[account(
+        seeds = [b"angry-engine-vault"],
+        bump = vault.bump,
+        constraint = vault.config == config.key()
+            @ AngryEngineError::InvalidConfig
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    /// CHECK:
+    /// System-owned PDA holding staged Buyback SOL.
+    #[account(
+        mut,
+        seeds = [b"angry-engine-buyback-sol"],
+        bump,
+        constraint =
+            buyback_sol_vault.owner
+                == &anchor_lang::system_program::ID
+            @ AngryEngineError::InvalidBuybackSolVault,
+        constraint =
+            buyback_sol_vault.data_is_empty()
+            @ AngryEngineError::InvalidBuybackSolVault
+    )]
+    pub buyback_sol_vault: UncheckedAccount<'info>,
+
+    #[account(
+        mut,
+        constraint =
+            buyback_wsol_account.owner
+                == buyback_sol_vault.key()
+            @ AngryEngineError::InvalidBuybackWsolAccount,
+        constraint =
+            buyback_wsol_account.mint
+                == wsol_mint.key()
+            @ AngryEngineError::InvalidBuybackWsolAccount
+    )]
+    pub buyback_wsol_account:
+        Account<'info, TokenAccount>,
+
+    #[account(
+        address =
+            anchor_spl::token::spl_token::native_mint::ID
+    )]
+    pub wsol_mint: Account<'info, Mint>,
+
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct BurnEngineTokens<'info> {
     #[account(
         seeds = [b"angry-engine-config"],
@@ -766,6 +955,12 @@ pub enum AngryEngineError {
 
     #[msg("Invalid ANGRY Engine Buyback SOL Vault.")]
     InvalidBuybackSolVault,
+
+    #[msg("Buyback amount exceeds staged Buyback SOL.")]
+    BuybackAmountExceedsStagedSol,
+
+    #[msg("Invalid ANGRY Engine Buyback WSOL account.")]
+    InvalidBuybackWsolAccount,
 
     #[msg("Burn amount must be greater than zero.")]
     InvalidBurnAmount,
