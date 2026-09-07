@@ -183,6 +183,91 @@ describe("ANGRY Engine v0.6A Burn Test", () => {
 
     console.log("Burn TX:", signature);
 
+    // Verify the TokensBurned event from the confirmed transaction logs.
+    const txDetails = await pg.connection.getTransaction(
+      signature,
+      {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      }
+    );
+
+    assert(txDetails !== null, "Burn transaction could not be fetched");
+
+    const logs = txDetails.meta?.logMessages ?? [];
+
+    // Anchor event discriminator:
+    // sha256("event:TokensBurned")[0..8]
+    const eventDiscriminator = Buffer.from([
+      230, 255, 34, 113, 226, 53, 227, 9
+    ]);
+
+    let tokensBurnedEvent: Buffer | null = null;
+
+    for (const log of logs) {
+      const prefix = "Program data: ";
+
+      if (!log.startsWith(prefix)) {
+        continue;
+      }
+
+      const data = Buffer.from(
+        log.slice(prefix.length),
+        "base64"
+      );
+
+      if (
+        data.length >= 168 &&
+        data.slice(0, 8).equals(eventDiscriminator)
+      ) {
+        tokensBurnedEvent = data;
+        break;
+      }
+    }
+
+    assert(
+      tokensBurnedEvent !== null,
+      "TokensBurned event was not found"
+    );
+
+    const eventAmount = new BN(
+      tokensBurnedEvent!.slice(136, 144),
+      "le"
+    );
+
+    const eventRemainingBalance = new BN(
+      tokensBurnedEvent!.slice(144, 152),
+      "le"
+    );
+
+    const eventRemainingSupply = new BN(
+      tokensBurnedEvent!.slice(152, 160),
+      "le"
+    );
+
+    console.log(
+      "TokensBurned event amount:",
+      eventAmount.toString()
+    );
+
+    console.log(
+      "TokensBurned event remaining balance:",
+      eventRemainingBalance.toString()
+    );
+
+    console.log(
+      "TokensBurned event remaining supply:",
+      eventRemainingSupply.toString()
+    );
+
+    assert.equal(eventAmount.toString(), "400");
+    assert.equal(eventRemainingBalance.toString(), "600");
+    assert.equal(eventRemainingSupply.toString(), "600");
+
+    console.log(
+      "✅ TokensBurned EVENT VERIFIED: 400 / 600 / 600"
+    );
+
     const accountAfter = await getAccount(
       pg.connection,
       engineTokenAccount.address
