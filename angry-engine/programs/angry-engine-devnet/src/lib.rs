@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Burn, Mint, Token, TokenAccount};
 
 declare_id!("Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt");
 
@@ -263,6 +264,81 @@ pub mod angry_engine_devnet {
 
         Ok(())
     }
+
+    pub fn burn_engine_tokens(
+        mut ctx: Context<BurnEngineTokens>,
+        amount: u64,
+    ) -> Result<()> {
+        require!(
+            !ctx.accounts.config.paused,
+            AngryEngineError::EnginePaused
+        );
+
+        require!(
+            amount > 0,
+            AngryEngineError::InvalidBurnAmount
+        );
+
+        require!(
+            ctx.accounts.engine_token_account.amount >= amount,
+            AngryEngineError::BurnAmountExceedsBalance
+        );
+
+        let vault_bump = ctx.accounts.vault.bump;
+
+        let vault_seeds: &[&[u8]] = &[
+            b"angry-engine-vault",
+            &[vault_bump],
+        ];
+
+        let signer_seeds = &[vault_seeds];
+
+        let cpi_accounts = Burn {
+            mint: ctx.accounts.mint.to_account_info(),
+            from: ctx.accounts.engine_token_account.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+        };
+
+        let cpi_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            cpi_accounts,
+            signer_seeds,
+        );
+
+        token::burn(cpi_ctx, amount)?;
+
+        ctx.accounts.engine_token_account.reload()?;
+        ctx.accounts.mint.reload()?;
+
+        let timestamp = Clock::get()?.unix_timestamp;
+
+        emit!(TokensBurned {
+            config: ctx.accounts.config.key(),
+            vault: ctx.accounts.vault.key(),
+            mint: ctx.accounts.mint.key(),
+            engine_token_account:
+                ctx.accounts.engine_token_account.key(),
+            amount,
+            remaining_engine_balance:
+                ctx.accounts.engine_token_account.amount,
+            remaining_supply:
+                ctx.accounts.mint.supply,
+            timestamp,
+        });
+
+        msg!("ANGRY Engine burned tokens");
+        msg!("Burn amount: {} raw token units", amount);
+        msg!(
+            "Remaining Engine token balance: {}",
+            ctx.accounts.engine_token_account.amount
+        );
+        msg!(
+            "Remaining token supply: {}",
+            ctx.accounts.mint.supply
+        );
+
+        Ok(())
+    }
 }
 
 fn calculate_bps(amount: u64, bps: u16) -> Result<u64> {
@@ -298,6 +374,20 @@ pub struct DevelopmentSettled {
     pub amount: u64,
     pub remaining_development_reserve: u64,
     pub accounted_balance: u64,
+
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct TokensBurned {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub mint: Pubkey,
+    pub engine_token_account: Pubkey,
+
+    pub amount: u64,
+    pub remaining_engine_balance: u64,
+    pub remaining_supply: u64,
 
     pub timestamp: i64,
 }
@@ -375,6 +465,41 @@ pub struct SettleDevelopment<'info> {
     /// Must exactly match development_wallet stored in EngineConfig.
     #[account(mut)]
     pub development_wallet: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct BurnEngineTokens<'info> {
+    #[account(
+        seeds = [b"angry-engine-config"],
+        bump = config.bump,
+        has_one = authority @ AngryEngineError::InvalidAuthority,
+        has_one = vault @ AngryEngineError::InvalidVault
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    pub authority: Signer<'info>,
+
+    #[account(
+        seeds = [b"angry-engine-vault"],
+        bump = vault.bump,
+        constraint = vault.config == config.key()
+            @ AngryEngineError::InvalidConfig
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    #[account(mut)]
+    pub mint: Account<'info, Mint>,
+
+    #[account(
+        mut,
+        constraint = engine_token_account.owner == vault.key()
+            @ AngryEngineError::InvalidEngineTokenAccount,
+        constraint = engine_token_account.mint == mint.key()
+            @ AngryEngineError::InvalidEngineTokenAccount
+    )]
+    pub engine_token_account: Account<'info, TokenAccount>,
+
+    pub token_program: Program<'info, Token>,
 }
 
 #[account]
@@ -461,4 +586,16 @@ pub enum AngryEngineError {
 
     #[msg("Invalid Development wallet.")]
     InvalidDevelopmentWallet,
+
+    #[msg("Invalid ANGRY Engine authority.")]
+    InvalidAuthority,
+
+    #[msg("Burn amount must be greater than zero.")]
+    InvalidBurnAmount,
+
+    #[msg("Burn amount exceeds Engine token balance.")]
+    BurnAmountExceedsBalance,
+
+    #[msg("Invalid Engine token account.")]
+    InvalidEngineTokenAccount,
 }
