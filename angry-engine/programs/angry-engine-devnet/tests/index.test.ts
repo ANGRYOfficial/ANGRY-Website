@@ -1,315 +1,325 @@
-import {
-  createMint,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-  getAccount,
-  getMint,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
-
-describe("ANGRY Engine v0.6A Burn Test", () => {
-  it("Burns Engine tokens from the real ANGRY Engine program", async () => {
+describe("ANGRY Engine v0.6B Buyback SOL Staging Test", () => {
+  it("Processes creator fees and stages Buyback SOL on real Devnet", async () => {
     const payer = pg.wallet.keypair;
 
-    const ANGRY_PROGRAM_ID = new web3.PublicKey(
-      "Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt"
+    const ANGRY_V06B_PROGRAM_ID = new web3.PublicKey(
+      "9LeVEqRxnkaTGWkkQoNSdjb8PLcLbjnecQTkBcqsAS92"
+    );
+
+    assert.equal(
+      pg.PROGRAM_ID.toString(),
+      ANGRY_V06B_PROGRAM_ID.toString(),
+      "Wrong Playground Program ID. Open the ANGRY Engine v06B Build project."
     );
 
     const [configPda] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("angry-engine-config")],
-      ANGRY_PROGRAM_ID
+      ANGRY_V06B_PROGRAM_ID
     );
 
     const [vaultPda] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("angry-engine-vault")],
-      ANGRY_PROGRAM_ID
+      ANGRY_V06B_PROGRAM_ID
     );
 
-    console.log("ANGRY Program:", ANGRY_PROGRAM_ID.toString());
+    const [buybackSolPda] = web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("angry-engine-buyback-sol")],
+      ANGRY_V06B_PROGRAM_ID
+    );
+
+    console.log(
+      "ANGRY v0.6B Program:",
+      ANGRY_V06B_PROGRAM_ID.toString()
+    );
     console.log("Config PDA:", configPda.toString());
     console.log("Vault PDA:", vaultPda.toString());
+    console.log("Buyback SOL PDA:", buybackSolPda.toString());
     console.log("Authority:", pg.wallet.publicKey.toString());
 
-    // Verify that the real ANGRY Engine accounts exist on Devnet.
-    const configInfo = await pg.connection.getAccountInfo(
-      configPda,
-      "confirmed"
-    );
-
-    const vaultInfo = await pg.connection.getAccountInfo(
-      vaultPda,
-      "confirmed"
-    );
-
-    assert(configInfo !== null, "ANGRY Engine config PDA does not exist");
-    assert(vaultInfo !== null, "ANGRY Engine vault PDA does not exist");
-
-    assert(
-      configInfo.owner.equals(ANGRY_PROGRAM_ID),
-      "Config PDA is not owned by ANGRY Engine"
-    );
-
-    assert(
-      vaultInfo.owner.equals(ANGRY_PROGRAM_ID),
-      "Vault PDA is not owned by ANGRY Engine"
-    );
-
-    console.log("✅ Real ANGRY Engine config/vault found");
-
-    // Create temporary Devnet token for burn testing.
-    const mint = await createMint(
-      pg.connection,
-      payer,
-      payer.publicKey,
-      null,
-      0
-    );
-
-    console.log("Test Mint:", mint.toString());
-
-    // Token account controlled by ANGRY Engine Vault PDA.
-    const engineTokenAccount =
-      await getOrCreateAssociatedTokenAccount(
-        pg.connection,
-        payer,
-        mint,
-        vaultPda,
-        true
+    // Initialize only on the first run.
+    const configInfoBefore =
+      await pg.connection.getAccountInfo(
+        configPda,
+        "confirmed"
       );
 
+    if (configInfoBefore === null) {
+      console.log("Initializing temporary ANGRY Engine v0.6B...");
+
+      const initializeSignature =
+        await pg.program.methods
+          .initializeEngine()
+          .accounts({
+            authority: pg.wallet.publicKey,
+            developmentWallet: pg.wallet.publicKey,
+            config: configPda,
+            vault: vaultPda,
+            systemProgram: web3.SystemProgram.programId,
+          })
+          .rpc();
+
+      console.log(
+        "Initialize TX:",
+        initializeSignature
+      );
+
+      await pg.connection.confirmTransaction(
+        initializeSignature,
+        "confirmed"
+      );
+    } else {
+      console.log(
+        "Existing temporary v0.6B config found — initialization skipped"
+      );
+    }
+
+    const config =
+      await pg.program.account.engineConfig.fetch(
+        configPda
+      );
+
+    assert(
+      config.authority.equals(pg.wallet.publicKey),
+      "Playground wallet is not v0.6B authority"
+    );
+
+    assert.equal(
+      config.buybackBurnBps.toString(),
+      "4000"
+    );
+
+    assert.equal(
+      config.liquidityBps.toString(),
+      "4000"
+    );
+
+    assert.equal(
+      config.developmentBps.toString(),
+      "2000"
+    );
+
+    console.log("✅ v0.6B CONFIG VERIFIED: 40 / 40 / 20");
+
+    const vaultBefore =
+      await pg.program.account.engineVault.fetch(
+        vaultPda
+      );
+
+    const TEST_CREATOR_FEE = 5_000_000;
+    const EXPECTED_BUYBACK = 2_000_000;
+    const EXPECTED_LIQUIDITY = 2_000_000;
+    const EXPECTED_DEVELOPMENT = 1_000_000;
+
     console.log(
-      "Engine Token Account:",
-      engineTokenAccount.address.toString()
+      "Sending creator fee:",
+      TEST_CREATOR_FEE,
+      "lamports"
     );
 
-    // Mint 1000 temporary test tokens to Engine.
-    await mintTo(
-      pg.connection,
-      payer,
-      mint,
-      engineTokenAccount.address,
-      payer,
-      1000
-    );
+    const transferTransaction =
+      new web3.Transaction().add(
+        web3.SystemProgram.transfer({
+          fromPubkey: pg.wallet.publicKey,
+          toPubkey: vaultPda,
+          lamports: TEST_CREATOR_FEE,
+        })
+      );
 
-    const accountBefore = await getAccount(
-      pg.connection,
-      engineTokenAccount.address
-    );
-
-    const mintBefore = await getMint(
-      pg.connection,
-      mint
-    );
-
-    console.log(
-      "Engine balance BEFORE burn:",
-      accountBefore.amount.toString()
-    );
-
-    console.log(
-      "Total supply BEFORE burn:",
-      mintBefore.supply.toString()
-    );
-
-    // Anchor discriminator:
-    // sha256("global:burn_engine_tokens")[0..8]
-    const discriminator = Buffer.from([
-      181, 71, 171, 169, 111, 65, 106, 95
-    ]);
-
-    // Burn 400 raw token units.
-    const amountData = new BN(400).toArrayLike(
-      Buffer,
-      "le",
-      8
-    );
-
-    const instructionData = Buffer.concat([
-      discriminator,
-      amountData
-    ]);
-
-    const burnInstruction =
-      new web3.TransactionInstruction({
-        programId: ANGRY_PROGRAM_ID,
-        keys: [
-          {
-            pubkey: configPda,
-            isSigner: false,
-            isWritable: false,
-          },
-          {
-            pubkey: pg.wallet.publicKey,
-            isSigner: true,
-            isWritable: false,
-          },
-          {
-            pubkey: vaultPda,
-            isSigner: false,
-            isWritable: false,
-          },
-          {
-            pubkey: mint,
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: engineTokenAccount.address,
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: TOKEN_PROGRAM_ID,
-            isSigner: false,
-            isWritable: false,
-          },
-        ],
-        data: instructionData,
-      });
-
-    const transaction =
-      new web3.Transaction().add(burnInstruction);
-
-    const signature =
+    const transferSignature =
       await web3.sendAndConfirmTransaction(
         pg.connection,
-        transaction,
+        transferTransaction,
         [payer],
         {
           commitment: "confirmed",
         }
       );
 
-    console.log("Burn TX:", signature);
-
-    // Verify the TokensBurned event from the confirmed transaction logs.
-    const txDetails = await pg.connection.getTransaction(
-      signature,
-      {
-        commitment: "confirmed",
-        maxSupportedTransactionVersion: 0,
-      }
+    console.log(
+      "Creator Fee TX:",
+      transferSignature
     );
 
-    assert(txDetails !== null, "Burn transaction could not be fetched");
+    const syncSignature =
+      await pg.program.methods
+        .syncFees()
+        .accounts({
+          config: configPda,
+          vault: vaultPda,
+        })
+        .rpc();
 
-    const logs = txDetails.meta?.logMessages ?? [];
+    console.log("Sync Fees TX:", syncSignature);
 
-    // Anchor event discriminator:
-    // sha256("event:TokensBurned")[0..8]
-    const eventDiscriminator = Buffer.from([
-      230, 255, 34, 113, 226, 53, 227, 9
-    ]);
+    await pg.connection.confirmTransaction(
+      syncSignature,
+      "confirmed"
+    );
 
-    let tokensBurnedEvent: Buffer | null = null;
-
-    for (const log of logs) {
-      const prefix = "Program data: ";
-
-      if (!log.startsWith(prefix)) {
-        continue;
-      }
-
-      const data = Buffer.from(
-        log.slice(prefix.length),
-        "base64"
+    const vaultAfterSync =
+      await pg.program.account.engineVault.fetch(
+        vaultPda
       );
 
-      if (
-        data.length >= 168 &&
-        data.slice(0, 8).equals(eventDiscriminator)
-      ) {
-        tokensBurnedEvent = data;
-        break;
-      }
-    }
-
-    assert(
-      tokensBurnedEvent !== null,
-      "TokensBurned event was not found"
-    );
-
-    const eventAmount = new BN(
-      tokensBurnedEvent!.slice(136, 144),
-      "le"
-    );
-
-    const eventRemainingBalance = new BN(
-      tokensBurnedEvent!.slice(144, 152),
-      "le"
-    );
-
-    const eventRemainingSupply = new BN(
-      tokensBurnedEvent!.slice(152, 160),
-      "le"
-    );
-
-    console.log(
-      "TokensBurned event amount:",
-      eventAmount.toString()
-    );
-
-    console.log(
-      "TokensBurned event remaining balance:",
-      eventRemainingBalance.toString()
-    );
-
-    console.log(
-      "TokensBurned event remaining supply:",
-      eventRemainingSupply.toString()
-    );
-
-    assert.equal(eventAmount.toString(), "400");
-    assert.equal(eventRemainingBalance.toString(), "600");
-    assert.equal(eventRemainingSupply.toString(), "600");
-
-    console.log(
-      "✅ TokensBurned EVENT VERIFIED: 400 / 600 / 600"
-    );
-
-    const accountAfter = await getAccount(
-      pg.connection,
-      engineTokenAccount.address
-    );
-
-    const mintAfter = await getMint(
-      pg.connection,
-      mint
-    );
-
-    console.log(
-      "Engine balance AFTER burn:",
-      accountAfter.amount.toString()
-    );
-
-    console.log(
-      "Total supply AFTER burn:",
-      mintAfter.supply.toString()
+    assert.equal(
+      vaultAfterSync.totalReceived.toString(),
+      new BN(vaultBefore.totalReceived.toString())
+        .add(new BN(TEST_CREATOR_FEE))
+        .toString()
     );
 
     assert.equal(
-      accountBefore.amount.toString(),
-      "1000"
+      vaultAfterSync.buybackBurnReserve.toString(),
+      new BN(vaultBefore.buybackBurnReserve.toString())
+        .add(new BN(EXPECTED_BUYBACK))
+        .toString()
     );
 
     assert.equal(
-      accountAfter.amount.toString(),
-      "600"
+      vaultAfterSync.liquidityReserve.toString(),
+      new BN(vaultBefore.liquidityReserve.toString())
+        .add(new BN(EXPECTED_LIQUIDITY))
+        .toString()
     );
 
     assert.equal(
-      mintBefore.supply.toString(),
-      "1000"
+      vaultAfterSync.developmentReserve.toString(),
+      new BN(vaultBefore.developmentReserve.toString())
+        .add(new BN(EXPECTED_DEVELOPMENT))
+        .toString()
     );
 
     assert.equal(
-      mintAfter.supply.toString(),
-      "600"
+      vaultAfterSync.accountedBalance.toString(),
+      new BN(vaultBefore.accountedBalance.toString())
+        .add(new BN(TEST_CREATOR_FEE))
+        .toString()
     );
 
     console.log(
-      "✅ ANGRY ENGINE v0.6A REAL DEVNET TOKEN BURN PASSED"
+      "✅ CREATOR FEE SPLIT VERIFIED:"
+    );
+    console.log(
+      "Buyback/Burn +",
+      EXPECTED_BUYBACK
+    );
+    console.log(
+      "Liquidity +",
+      EXPECTED_LIQUIDITY
+    );
+    console.log(
+      "Development +",
+      EXPECTED_DEVELOPMENT
+    );
+
+    const buybackSolBalanceBefore =
+      await pg.connection.getBalance(
+        buybackSolPda,
+        "confirmed"
+      );
+
+    console.log(
+      "Buyback SOL balance BEFORE staging:",
+      buybackSolBalanceBefore
+    );
+
+    const stageSignature =
+      await pg.program.methods
+        .stageBuybackSol(
+          new BN(EXPECTED_BUYBACK)
+        )
+        .accounts({
+          config: configPda,
+          authority: pg.wallet.publicKey,
+          vault: vaultPda,
+          buybackSolVault: buybackSolPda,
+        })
+        .rpc();
+
+    console.log(
+      "Stage Buyback SOL TX:",
+      stageSignature
+    );
+
+    await pg.connection.confirmTransaction(
+      stageSignature,
+      "confirmed"
+    );
+
+    const vaultAfterStage =
+      await pg.program.account.engineVault.fetch(
+        vaultPda
+      );
+
+    const buybackSolBalanceAfter =
+      await pg.connection.getBalance(
+        buybackSolPda,
+        "confirmed"
+      );
+
+    console.log(
+      "Buyback reserve AFTER staging:",
+      vaultAfterStage.buybackBurnReserve.toString()
+    );
+
+    console.log(
+      "Liquidity reserve:",
+      vaultAfterStage.liquidityReserve.toString()
+    );
+
+    console.log(
+      "Development reserve:",
+      vaultAfterStage.developmentReserve.toString()
+    );
+
+    console.log(
+      "Accounted balance AFTER staging:",
+      vaultAfterStage.accountedBalance.toString()
+    );
+
+    console.log(
+      "Buyback SOL balance AFTER staging:",
+      buybackSolBalanceAfter
+    );
+
+    assert.equal(
+      vaultAfterStage.buybackBurnReserve.toString(),
+      new BN(
+        vaultAfterSync.buybackBurnReserve.toString()
+      )
+        .sub(new BN(EXPECTED_BUYBACK))
+        .toString()
+    );
+
+    assert.equal(
+      vaultAfterStage.liquidityReserve.toString(),
+      vaultAfterSync.liquidityReserve.toString()
+    );
+
+    assert.equal(
+      vaultAfterStage.developmentReserve.toString(),
+      vaultAfterSync.developmentReserve.toString()
+    );
+
+    assert.equal(
+      vaultAfterStage.accountedBalance.toString(),
+      new BN(
+        vaultAfterSync.accountedBalance.toString()
+      )
+        .sub(new BN(EXPECTED_BUYBACK))
+        .toString()
+    );
+
+    assert.equal(
+      buybackSolBalanceAfter.toString(),
+      (
+        buybackSolBalanceBefore +
+        EXPECTED_BUYBACK
+      ).toString()
+    );
+
+    console.log(
+      "✅ ANGRY ENGINE v0.6B BUYBACK SOL STAGING PASSED"
     );
   });
 });
