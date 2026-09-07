@@ -8,38 +8,55 @@ import {
 } from "@solana/spl-token";
 
 describe("ANGRY Engine v0.6A Burn Test", () => {
-  it("Burns Engine tokens from the Vault PDA", async () => {
+  it("Burns Engine tokens from the real ANGRY Engine program", async () => {
     const payer = pg.wallet.keypair;
+
+    const ANGRY_PROGRAM_ID = new web3.PublicKey(
+      "Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt"
+    );
 
     const [configPda] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("angry-engine-config")],
-      pg.PROGRAM_ID
+      ANGRY_PROGRAM_ID
     );
 
     const [vaultPda] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from("angry-engine-vault")],
-      pg.PROGRAM_ID
+      ANGRY_PROGRAM_ID
     );
 
-    console.log("Program:", pg.PROGRAM_ID.toString());
+    console.log("ANGRY Program:", ANGRY_PROGRAM_ID.toString());
     console.log("Config PDA:", configPda.toString());
     console.log("Vault PDA:", vaultPda.toString());
     console.log("Authority:", pg.wallet.publicKey.toString());
 
-    const config =
-      await pg.program.account.engineConfig.fetch(configPda);
-
-    const vault =
-      await pg.program.account.engineVault.fetch(vaultPda);
-
-    console.log("Config authority:", config.authority.toString());
-    console.log("Vault config:", vault.config.toString());
-
-    assert(
-      config.authority.equals(pg.wallet.publicKey),
-      "Playground wallet is not ANGRY Engine authority"
+    // Verify that the real ANGRY Engine accounts exist on Devnet.
+    const configInfo = await pg.connection.getAccountInfo(
+      configPda,
+      "confirmed"
     );
 
+    const vaultInfo = await pg.connection.getAccountInfo(
+      vaultPda,
+      "confirmed"
+    );
+
+    assert(configInfo !== null, "ANGRY Engine config PDA does not exist");
+    assert(vaultInfo !== null, "ANGRY Engine vault PDA does not exist");
+
+    assert(
+      configInfo.owner.equals(ANGRY_PROGRAM_ID),
+      "Config PDA is not owned by ANGRY Engine"
+    );
+
+    assert(
+      vaultInfo.owner.equals(ANGRY_PROGRAM_ID),
+      "Vault PDA is not owned by ANGRY Engine"
+    );
+
+    console.log("✅ Real ANGRY Engine config/vault found");
+
+    // Create temporary Devnet token for burn testing.
     const mint = await createMint(
       pg.connection,
       payer,
@@ -50,6 +67,7 @@ describe("ANGRY Engine v0.6A Burn Test", () => {
 
     console.log("Test Mint:", mint.toString());
 
+    // Token account controlled by ANGRY Engine Vault PDA.
     const engineTokenAccount =
       await getOrCreateAssociatedTokenAccount(
         pg.connection,
@@ -64,6 +82,7 @@ describe("ANGRY Engine v0.6A Burn Test", () => {
       engineTokenAccount.address.toString()
     );
 
+    // Mint 1000 temporary test tokens to Engine.
     await mintTo(
       pg.connection,
       payer,
@@ -93,24 +112,76 @@ describe("ANGRY Engine v0.6A Burn Test", () => {
       mintBefore.supply.toString()
     );
 
-    const tx = await pg.program.methods
-      .burnEngineTokens(new BN(400))
-      .accounts({
-        config: configPda,
-        authority: pg.wallet.publicKey,
-        vault: vaultPda,
-        mint: mint,
-        engineTokenAccount: engineTokenAccount.address,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    // Anchor discriminator:
+    // sha256("global:burn_engine_tokens")[0..8]
+    const discriminator = Buffer.from([
+      181, 71, 171, 169, 111, 65, 106, 95
+    ]);
 
-    console.log("Burn TX:", tx);
-
-    await pg.connection.confirmTransaction(
-      tx,
-      "confirmed"
+    // Burn 400 raw token units.
+    const amountData = new BN(400).toArrayLike(
+      Buffer,
+      "le",
+      8
     );
+
+    const instructionData = Buffer.concat([
+      discriminator,
+      amountData
+    ]);
+
+    const burnInstruction =
+      new web3.TransactionInstruction({
+        programId: ANGRY_PROGRAM_ID,
+        keys: [
+          {
+            pubkey: configPda,
+            isSigner: false,
+            isWritable: false,
+          },
+          {
+            pubkey: pg.wallet.publicKey,
+            isSigner: true,
+            isWritable: false,
+          },
+          {
+            pubkey: vaultPda,
+            isSigner: false,
+            isWritable: false,
+          },
+          {
+            pubkey: mint,
+            isSigner: false,
+            isWritable: true,
+          },
+          {
+            pubkey: engineTokenAccount.address,
+            isSigner: false,
+            isWritable: true,
+          },
+          {
+            pubkey: TOKEN_PROGRAM_ID,
+            isSigner: false,
+            isWritable: false,
+          },
+        ],
+        data: instructionData,
+      });
+
+    const transaction =
+      new web3.Transaction().add(burnInstruction);
+
+    const signature =
+      await web3.sendAndConfirmTransaction(
+        pg.connection,
+        transaction,
+        [payer],
+        {
+          commitment: "confirmed",
+        }
+      );
+
+    console.log("Burn TX:", signature);
 
     const accountAfter = await getAccount(
       pg.connection,
@@ -153,7 +224,7 @@ describe("ANGRY Engine v0.6A Burn Test", () => {
     );
 
     console.log(
-      "✅ ANGRY ENGINE v0.6A TOKEN BURN PASSED"
+      "✅ ANGRY ENGINE v0.6A REAL DEVNET TOKEN BURN PASSED"
     );
   });
 });
