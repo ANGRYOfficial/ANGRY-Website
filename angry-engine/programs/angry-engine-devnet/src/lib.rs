@@ -265,6 +265,121 @@ pub mod angry_engine_devnet {
         Ok(())
     }
 
+    pub fn stage_buyback_sol(
+        ctx: Context<StageBuybackSol>,
+        amount: u64,
+    ) -> Result<()> {
+        require!(
+            !ctx.accounts.config.paused,
+            AngryEngineError::EnginePaused
+        );
+
+        require!(
+            amount > 0,
+            AngryEngineError::InvalidBuybackAmount
+        );
+
+        require!(
+            ctx.accounts.vault.buyback_burn_reserve >= amount,
+            AngryEngineError::BuybackAmountExceedsReserve
+        );
+
+        require!(
+            ctx.accounts.vault.accounted_balance >= amount,
+            AngryEngineError::InvalidVaultBalance
+        );
+
+        let vault_info = ctx.accounts.vault.to_account_info();
+        let buyback_sol_info =
+            ctx.accounts.buyback_sol_vault.to_account_info();
+
+        let rent = Rent::get()?;
+        let rent_minimum =
+            rent.minimum_balance(8 + EngineVault::LEN);
+
+        let current_vault_lamports = vault_info.lamports();
+
+        let spendable_balance = current_vault_lamports
+            .checked_sub(rent_minimum)
+            .ok_or(AngryEngineError::InvalidVaultBalance)?;
+
+        require!(
+            spendable_balance >= amount,
+            AngryEngineError::InvalidVaultBalance
+        );
+
+        let new_vault_lamports = current_vault_lamports
+            .checked_sub(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        let new_buyback_sol_lamports = buyback_sol_info
+            .lamports()
+            .checked_add(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        let new_buyback_reserve = ctx
+            .accounts
+            .vault
+            .buyback_burn_reserve
+            .checked_sub(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        let new_accounted_balance = ctx
+            .accounts
+            .vault
+            .accounted_balance
+            .checked_sub(amount)
+            .ok_or(AngryEngineError::MathOverflow)?;
+
+        {
+            let vault = &mut ctx.accounts.vault;
+            vault.buyback_burn_reserve = new_buyback_reserve;
+            vault.accounted_balance = new_accounted_balance;
+        }
+
+        {
+            let mut vault_lamports =
+                vault_info.try_borrow_mut_lamports()?;
+            **vault_lamports = new_vault_lamports;
+        }
+
+        {
+            let mut buyback_sol_lamports =
+                buyback_sol_info.try_borrow_mut_lamports()?;
+            **buyback_sol_lamports = new_buyback_sol_lamports;
+        }
+
+        let timestamp = Clock::get()?.unix_timestamp;
+
+        emit!(BuybackSolStaged {
+            config: ctx.accounts.config.key(),
+            vault: ctx.accounts.vault.key(),
+            buyback_sol_vault:
+                ctx.accounts.buyback_sol_vault.key(),
+            amount,
+            remaining_buyback_burn_reserve:
+                ctx.accounts.vault.buyback_burn_reserve,
+            staged_buyback_sol_balance:
+                buyback_sol_info.lamports(),
+            accounted_balance:
+                ctx.accounts.vault.accounted_balance,
+            timestamp,
+        });
+
+        msg!("ANGRY Engine Buyback SOL staged");
+        msg!("Staged amount: {} lamports", amount);
+        msg!(
+            "Remaining Buyback & Burn reserve: {}",
+            ctx.accounts.vault.buyback_burn_reserve
+        );
+        msg!(
+            "Buyback SOL Vault balance: {}",
+            buyback_sol_info.lamports()
+        );
+
+        Ok(())
+    }
+
     pub fn burn_engine_tokens(
         mut ctx: Context<BurnEngineTokens>,
         amount: u64,
@@ -379,6 +494,20 @@ pub struct DevelopmentSettled {
 }
 
 #[event]
+pub struct BuybackSolStaged {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub buyback_sol_vault: Pubkey,
+
+    pub amount: u64,
+    pub remaining_buyback_burn_reserve: u64,
+    pub staged_buyback_sol_balance: u64,
+    pub accounted_balance: u64,
+
+    pub timestamp: i64,
+}
+
+#[event]
 pub struct TokensBurned {
     pub config: Pubkey,
     pub vault: Pubkey,
@@ -465,6 +594,45 @@ pub struct SettleDevelopment<'info> {
     /// Must exactly match development_wallet stored in EngineConfig.
     #[account(mut)]
     pub development_wallet: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct StageBuybackSol<'info> {
+    #[account(
+        seeds = [b"angry-engine-config"],
+        bump = config.bump,
+        has_one = authority @ AngryEngineError::InvalidAuthority,
+        has_one = vault @ AngryEngineError::InvalidVault
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    pub authority: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"angry-engine-vault"],
+        bump = vault.bump,
+        constraint = vault.config == config.key()
+            @ AngryEngineError::InvalidConfig
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    /// CHECK:
+    /// Deterministic System-owned PDA used only to stage
+    /// the Buyback & Burn SOL allocation.
+    #[account(
+        mut,
+        seeds = [b"angry-engine-buyback-sol"],
+        bump,
+        constraint =
+            buyback_sol_vault.owner
+                == &anchor_lang::system_program::ID
+                @ AngryEngineError::InvalidBuybackSolVault,
+        constraint =
+            buyback_sol_vault.data_is_empty()
+                @ AngryEngineError::InvalidBuybackSolVault
+    )]
+    pub buyback_sol_vault: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
@@ -589,6 +757,15 @@ pub enum AngryEngineError {
 
     #[msg("Invalid ANGRY Engine authority.")]
     InvalidAuthority,
+
+    #[msg("Buyback staging amount must be greater than zero.")]
+    InvalidBuybackAmount,
+
+    #[msg("Buyback staging amount exceeds Buyback & Burn reserve.")]
+    BuybackAmountExceedsReserve,
+
+    #[msg("Invalid ANGRY Engine Buyback SOL Vault.")]
+    InvalidBuybackSolVault,
 
     #[msg("Burn amount must be greater than zero.")]
     InvalidBurnAmount,
