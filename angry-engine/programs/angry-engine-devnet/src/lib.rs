@@ -516,6 +516,428 @@ pub mod angry_engine_devnet {
         Ok(())
     }
 
+    pub fn execute_buyback_pumpswap(
+        mut ctx: Context<ExecuteBuybackPumpSwap>,
+        spendable_quote_in: u64,
+        min_base_amount_out: u64,
+        track_volume: bool,
+    ) -> Result<()> {
+        require!(
+            !ctx.accounts.config.paused,
+            AngryEngineError::EnginePaused
+        );
+
+        require!(
+            spendable_quote_in > 0,
+            AngryEngineError::InvalidBuybackSwapAmount
+        );
+
+        require!(
+            min_base_amount_out > 0,
+            AngryEngineError::InvalidBuybackMinOut
+        );
+
+        require!(
+            ctx.accounts.buyback_wsol_account.amount
+                >= spendable_quote_in,
+            AngryEngineError::InsufficientBuybackWsol
+        );
+
+        require_keys_neq!(
+            ctx.accounts.base_mint.key(),
+            ctx.accounts.quote_mint.key(),
+            AngryEngineError::InvalidBuybackBaseTokenAccount
+        );
+
+        // Current PumpSwap trailing account requirement:
+        // pool_v2 PDA = ["pool-v2", base_mint]
+        let base_mint_key = ctx.accounts.base_mint.key();
+
+        let (expected_pool_v2, _) =
+            Pubkey::find_program_address(
+                &[
+                    b"pool-v2",
+                    base_mint_key.as_ref(),
+                ],
+                &PUMPSWAP_PROGRAM_ID,
+            );
+
+        require_keys_eq!(
+            ctx.accounts.pool_v2.key(),
+            expected_pool_v2,
+            AngryEngineError::InvalidPumpSwapPoolV2
+        );
+
+        let quote_balance_before =
+            ctx.accounts.buyback_wsol_account.amount;
+
+        let base_balance_before =
+            ctx.accounts.buyback_base_token_account.amount;
+
+        // Anchor/Borsh encoding:
+        // discriminator [8]
+        // spendable_quote_in u64
+        // min_base_amount_out u64
+        // OptionBool { bool } = one byte
+        let mut instruction_data =
+            Vec::with_capacity(25);
+
+        instruction_data.extend_from_slice(
+            &PUMPSWAP_BUY_EXACT_QUOTE_IN_DISCRIMINATOR
+        );
+
+        instruction_data.extend_from_slice(
+            &spendable_quote_in.to_le_bytes()
+        );
+
+        instruction_data.extend_from_slice(
+            &min_base_amount_out.to_le_bytes()
+        );
+
+        instruction_data.push(
+            if track_volume { 1 } else { 0 }
+        );
+
+        // PumpSwap buy_exact_quote_in core accounts.
+        let mut account_metas = vec![
+            AccountMeta::new(
+                ctx.accounts.pool.key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts.buyback_sol_vault.key(),
+                true,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.global_config.key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.base_mint.key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.quote_mint.key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .buyback_base_token_account
+                    .key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .buyback_wsol_account
+                    .key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .pool_base_token_account
+                    .key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .pool_quote_token_account
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts
+                    .protocol_fee_recipient
+                    .key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .protocol_fee_recipient_token_account
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.base_token_program.key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.quote_token_program.key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.system_program.key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts
+                    .associated_token_program
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts
+                    .pump_event_authority
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.pump_swap_program.key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .coin_creator_vault_ata
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts
+                    .coin_creator_vault_authority
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts
+                    .global_volume_accumulator
+                    .key(),
+                false,
+            ),
+            AccountMeta::new(
+                ctx.accounts
+                    .user_volume_accumulator
+                    .key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.fee_config.key(),
+                false,
+            ),
+            AccountMeta::new_readonly(
+                ctx.accounts.fee_program.key(),
+                false,
+            ),
+        ];
+
+        let mut account_infos = vec![
+            ctx.accounts.pool.to_account_info(),
+            ctx.accounts
+                .buyback_sol_vault
+                .to_account_info(),
+            ctx.accounts
+                .global_config
+                .to_account_info(),
+            ctx.accounts.base_mint.to_account_info(),
+            ctx.accounts.quote_mint.to_account_info(),
+            ctx.accounts
+                .buyback_base_token_account
+                .to_account_info(),
+            ctx.accounts
+                .buyback_wsol_account
+                .to_account_info(),
+            ctx.accounts
+                .pool_base_token_account
+                .to_account_info(),
+            ctx.accounts
+                .pool_quote_token_account
+                .to_account_info(),
+            ctx.accounts
+                .protocol_fee_recipient
+                .to_account_info(),
+            ctx.accounts
+                .protocol_fee_recipient_token_account
+                .to_account_info(),
+            ctx.accounts
+                .base_token_program
+                .to_account_info(),
+            ctx.accounts
+                .quote_token_program
+                .to_account_info(),
+            ctx.accounts
+                .system_program
+                .to_account_info(),
+            ctx.accounts
+                .associated_token_program
+                .to_account_info(),
+            ctx.accounts
+                .pump_event_authority
+                .to_account_info(),
+            ctx.accounts
+                .pump_swap_program
+                .to_account_info(),
+            ctx.accounts
+                .coin_creator_vault_ata
+                .to_account_info(),
+            ctx.accounts
+                .coin_creator_vault_authority
+                .to_account_info(),
+            ctx.accounts
+                .global_volume_accumulator
+                .to_account_info(),
+            ctx.accounts
+                .user_volume_accumulator
+                .to_account_info(),
+            ctx.accounts
+                .fee_config
+                .to_account_info(),
+            ctx.accounts
+                .fee_program
+                .to_account_info(),
+        ];
+
+        // Cashback coins require this account immediately
+        // before pool_v2. Non-cashback coins omit it.
+        if let Some(cashback_wsol_ata) =
+            ctx.accounts.cashback_wsol_ata.as_ref()
+        {
+            account_metas.push(
+                AccountMeta::new(
+                    cashback_wsol_ata.key(),
+                    false,
+                )
+            );
+
+            account_infos.push(
+                cashback_wsol_ata.to_account_info()
+            );
+        }
+
+        // Current PumpSwap required trailing accounts.
+        account_metas.push(
+            AccountMeta::new_readonly(
+                ctx.accounts.pool_v2.key(),
+                false,
+            )
+        );
+
+        account_metas.push(
+            AccountMeta::new_readonly(
+                ctx.accounts
+                    .breaking_fee_recipient
+                    .key(),
+                false,
+            )
+        );
+
+        account_metas.push(
+            AccountMeta::new(
+                ctx.accounts
+                    .breaking_fee_recipient_quote_ata
+                    .key(),
+                false,
+            )
+        );
+
+        account_infos.push(
+            ctx.accounts.pool_v2.to_account_info()
+        );
+
+        account_infos.push(
+            ctx.accounts
+                .breaking_fee_recipient
+                .to_account_info()
+        );
+
+        account_infos.push(
+            ctx.accounts
+                .breaking_fee_recipient_quote_ata
+                .to_account_info()
+        );
+
+        let swap_instruction = Instruction {
+            program_id: PUMPSWAP_PROGRAM_ID,
+            accounts: account_metas,
+            data: instruction_data,
+        };
+
+        let buyback_sol_bump =
+            ctx.bumps.buyback_sol_vault;
+
+        let buyback_sol_seeds: &[&[u8]] = &[
+            b"angry-engine-buyback-sol",
+            &[buyback_sol_bump],
+        ];
+
+        let signer_seeds =
+            &[buyback_sol_seeds];
+
+        invoke_signed(
+            &swap_instruction,
+            &account_infos,
+            signer_seeds,
+        )?;
+
+        ctx.accounts
+            .buyback_wsol_account
+            .reload()?;
+
+        ctx.accounts
+            .buyback_base_token_account
+            .reload()?;
+
+        let quote_balance_after =
+            ctx.accounts.buyback_wsol_account.amount;
+
+        let base_balance_after =
+            ctx.accounts.buyback_base_token_account.amount;
+
+        let quote_spent =
+            quote_balance_before
+                .checked_sub(quote_balance_after)
+                .ok_or(AngryEngineError::MathOverflow)?;
+
+        let base_received =
+            base_balance_after
+                .checked_sub(base_balance_before)
+                .ok_or(AngryEngineError::MathOverflow)?;
+
+        require!(
+            quote_spent > 0,
+            AngryEngineError::BuybackSwapNoQuoteSpent
+        );
+
+        require!(
+            base_received >= min_base_amount_out,
+            AngryEngineError::BuybackSwapBelowMinimum
+        );
+
+        let timestamp =
+            Clock::get()?.unix_timestamp;
+
+        emit!(PumpSwapBuybackExecuted {
+            config: ctx.accounts.config.key(),
+            vault: ctx.accounts.vault.key(),
+            pool: ctx.accounts.pool.key(),
+            base_mint: ctx.accounts.base_mint.key(),
+            quote_mint: ctx.accounts.quote_mint.key(),
+            buyback_sol_vault:
+                ctx.accounts.buyback_sol_vault.key(),
+            buyback_wsol_account:
+                ctx.accounts.buyback_wsol_account.key(),
+            buyback_base_token_account:
+                ctx.accounts
+                    .buyback_base_token_account
+                    .key(),
+            spendable_quote_in,
+            quote_spent,
+            min_base_amount_out,
+            base_received,
+            remaining_wsol: quote_balance_after,
+            buyback_token_balance: base_balance_after,
+            track_volume,
+            timestamp,
+        });
+
+        msg!("ANGRY Engine PumpSwap buyback executed");
+        msg!("WSOL spent: {}", quote_spent);
+        msg!("Tokens received: {}", base_received);
+        msg!(
+            "Remaining Buyback WSOL: {}",
+            quote_balance_after
+        );
+
+        Ok(())
+    }
+
     pub fn burn_engine_tokens(
         mut ctx: Context<BurnEngineTokens>,
         amount: u64,
@@ -658,6 +1080,26 @@ pub struct BuybackWsolPrepared {
 }
 
 #[event]
+pub struct PumpSwapBuybackExecuted {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub pool: Pubkey,
+    pub base_mint: Pubkey,
+    pub quote_mint: Pubkey,
+    pub buyback_sol_vault: Pubkey,
+    pub buyback_wsol_account: Pubkey,
+    pub buyback_base_token_account: Pubkey,
+    pub spendable_quote_in: u64,
+    pub quote_spent: u64,
+    pub min_base_amount_out: u64,
+    pub base_received: u64,
+    pub remaining_wsol: u64,
+    pub buyback_token_balance: u64,
+    pub track_volume: bool,
+    pub timestamp: i64,
+}
+
+#[event]
 pub struct TokensBurned {
     pub config: Pubkey,
     pub vault: Pubkey,
@@ -783,6 +1225,213 @@ pub struct StageBuybackSol<'info> {
                 @ AngryEngineError::InvalidBuybackSolVault
     )]
     pub buyback_sol_vault: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct ExecuteBuybackPumpSwap<'info> {
+    #[account(
+        seeds = [b"angry-engine-config"],
+        bump = config.bump,
+        has_one = authority
+            @ AngryEngineError::InvalidAuthority,
+        has_one = vault
+            @ AngryEngineError::InvalidVault
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    pub authority: Signer<'info>,
+
+    #[account(
+        seeds = [b"angry-engine-vault"],
+        bump = vault.bump,
+        constraint = vault.config == config.key()
+            @ AngryEngineError::InvalidConfig
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    /// CHECK:
+    /// ANGRY Buyback PDA. It becomes the PumpSwap
+    /// `user` signer through invoke_signed.
+    #[account(
+        mut,
+        seeds = [b"angry-engine-buyback-sol"],
+        bump,
+        constraint =
+            buyback_sol_vault.owner
+                == &anchor_lang::system_program::ID
+            @ AngryEngineError::InvalidBuybackSolVault,
+        constraint =
+            buyback_sol_vault.data_is_empty()
+            @ AngryEngineError::InvalidBuybackSolVault
+    )]
+    pub buyback_sol_vault:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates Pool state.
+    #[account(mut)]
+    pub pool: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates GlobalConfig.
+    pub global_config: UncheckedAccount<'info>,
+
+    #[account(
+        constraint =
+            *base_mint.to_account_info().owner
+                == base_token_program.key()
+            @ AngryEngineError::InvalidBuybackBaseTokenAccount
+    )]
+    pub base_mint:
+        InterfaceAccount<'info, InterfaceMint>,
+
+    #[account(
+        address =
+            anchor_spl::token::spl_token::native_mint::ID,
+        constraint =
+            *quote_mint.to_account_info().owner
+                == quote_token_program.key()
+            @ AngryEngineError::InvalidBuybackWsolAccount
+    )]
+    pub quote_mint:
+        InterfaceAccount<'info, InterfaceMint>,
+
+    #[account(
+        mut,
+        constraint =
+            buyback_base_token_account.owner
+                == buyback_sol_vault.key()
+            @ AngryEngineError::InvalidBuybackBaseTokenAccount,
+        constraint =
+            buyback_base_token_account.mint
+                == base_mint.key()
+            @ AngryEngineError::InvalidBuybackBaseTokenAccount,
+        constraint =
+            *buyback_base_token_account
+                .to_account_info()
+                .owner
+                == base_token_program.key()
+            @ AngryEngineError::InvalidBuybackBaseTokenAccount
+    )]
+    pub buyback_base_token_account:
+        InterfaceAccount<'info, InterfaceTokenAccount>,
+
+    #[account(
+        mut,
+        constraint =
+            buyback_wsol_account.owner
+                == buyback_sol_vault.key()
+            @ AngryEngineError::InvalidBuybackWsolAccount,
+        constraint =
+            buyback_wsol_account.mint
+                == quote_mint.key()
+            @ AngryEngineError::InvalidBuybackWsolAccount,
+        constraint =
+            *buyback_wsol_account
+                .to_account_info()
+                .owner
+                == quote_token_program.key()
+            @ AngryEngineError::InvalidBuybackWsolAccount
+    )]
+    pub buyback_wsol_account:
+        InterfaceAccount<'info, InterfaceTokenAccount>,
+
+    /// CHECK: PumpSwap validates this pool token account.
+    #[account(mut)]
+    pub pool_base_token_account:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates this pool token account.
+    #[account(mut)]
+    pub pool_quote_token_account:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates selected protocol recipient.
+    pub protocol_fee_recipient:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates its quote ATA.
+    #[account(mut)]
+    pub protocol_fee_recipient_token_account:
+        UncheckedAccount<'info>,
+
+    pub base_token_program:
+        Interface<'info, TokenInterface>,
+
+    #[account(
+        address = anchor_spl::token::ID
+    )]
+    pub quote_token_program:
+        Interface<'info, TokenInterface>,
+
+    pub system_program:
+        Program<'info, System>,
+
+    /// CHECK:
+    /// PumpSwap validates Associated Token Program address.
+    pub associated_token_program:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap event authority PDA.
+    pub pump_event_authority:
+        UncheckedAccount<'info>,
+
+    /// CHECK:
+    /// Fixed official PumpSwap executable.
+    #[account(
+        address = PUMPSWAP_PROGRAM_ID,
+        executable
+    )]
+    pub pump_swap_program:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap creator fee ATA.
+    #[account(mut)]
+    pub coin_creator_vault_ata:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates creator vault authority.
+    pub coin_creator_vault_authority:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap global volume PDA.
+    pub global_volume_accumulator:
+        UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap user volume PDA.
+    #[account(mut)]
+    pub user_volume_accumulator:
+        UncheckedAccount<'info>,
+
+    /// CHECK: Pump Fees config PDA.
+    pub fee_config:
+        UncheckedAccount<'info>,
+
+    /// CHECK: Pump Fees program.
+    pub fee_program:
+        UncheckedAccount<'info>,
+
+    /// CHECK:
+    /// Optional cashback WSOL ATA.
+    /// Present only for cashback pools.
+    #[account(mut)]
+    pub cashback_wsol_ata:
+        Option<UncheckedAccount<'info>>,
+
+    /// CHECK:
+    /// Required current PumpSwap pool-v2 PDA.
+    /// Address is verified in the handler.
+    pub pool_v2:
+        UncheckedAccount<'info>,
+
+    /// CHECK:
+    /// Current trailing PumpSwap fee recipient.
+    pub breaking_fee_recipient:
+        UncheckedAccount<'info>,
+
+    /// CHECK:
+    /// Quote-mint ATA of the trailing fee recipient.
+    #[account(mut)]
+    pub breaking_fee_recipient_quote_ata:
+        UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
@@ -982,6 +1631,27 @@ pub enum AngryEngineError {
 
     #[msg("Invalid ANGRY Engine Buyback WSOL account.")]
     InvalidBuybackWsolAccount,
+
+    #[msg("Buyback swap amount must be greater than zero.")]
+    InvalidBuybackSwapAmount,
+
+    #[msg("Minimum buyback token output must be greater than zero.")]
+    InvalidBuybackMinOut,
+
+    #[msg("Buyback WSOL balance is too small for this swap.")]
+    InsufficientBuybackWsol,
+
+    #[msg("Invalid Buyback base token account.")]
+    InvalidBuybackBaseTokenAccount,
+
+    #[msg("Invalid PumpSwap pool-v2 PDA.")]
+    InvalidPumpSwapPoolV2,
+
+    #[msg("PumpSwap buyback spent zero WSOL.")]
+    BuybackSwapNoQuoteSpent,
+
+    #[msg("PumpSwap buyback output was below the required minimum.")]
+    BuybackSwapBelowMinimum,
 
     #[msg("Burn amount must be greater than zero.")]
     InvalidBurnAmount,
