@@ -1,0 +1,19 @@
+ANGRY ENGINE CORE CLEAN - AUDIT REVISION 3
+
+FILES:
+    2250 bytes  94775556a46b2a463cdc9995dcfd7d51c3d300651069e384a74a07b0269dc88d  AUDIT-NOTES.txt
+    2474 bytes  ca1a6357fefbcd7b961af7f2a63ae0fef2e81854116aa4d9a4bc89ee11e1c614  CORE-DESIGN.txt
+     327 bytes  61ac9bc17d162a19f21e4d6af13c95bf2432c102c92d521faf7e9cf80aee1d0f  Cargo.toml
+     477 bytes  9c8a80127f5681ae9353c1f4784c2a6da1567db21210d6c8fdbf224c36299a4a  STATIC-CHECK.json
+    1684 bytes  bd0b9a6a3521589563bec1f32dbb978afa45584b28926c4b4aaa63df6fdfd8f6  src/accounting.rs
+     184 bytes  7d8e034f60b15b30d96501d7bfac454530a536b7a20608575c1b392eec0fa8fa  src/constants.rs
+    1554 bytes  52d68e19944bc5242ad737082dd78cacef6f3ed83750cc0f458d46864fc2af48  src/errors.rs
+    2043 bytes  946fb30f61f86aa7addde545f40bccc6690255a5ea3eff064fb65fc3371647d0  src/events.rs
+    8098 bytes  2a9b40090de5823301fd0470a6ca0355f57d3a1a310554b12a0e2e802e6496a9  src/instructions/admin.rs
+    3163 bytes  53ff678622bdacab18d536e6b520ce07f26a38ba8a2a84ccf545b3b69f6a0f2e  src/instructions/development.rs
+    3943 bytes  b9b326dea3df6c695b3fceadfccac0016896b12f7ce81b2ab52ba8c6a969e5a7  src/instructions/initialize.rs
+     402 bytes  e65893d95a01ef165144e71c95fd6eb4e3f59ae6805180df447ff59df29271f4  src/instructions/mod.rs
+    1984 bytes  631cd4bf84043d4aa1d20faa52594d21d98826b2cb461ba628a9784a416903d0  src/instructions/sync_fees.rs
+    1966 bytes  f88faa24307f111646fce3fad6ec843deffe685c12e5a62efa0bd8a3a3139e10  src/lib.rs
+    9095 bytes  0244526420d78bfa2cb1024e830423775e1e98776d60180e9a7f25a9a5ed9336  src/state.rs
+   19783 bytes  7bfece6c24fdb3decc82398eb62dde26a31243a71a4402712bc8cf3d0fb36fab  tests/core.test.ts

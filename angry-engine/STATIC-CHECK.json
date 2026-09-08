@@ -1,0 +1,10 @@
+{
+  "r2_snapshot_sha256": "ef62c3a7ce5e88db26e247d4463e4638812ce2fd9159041621660e0332019d87",
+  "r2_file_count": 16,
+  "r2_matches_original_r2_by_file": true,
+  "r3_math_fuzz_iterations": 10000,
+  "r3_engine_config_len_without_discriminator": 546,
+  "r3_engine_config_account_space_with_discriminator": 554,
+  "rust_anchor_compile_run_here": false,
+  "reason_compile_not_run": "Rust/cargo toolchain is not installed in this container; final compile remains Playground step."
+}

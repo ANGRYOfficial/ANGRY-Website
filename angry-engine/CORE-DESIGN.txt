@@ -1,0 +1,47 @@
+ANGRY ENGINE CLEAN - CORE DESIGN (AUDIT REVISION 3)
+
+PURPOSE
+- Core accounting and reserve management only.
+- No PumpSwap, token burn, or productive-liquidity deployment yet.
+- No transaction for every trade or tiny creator-fee payment.
+- One project config is controlled by an authority and uses deterministic PDAs.
+
+DEFAULT ANGRY TEST CONFIGURATION
+- Buyback & Burn: 25% (2500 BPS)
+- Productive Liquidity: 15% (1500 BPS)
+- Development / Operations: 60% (6000 BPS)
+
+TRANSACTION-EFFICIENCY MODEL
+1. Creator-fee SOL accumulates directly in the Engine vault.
+2. sync_fees is optional/manual accounting and is not required per trade.
+3. Processing instructions lazy-sync pending fees inside the same transaction.
+4. Settings updates also lazy-sync pending fees under the OLD BPS before changing BPS.
+5. Heavy actions use thresholds/batches instead of one action per incoming fee.
+
+CORE SAFETY RULES
+1. Allocation totals exactly 10000 BPS.
+2. Processing thresholds are greater than zero.
+3. Reserve total equals accounted_balance.
+4. Lifetime conservation holds:
+   total_received =
+   accounted_balance
+   + total_development_settled
+   + total_buyback_processed
+   + total_liquidity_deployed.
+5. Cumulative epoch allocation must equal the exact BPS targets, so sync frequency
+   cannot change the final allocation.
+6. Emergency pause has minimal dependencies and does not require a healthy invariant.
+7. Unpause requires both healthy accounting and real vault SOL backing.
+8. Outgoing development settlement is blocked while paused.
+9. There is no generic admin sweep/recover-SOL function for the fee vault because
+   unsynced legitimate creator fees cannot be distinguished from arbitrary SOL.
+10. Authority rotation is two-step (propose -> accept) and only while paused.
+11. The original seed_authority is stored because the config PDA was derived from the
+    initial authority plus project; authority rotation does not move the config PDA.
+12. Additional state space is pre-allocated for future backwards-compatible fields.
+13. Future Buyback and Productive Liquidity instructions must lazy-sync first, execute
+    atomically, then reduce only their own reserve/accounted balance and increment the
+    matching lifetime processed counter only when the intended action succeeds.
+14. Program ID remains a placeholder until one new Clean Devnet ID is chosen. It must
+    be inserted into the source before the first Build/Deploy and included in a final
+    audited snapshot.

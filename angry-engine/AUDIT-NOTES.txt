@@ -1,0 +1,45 @@
+ANGRY ENGINE CLEAN - AUDIT REVISION 3 NOTES
+
+Termux R2 snapshot received:
+ANGRY-Engine-Core-Clean-R2-TERMUX-SNAPSHOT.tar.gz
+SHA256:
+ef62c3a7ce5e88db26e247d4463e4638812ce2fd9159041621660e0332019d87
+
+R2 integrity:
+- 16 files present.
+- No missing file.
+- No empty file.
+- Every extracted file matched the originally generated R2 package byte-for-byte.
+- Every file listed in the R2 manifest matched its size and SHA256.
+
+Additional full-source review before Build found design hardening opportunities.
+They are addressed together in R3, before any Playground Build:
+
+1. R2 unpause checked only internal accounting. R3 separates emergency pause and
+   unpause. Pause remains dependency-light; unpause also verifies actual vault backing.
+
+2. R2 had no safe authority rotation. R3 adds two-step propose/accept authority transfer,
+   plus cancellation, restricted to paused state. seed_authority is stored so the original
+   config PDA derivation remains discoverable after rotation.
+
+3. R2 invariant checked epoch totals but not exact BPS targets. R3 verifies each cumulative
+   epoch allocation against its exact deterministic target.
+
+4. R2 did not yet express lifetime conservation for future Buyback/Liquidity outflows.
+   R3 adds total_buyback_processed and total_liquidity_deployed now, while the project is
+   still clean, so future actions can preserve one global conservation invariant.
+
+5. R2 required a separate sync before a safe settings update when pending fees existed.
+   R3 lazy-syncs those pending fees under the OLD settings inside the same atomic settings
+   transaction, avoiding an unnecessary transaction and preventing retroactive reallocation.
+
+6. R3 pre-allocates substantially more config state space before first deployment to reduce
+   later migration/reallocation pressure as Buyback and Productive Liquidity are added.
+
+Still intentionally NOT complete:
+- Program ID is a placeholder.
+- Buyback/PumpSwap/burn is not Core.
+- Productive liquidity is not Core.
+- R3 has been statically audited and math/invariant checked locally, but this environment
+  does not have the Rust/Anchor toolchain installed. Anchor compilation and Devnet tests
+  therefore remain the final verification step for Core after the Program ID is fixed.
