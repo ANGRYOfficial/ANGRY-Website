@@ -55,7 +55,9 @@ fn require_pda(
     error: EngineError,
 ) -> Result<()> {
     let (expected, _) = Pubkey::find_program_address(seeds, program_id);
-    require!(actual == expected, error);
+    if actual != expected {
+        return Err(error.into());
+    }
     Ok(())
 }
 

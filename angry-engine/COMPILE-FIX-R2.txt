@@ -1,0 +1,34 @@
+ANGRY ENGINE PART 2 — COMPILE FIX R2
+========================================
+
+Observed on the first Solana Playground Anchor Build of Part 2 R1:
+
+  error[E0433] at src/instructions/buyback.rs:58
+  require!(actual == expected, error)
+  macro attempted to resolve ErrorCode from the crate.
+
+Cause:
+  require_pda accepted a runtime EngineError value and passed that value to
+  Anchor's require! macro. Anchor's macro matcher treats this differently from
+  a direct EngineError::Variant path.
+
+R2 fix:
+  The PDA helper now compares directly and returns Err(error.into()) when the
+  PDA does not match.
+
+Why behavior is preserved:
+  #[error_code] implements conversion from the user-defined EngineError into
+  Anchor's Error type. Each call site still supplies the same EngineError
+  variant as in R1.
+
+Static sweep performed:
+  - searched all Part 2 Rust source for require_pda calls
+  - searched require!/err! use for another runtime error variable
+  - only this single runtime-error macro use existed
+  - Core accounting/state/admin/development logic unchanged
+  - Program ID unchanged
+  - PumpSwap account order unchanged
+  - Buyback/burn flow unchanged
+
+Compile status:
+  NOT CLAIMED PASSED YET. R2 must be built once in Solana Playground.
