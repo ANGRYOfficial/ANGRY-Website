@@ -2,7 +2,6 @@ use anchor_lang::prelude::*;
 
 use crate::{
     accounting::{assert_vault_backing, sync_pending_fees},
-    constants::VAULT_SEED,
     errors::EngineError,
     events::{
         AuthorityTransferAccepted,
@@ -12,30 +11,15 @@ use crate::{
         EngineSettingsUpdated,
     },
     instructions::sync_fees::emit_sync_event,
-    state::{EngineConfig, EngineVault},
+    state::EngineConfig,
+    AcceptAuthority,
+    CancelAuthorityTransfer,
+    PauseEngine,
+    ProposeAuthority,
+    UnpauseEngine,
+    UpdateEngineSettings,
+    UpdateEngineSettingsArgs,
 };
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct UpdateEngineSettingsArgs {
-    pub buyback_bps: u16,
-    pub liquidity_bps: u16,
-    pub development_bps: u16,
-
-    pub buyback_threshold: u64,
-    pub liquidity_threshold: u64,
-    pub development_threshold: u64,
-}
-
-#[derive(Accounts)]
-pub struct PauseEngine<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    pub authority: Signer<'info>,
-}
 
 pub fn pause_engine_handler(ctx: Context<PauseEngine>) -> Result<()> {
     let config = &mut ctx.accounts.config;
@@ -57,26 +41,6 @@ pub fn pause_engine_handler(ctx: Context<PauseEngine>) -> Result<()> {
     });
 
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct UnpauseEngine<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    #[account(
-        seeds = [
-            VAULT_SEED,
-            config.key().as_ref(),
-        ],
-        bump = config.vault_bump
-    )]
-    pub vault: Account<'info, EngineVault>,
-
-    pub authority: Signer<'info>,
 }
 
 pub fn unpause_engine_handler(ctx: Context<UnpauseEngine>) -> Result<()> {
@@ -104,28 +68,6 @@ pub fn unpause_engine_handler(ctx: Context<UnpauseEngine>) -> Result<()> {
     });
 
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct UpdateEngineSettings<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    #[account(
-        seeds = [
-            VAULT_SEED,
-            config.key().as_ref(),
-        ],
-        bump = config.vault_bump
-    )]
-    pub vault: Account<'info, EngineVault>,
-
-    pub authority: Signer<'info>,
-
-    pub new_development_wallet: SystemAccount<'info>,
 }
 
 pub fn update_settings_handler(
@@ -198,17 +140,6 @@ pub fn update_settings_handler(
     Ok(())
 }
 
-#[derive(Accounts)]
-pub struct ProposeAuthority<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    pub authority: Signer<'info>,
-}
-
 pub fn propose_authority_handler(
     ctx: Context<ProposeAuthority>,
     new_authority: Pubkey,
@@ -234,14 +165,6 @@ pub fn propose_authority_handler(
     });
 
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct AcceptAuthority<'info> {
-    #[account(mut)]
-    pub config: Account<'info, EngineConfig>,
-
-    pub pending_authority: Signer<'info>,
 }
 
 pub fn accept_authority_handler(
@@ -277,17 +200,6 @@ pub fn accept_authority_handler(
     });
 
     Ok(())
-}
-
-#[derive(Accounts)]
-pub struct CancelAuthorityTransfer<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    pub authority: Signer<'info>,
 }
 
 pub fn cancel_authority_transfer_handler(

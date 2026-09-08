@@ -1,0 +1,9 @@
+{
+  "program_id_exact": true,
+  "accounts_derives_only_in_lib": true,
+  "accounts_context_count": true,
+  "program_instruction_count": true,
+  "allocation_bps_in_tests": true,
+  "no_zero_length_files": true,
+  "business_logic_still_modular": true
+}

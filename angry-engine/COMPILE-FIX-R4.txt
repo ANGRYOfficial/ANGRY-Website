@@ -1,0 +1,21 @@
+ANGRY ENGINE CLEAN CORE R4 - ANCHOR MODULE COMPILE FIX
+
+Observed first Build error:
+- error[E0432]: unresolved import `crate` at #[program]
+- compiler suggested a generated __client_accounts_* path inside a nested instruction module.
+
+Cause:
+- Anchor #[program] expects generated __client_accounts_* modules for instruction
+  Context structs at crate root. R3 placed #[derive(Accounts)] structs inside
+  src/instructions/*.rs and re-exported only their public types.
+
+R4 fix:
+- All #[derive(Accounts)] structs and instruction argument structs are now in
+  src/lib.rs (crate root).
+- Business logic remains separated in src/instructions/*.rs.
+- Program ID is unchanged:
+  NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C
+- Accounting, state layout, BPS, thresholds, authority logic, tests, and fee-flow
+  behavior are unchanged from the audited R3 source.
+
+This package still requires Anchor Build + Devnet test before the Core is marked PASS.

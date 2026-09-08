@@ -2,34 +2,11 @@ use anchor_lang::prelude::*;
 
 use crate::{
     accounting::{spendable_vault_balance, sync_pending_fees},
-    constants::VAULT_SEED,
     errors::EngineError,
     events::DevelopmentSettled,
     instructions::sync_fees::emit_sync_event,
-    state::{EngineConfig, EngineVault},
+    SettleDevelopment,
 };
-
-#[derive(Accounts)]
-pub struct SettleDevelopment<'info> {
-    #[account(mut)]
-    pub config: Account<'info, EngineConfig>,
-
-    #[account(
-        mut,
-        seeds = [
-            VAULT_SEED,
-            config.key().as_ref(),
-        ],
-        bump = config.vault_bump
-    )]
-    pub vault: Account<'info, EngineVault>,
-
-    #[account(
-        mut,
-        address = config.development_wallet @ EngineError::InvalidDevelopmentWallet
-    )]
-    pub development_wallet: SystemAccount<'info>,
-}
 
 pub fn handler(ctx: Context<SettleDevelopment>) -> Result<()> {
     let config_key = ctx.accounts.config.key();

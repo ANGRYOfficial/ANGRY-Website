@@ -1,62 +1,13 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{CONFIG_SEED, ENGINE_VERSION, VAULT_SEED},
+    constants::ENGINE_VERSION,
     errors::EngineError,
     events::EngineInitialized,
     state::{EngineConfig, EngineVault},
+    InitializeEngine,
+    InitializeEngineArgs,
 };
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct InitializeEngineArgs {
-    pub project: Pubkey,
-
-    pub buyback_bps: u16,
-    pub liquidity_bps: u16,
-    pub development_bps: u16,
-
-    pub buyback_threshold: u64,
-    pub liquidity_threshold: u64,
-    pub development_threshold: u64,
-}
-
-#[derive(Accounts)]
-#[instruction(args: InitializeEngineArgs)]
-pub struct InitializeEngine<'info> {
-    #[account(mut)]
-    pub authority: Signer<'info>,
-
-    // A System-owned destination prevents configuring a program data account
-    // that cannot receive direct SOL settlement.
-    pub development_wallet: SystemAccount<'info>,
-
-    #[account(
-        init,
-        payer = authority,
-        space = 8 + EngineConfig::LEN,
-        seeds = [
-            CONFIG_SEED,
-            authority.key().as_ref(),
-            args.project.as_ref(),
-        ],
-        bump
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    #[account(
-        init,
-        payer = authority,
-        space = 8 + EngineVault::LEN,
-        seeds = [
-            VAULT_SEED,
-            config.key().as_ref(),
-        ],
-        bump
-    )]
-    pub vault: Account<'info, EngineVault>,
-
-    pub system_program: Program<'info, System>,
-}
 
 pub fn handler(
     ctx: Context<InitializeEngine>,

@@ -2,31 +2,11 @@ use anchor_lang::prelude::*;
 
 use crate::{
     accounting::{sync_pending_fees, FeeAllocation},
-    constants::VAULT_SEED,
     errors::EngineError,
     events::FeesSynced,
-    state::{EngineConfig, EngineVault},
+    state::EngineConfig,
+    SyncFees,
 };
-
-#[derive(Accounts)]
-pub struct SyncFees<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub config: Account<'info, EngineConfig>,
-
-    pub authority: Signer<'info>,
-
-    #[account(
-        seeds = [
-            VAULT_SEED,
-            config.key().as_ref(),
-        ],
-        bump = config.vault_bump
-    )]
-    pub vault: Account<'info, EngineVault>,
-}
 
 pub fn emit_sync_event(
     config_key: Pubkey,
