@@ -1,28 +1,24 @@
 {
-  "revision": "Part2 Buyback & Burn R2 compile-fix candidate",
-  "date": "2026-09-09",
+  "revision": "Part2 Buyback & Burn R3 compile-fix candidate",
   "program_id": "NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C",
-  "r1_build_result": {
+  "r2_build_result": {
     "anchor_build": "FAILED",
-    "error": "E0433 in src/instructions/buyback.rs:58: require!(actual == expected, error)",
-    "rust_contract_not_upgraded": true
+    "reason": "Context lifetime invariance in pumpswap_buy_exact_quote_in helper"
   },
-  "r2_change": {
+  "r3_change": {
     "file": "src/instructions/buyback.rs",
-    "scope": "require_pda helper only",
-    "old": "require!(actual == expected, error);",
-    "new": "if actual != expected { return Err(error.into()); }"
+    "scope": "helper signature only",
+    "old": "ctx: &Context<'_, '_, '_, 'info, ExecuteBuybackBurn<'info>>",
+    "new": "ctx: &Context<ExecuteBuybackBurn>"
   },
   "static_sweep": {
-    "runtime_error_variable_in_anchor_require_or_err_macros_remaining": false,
-    "require_pda_call_count": 6,
-    "core_state_layout_changed": false,
-    "core_accounting_changed": false,
-    "core_admin_changed": false,
-    "core_development_changed": false,
-    "program_id_changed": false,
+    "explicit_context_lifetime_coupling_remaining": false,
+    "pumpswap_instruction_data_changed": false,
     "pumpswap_account_order_changed": false,
-    "buyback_burn_flow_changed": false
+    "signer_seeds_changed": false,
+    "buyback_burn_accounting_changed": false,
+    "core_logic_changed": false,
+    "program_id_changed": false
   },
-  "compile_status": "NOT RUN — requires one Solana Playground Build"
+  "compile_status": "NOT RUN \u2014 requires one Solana Playground Build"
 }

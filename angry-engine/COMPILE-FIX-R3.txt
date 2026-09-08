@@ -1,0 +1,38 @@
+ANGRY ENGINE PART 2 — COMPILE FIX R3
+========================================
+
+Observed on Solana Playground Anchor Build of Part 2 R2:
+
+  lifetime error at the call to pumpswap_buy_exact_quote_in(&ctx, ...)
+  Anchor Context is invariant over its account-info lifetime.
+
+Cause:
+  The helper signature explicitly forced the lifetime used by
+  Context::remaining_accounts to be the same lifetime used inside
+  ExecuteBuybackBurn<'info>:
+
+    Context<'_, '_, '_, 'info, ExecuteBuybackBurn<'info>>
+
+  The handler's Anchor Context does not guarantee those two elided lifetimes
+  are identical. Because Context is invariant over 'info, Rust rejects the call.
+
+R3 fix:
+  Match the already-compiling validation helper pattern and let Rust infer the
+  Context lifetimes independently:
+
+    fn pumpswap_buy_exact_quote_in(
+        ctx: &Context<ExecuteBuybackBurn>,
+        ...
+    )
+
+Static sweep:
+  - no other explicit Context lifetime coupling remains in src/
+  - PumpSwap instruction data unchanged
+  - PumpSwap 26-account order unchanged
+  - signer seeds unchanged
+  - swap/burn/accounting behavior unchanged
+  - Core state/accounting/admin/development source unchanged
+  - Program ID unchanged
+
+Compile status:
+  NOT CLAIMED PASSED YET. R3 still requires one Anchor Build.

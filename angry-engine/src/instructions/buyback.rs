@@ -278,8 +278,8 @@ fn validate_pumpswap_accounts(ctx: &Context<ExecuteBuybackBurn>) -> Result<()> {
     Ok(())
 }
 
-fn pumpswap_buy_exact_quote_in<'info>(
-    ctx: &Context<'_, '_, '_, 'info, ExecuteBuybackBurn<'info>>,
+fn pumpswap_buy_exact_quote_in(
+    ctx: &Context<ExecuteBuybackBurn>,
     spendable_quote_in: u64,
     min_base_amount_out: u64,
 ) -> Result<()> {
