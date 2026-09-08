@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
+    instruction::{AccountMeta, Instruction},
     program::invoke_signed,
     system_instruction,
 };
@@ -12,12 +13,32 @@ use anchor_spl::token::{
     TokenAccount,
 };
 
+use anchor_spl::token_interface::{
+    Mint as InterfaceMint,
+    TokenAccount as InterfaceTokenAccount,
+    TokenInterface,
+};
+
 declare_id!("Asv68hEx77m6yaoKYnMUym1t7MfxidTkZyMh6Ynip4Zt");
 
 const BPS_DENOMINATOR: u16 = 10_000;
 const BUYBACK_BURN_BPS: u16 = 4_000; // 40%
 const LIQUIDITY_BPS: u16 = 4_000; // 40%
 const DEVELOPMENT_BPS: u16 = 2_000; // 20%
+
+// Official PumpSwap program ID:
+// pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA
+const PUMPSWAP_PROGRAM_ID: Pubkey = Pubkey::new_from_array([
+    12, 20, 222, 252, 130, 94, 198, 118,
+    148, 37, 8, 24, 187, 101, 64, 101,
+    244, 41, 141, 49, 86, 213, 113, 180,
+    212, 248, 9, 12, 24, 233, 168, 99,
+]);
+
+// PumpSwap buy_exact_quote_in instruction discriminator.
+const PUMPSWAP_BUY_EXACT_QUOTE_IN_DISCRIMINATOR: [u8; 8] = [
+    198, 46, 21, 82, 180, 217, 232, 112,
+];
 
 #[program]
 pub mod angry_engine_devnet {
