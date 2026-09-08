@@ -1,3 +1,11 @@
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+
 const assert = {
   equal(actual: unknown, expected: unknown, message?: string) {
     if (actual !== expected) {
@@ -24,14 +32,14 @@ const assert = {
   },
 };
 
-describe("ANGRY Engine Clean - Core R5 Playground", () => {
+describe("ANGRY Engine Clean - Core R6 Playground", () => {
   // Solana Playground provides pg, web3, BN and Buffer globally.
   const program = pg.program;
   const authority = pg.wallet.publicKey;
 
-  const developmentWallet = web3.Keypair.generate();
-  const intruder = web3.Keypair.generate();
-  const newAuthority = web3.Keypair.generate();
+  const developmentWallet = Keypair.generate();
+  const intruder = Keypair.generate();
+  const newAuthority = Keypair.generate();
 
   const BUYBACK_BPS = 2500;
   const LIQUIDITY_BPS = 1500;
@@ -41,8 +49,8 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
   const LIQUIDITY_THRESHOLD = new BN(1_000_000);
   const DEVELOPMENT_THRESHOLD = new BN(1_000_000);
 
-  function derive(project: web3.PublicKey, seedAuthority = authority) {
-    const [config] = web3.PublicKey.findProgramAddressSync(
+  function derive(project: PublicKey, seedAuthority = authority) {
+    const [config] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("angry-engine-config"),
         seedAuthority.toBuffer(),
@@ -51,7 +59,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
       program.programId
     );
 
-    const [vault] = web3.PublicKey.findProgramAddressSync(
+    const [vault] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("angry-engine-vault"),
         config.toBuffer(),
@@ -62,16 +70,16 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
     return { config, vault };
   }
 
-  async function fund(pubkey: web3.PublicKey, lamports: number) {
-    const tx = new web3.Transaction().add(
-      web3.SystemProgram.transfer({
+  async function fund(pubkey: PublicKey, lamports: number) {
+    const tx = new Transaction().add(
+      SystemProgram.transfer({
         fromPubkey: authority,
         toPubkey: pubkey,
         lamports,
       })
     );
 
-    await web3.sendAndConfirmTransaction(pg.connection, tx, [pg.wallet.keypair]);
+    await sendAndConfirmTransaction(pg.connection, tx, [pg.wallet.keypair]);
   }
 
   async function expectFailure(
@@ -102,7 +110,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
   });
 
   it("rejects invalid allocation and zero thresholds", async () => {
-    const invalidProjectA = web3.Keypair.generate().publicKey;
+    const invalidProjectA = Keypair.generate().publicKey;
     const invalidA = derive(invalidProjectA);
 
     await expectFailure(
@@ -122,13 +130,13 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
             developmentWallet: developmentWallet.publicKey,
             config: invalidA.config,
             vault: invalidA.vault,
-            systemProgram: web3.SystemProgram.programId,
+            systemProgram: SystemProgram.programId,
           })
           .rpc(),
       "Allocation basis points must total 10000"
     );
 
-    const invalidProjectB = web3.Keypair.generate().publicKey;
+    const invalidProjectB = Keypair.generate().publicKey;
     const invalidB = derive(invalidProjectB);
 
     await expectFailure(
@@ -148,7 +156,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
             developmentWallet: developmentWallet.publicKey,
             config: invalidB.config,
             vault: invalidB.vault,
-            systemProgram: web3.SystemProgram.programId,
+            systemProgram: SystemProgram.programId,
           })
           .rpc(),
       "All processing thresholds must be greater than zero"
@@ -156,7 +164,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
   });
 
   it("keeps 25 / 15 / 60 stable across tiny sync batches", async () => {
-    const project = web3.Keypair.generate().publicKey;
+    const project = Keypair.generate().publicKey;
     const pda = derive(project);
 
     await program.methods
@@ -174,7 +182,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
         developmentWallet: developmentWallet.publicKey,
         config: pda.config,
         vault: pda.vault,
-        systemProgram: web3.SystemProgram.programId,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
 
@@ -215,7 +223,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
   });
 
   it("rolls back lazy sync if development threshold is not reached", async () => {
-    const project = web3.Keypair.generate().publicKey;
+    const project = Keypair.generate().publicKey;
     const pda = derive(project);
 
     await program.methods
@@ -233,7 +241,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
         developmentWallet: developmentWallet.publicKey,
         config: pda.config,
         vault: pda.vault,
-        systemProgram: web3.SystemProgram.programId,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
 
@@ -289,7 +297,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
   });
 
   it("runs the main Core flow with batching, pause and atomic settings update", async () => {
-    const project = web3.Keypair.generate().publicKey;
+    const project = Keypair.generate().publicKey;
     const pda = derive(project);
 
     await program.methods
@@ -307,7 +315,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
         developmentWallet: developmentWallet.publicKey,
         config: pda.config,
         vault: pda.vault,
-        systemProgram: web3.SystemProgram.programId,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
 
@@ -315,7 +323,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
 
     assert.equal(config.authority.toBase58(), authority.toBase58());
     assert.equal(config.seedAuthority.toBase58(), authority.toBase58());
-    assert.equal(config.pendingAuthority.toBase58(), web3.PublicKey.default.toBase58());
+    assert.equal(config.pendingAuthority.toBase58(), PublicKey.default.toBase58());
     assert.equal(config.project.toBase58(), project.toBase58());
     assert.equal(config.developmentWallet.toBase58(), developmentWallet.publicKey.toBase58());
     assert.equal(config.buybackBps, 2500);
@@ -550,7 +558,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
   });
 
   it("rotates authority with two-step acceptance while preserving the same PDAs", async () => {
-    const project = web3.Keypair.generate().publicKey;
+    const project = Keypair.generate().publicKey;
     const pda = derive(project);
 
     await program.methods
@@ -568,7 +576,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
         developmentWallet: developmentWallet.publicKey,
         config: pda.config,
         vault: pda.vault,
-        systemProgram: web3.SystemProgram.programId,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
 
@@ -615,7 +623,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
     config = await program.account.engineConfig.fetch(pda.config);
     assert.equal(config.authority.toBase58(), newAuthority.publicKey.toBase58());
     assert.equal(config.seedAuthority.toBase58(), authority.toBase58());
-    assert.equal(config.pendingAuthority.toBase58(), web3.PublicKey.default.toBase58());
+    assert.equal(config.pendingAuthority.toBase58(), PublicKey.default.toBase58());
 
     // Old authority can no longer unpause.
     await expectFailure(() =>
@@ -668,7 +676,7 @@ describe("ANGRY Engine Clean - Core R5 Playground", () => {
       .rpc();
 
     config = await program.account.engineConfig.fetch(pda.config);
-    assert.equal(config.pendingAuthority.toBase58(), web3.PublicKey.default.toBase58());
+    assert.equal(config.pendingAuthority.toBase58(), PublicKey.default.toBase58());
     assert.equal(config.authority.toBase58(), newAuthority.publicKey.toBase58());
   });
 });
