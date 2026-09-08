@@ -6,9 +6,33 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import { assert } from "chai";
+const assert = {
+  equal(actual: unknown, expected: unknown, message?: string) {
+    if (actual !== expected) {
+      throw new Error(
+        message ?? `Assertion failed: expected ${String(actual)} to equal ${String(expected)}`
+      );
+    }
+  },
 
-describe("ANGRY Engine Clean - Core R3", () => {
+  include(actual: string, expected: string, message?: string) {
+    if (!actual.includes(expected)) {
+      throw new Error(
+        message ?? `Assertion failed: expected "${actual}" to include "${expected}"`
+      );
+    }
+  },
+
+  isTrue(value: unknown, message?: string) {
+    if (value !== true) {
+      throw new Error(
+        message ?? `Assertion failed: expected true but got ${String(value)}`
+      );
+    }
+  },
+};
+
+describe("ANGRY Engine Clean - Core R4", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
