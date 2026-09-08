@@ -112,7 +112,7 @@ describe("ANGRY Engine v0.6C WSOL Buyback Preparation Test", () => {
     let stagedSolBefore =
       await pg.connection.getBalance(
         buybackSolPda,
-        "confirmed"
+        "finalized"
       );
 
     console.log(
@@ -184,10 +184,15 @@ describe("ANGRY Engine v0.6C WSOL Buyback Preparation Test", () => {
         stageSignature
       );
 
+      await pg.connection.confirmTransaction(
+        stageSignature,
+        "finalized"
+      );
+
       stagedSolBefore =
         await pg.connection.getBalance(
           buybackSolPda,
-          "confirmed"
+          "finalized"
         );
     }
 
@@ -360,11 +365,39 @@ describe("ANGRY Engine v0.6C WSOL Buyback Preparation Test", () => {
       prepareSignature
     );
 
-    const stagedSolAfter =
+    await pg.connection.confirmTransaction(
+      prepareSignature,
+      "finalized"
+    );
+
+    let stagedSolAfter =
       await pg.connection.getBalance(
         buybackSolPda,
-        "confirmed"
+        "finalized"
       );
+
+    for (let attempt = 1; attempt <= 8; attempt++) {
+      if (
+        stagedSolBefore - stagedSolAfter === WRAP_AMOUNT
+      ) {
+        break;
+      }
+
+      console.log(
+        "Waiting for finalized Buyback SOL balance...",
+        attempt
+      );
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, 1500)
+      );
+
+      stagedSolAfter =
+        await pg.connection.getBalance(
+          buybackSolPda,
+          "finalized"
+        );
+    }
 
     const wsolAfter =
       await readTokenAccount(
