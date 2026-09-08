@@ -1,0 +1,83 @@
+ANGRY ENGINE — PUMPSWAP COMPATIBILITY BASELINE
+Verified against official pump-fun/pump-public-docs on 2026-09-09.
+
+Official PumpSwap program:
+pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA
+
+Official Pump fee program:
+pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ
+
+WSOL:
+So11111111111111111111111111111111111111112
+
+buy_exact_quote_in discriminator:
+[198, 46, 21, 82, 180, 217, 232, 112]
+
+Fixed IDL accounts, in order:
+ 0 pool (writable)
+ 1 user (writable signer)
+ 2 global_config
+ 3 base_mint
+ 4 quote_mint
+ 5 user_base_token_account (writable)
+ 6 user_quote_token_account (writable)
+ 7 pool_base_token_account (writable)
+ 8 pool_quote_token_account (writable)
+ 9 protocol_fee_recipient
+10 protocol_fee_recipient_token_account (writable)
+11 base_token_program
+12 quote_token_program
+13 system_program
+14 associated_token_program
+15 event_authority
+16 PumpSwap program
+17 coin_creator_vault_ata (writable)
+18 coin_creator_vault_authority
+19 global_volume_accumulator
+20 user_volume_accumulator (writable)
+21 fee_config
+22 fee_program
+
+Current required non-cashback trailing accounts:
+23 pool_v2 = PDA [b"pool-v2", base_mint] under PumpSwap
+24 one official breaking fee recipient (readonly)
+25 that recipient's canonical quote-mint ATA (writable)
+
+Total non-cashback buy account count = 26.
+ANGRY uses track_volume=false and intentionally does not supply cashback ATA.
+
+OptionBool is one Borsh bool field. track_volume=false is encoded as byte 0.
+
+PumpSwap Pool layout used only for pre-CPI validation:
+- Anchor discriminator offset 0, length 8
+- base_mint offset 43
+- quote_mint offset 75
+- pool_base_token_account offset 139
+- pool_quote_token_account offset 171
+- coin_creator offset 211
+Newer Pool fields are appended, so these earlier offsets remain stable in the
+current official IDL.
+
+Official Pool discriminator:
+[241, 154, 109, 4, 17, 177, 109, 188]
+
+8 April-2026 breaking fee recipients:
+5YxQFdt3Tr9zJLvkFccqXVUwhdTWJQc1fFg2YPbxvxeD
+9M4giFFMxmFGXtc3feFzRai56WbBqehoSeRE5GK7gf7
+GXPFM2caqTtQYC2cJ5yJRi9VDkpsYZXzYdwYpGnLmtDL
+3BpXnfJaUTiwXnJNe7Ej1rcbzqTTQUvLShZaWazebsVR
+5cjcW9wExnJJiqgLjq7DEG75Pm6JBgE1hNv4B2vHXUW6
+EHAAiTxcdDwQ3U4bU6YcMsQGaekdzLS3B5SmYo46kJtL
+5eHhjP8JaYkz83CWwvGU2uMUXefd3AazWGx4gpcuEEYD
+A7hAgCzFw14fejgCp387JUJRMNyz4j89JKnhtKU8piqW
+
+Official sources checked:
+https://github.com/pump-fun/pump-public-docs
+https://raw.githubusercontent.com/pump-fun/pump-public-docs/main/idl/pump_amm.json
+https://raw.githubusercontent.com/pump-fun/pump-public-docs/main/docs/BREAKING_FEE_RECIPIENT.md
+
+IMPORTANT
+---------
+PumpSwap is an external upgradeable protocol. This compatibility baseline must
+be rechecked against official docs/IDL before a future mainnet launch even if
+Devnet currently passes.

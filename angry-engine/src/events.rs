@@ -88,3 +88,22 @@ pub struct AuthorityTransferCancelled {
     pub cancelled_pending_authority: Pubkey,
     pub timestamp: i64,
 }
+
+#[event]
+pub struct BuybackBurnExecuted {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub authority: Pubkey,
+    pub buyback_authority: Pubkey,
+    pub pool: Pubkey,
+    pub base_mint: Pubkey,
+    pub quote_amount_in: u64,
+    pub base_amount_received: u64,
+    pub base_amount_burned: u64,
+    pub mint_supply_before: u64,
+    pub mint_supply_after: u64,
+    pub remaining_buyback_reserve: u64,
+    pub remaining_accounted_balance: u64,
+    pub total_buyback_processed: u64,
+    pub timestamp: i64,
+}

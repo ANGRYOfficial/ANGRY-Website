@@ -1,0 +1,113 @@
+ANGRY ENGINE — PART 2: ATOMIC BUYBACK & BURN
+Revision: R1 source candidate
+Date: 2026-09-09
+Program ID: NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C
+Core checkpoint: core-devnet-verified-v1 / 9c5b894d48cae9ca1c7f3f82c3ee1522b882842d
+
+PURPOSE
+-------
+Part 2 consumes only the BUYBACK reserve. It must not touch the Productive
+Liquidity reserve or Development reserve.
+
+NORMAL EXECUTION — ONE ENGINE TRANSACTION
+-----------------------------------------
+1. Authority calls execute_buyback_burn(quote_amount_in, min_base_amount_out).
+2. Engine validates all deterministic ANGRY + PumpSwap account relationships.
+3. Any creator fees that arrived since the previous action are lazy-synced.
+4. Engine checks buyback reserve >= configured threshold.
+5. Only quote_amount_in is moved from the program-owned EngineVault to the
+   System-owned Buyback Authority PDA.
+6. The same amount is wrapped into the Buyback Authority's canonical WSOL ATA.
+7. PumpSwap buy_exact_quote_in buys config.project using that WSOL budget.
+8. Engine measures only the NEW base tokens received by this buyback.
+9. Engine burns exactly those newly received base tokens.
+10. Engine verifies:
+    - WSOL returned to its exact pre-buyback balance,
+    - base ATA returned to its exact pre-buyback balance,
+    - mint supply fell by exactly the burned amount.
+11. Only after all of the above succeeds:
+    - buyback_reserve -= quote_amount_in
+    - accounted_balance -= quote_amount_in
+    - total_buyback_processed += quote_amount_in
+12. Core invariant and vault backing are checked again.
+
+ATOMIC FAILURE RULE
+-------------------
+This flow deliberately occurs inside ONE Solana transaction. If wrapping,
+PumpSwap, slippage, burning, supply verification, or final accounting fails,
+the full transaction rolls back, including the lazy sync and the movement of
+creator-fee SOL out of EngineVault.
+
+ANTI-GRIEF / DUST RULE
+----------------------
+The Engine does NOT assume its WSOL/base ATAs have zero balances. Anyone can
+send token dust to a public address. Therefore it snapshots pre-balances:
+
+    wsol_before
+    base_before
+
+Then it requires:
+
+    after wrap   = wsol_before + quote_amount_in
+    after swap   = wsol_before
+    received     = base_after_swap - base_before
+    after burn   = base_before
+
+Only received is burned. Existing unrelated token dust remains untouched.
+
+TARGET-MINT BINDING
+-------------------
+config.project is treated as the immutable base mint identity for this Engine
+config. The buyback instruction rejects any base mint that is not exactly
+config.project. It also verifies the PumpSwap Pool discriminator, Pool owner,
+Pool base mint, WSOL quote mint, and Pool token vault addresses before moving
+creator-fee SOL.
+
+PUMPSWAP DEFENSE-IN-DEPTH
+-------------------------
+Before moving fee SOL the Engine validates:
+- canonical PumpSwap global_config PDA
+- canonical __event_authority PDA
+- canonical global_volume_accumulator PDA
+- canonical user_volume_accumulator PDA for the Buyback Authority
+- canonical Pump fee_config PDA
+- canonical pool-v2 PDA
+- PumpSwap Pool discriminator/base/quote/vault fields
+- canonical protocol fee quote ATA
+- canonical coin creator vault authority and quote ATA
+- one of Pump's 8 April-2026 breaking fee recipients
+- canonical WSOL ATA for that breaking fee recipient
+
+PumpSwap still performs its own protocol constraints during CPI. Any failure
+there rolls the Engine transaction back.
+
+TOKEN SUPPORT
+-------------
+Base token: legacy SPL Token OR Token-2022 through Anchor TokenInterface.
+Quote token: WSOL through the legacy SPL Token program.
+
+ONE-TIME ACCOUNT SETUP
+----------------------
+The Buyback Authority PDA's canonical base ATA and WSOL ATA must exist before
+execute_buyback_burn because the Engine deliberately does not create recurring
+accounts inside each buyback.
+
+The Buyback Authority PDA may also need a small AUTHORITY-FUNDED operational
+SOL buffer because PumpSwap can initialize protocol/creator/volume accounts.
+That buffer is NOT creator-fee accounting and is not included in any ANGRY
+reserve. This is one-time/occasional operational setup, not a per-trade Engine
+action.
+
+GAS / TRANSACTION POLICY
+------------------------
+- No buyback per market trade.
+- Creator fees accumulate in Core reserves.
+- Buyback runs only when the configured threshold is reached.
+- Lazy fee sync + wrap + PumpSwap + burn + accounting are combined into one
+  Engine transaction when practical.
+- A failed action does not consume the buyback reserve in accounting.
+
+NOT IN PART 2
+-------------
+Productive Liquidity is intentionally not implemented here. It remains a
+separate Part 3 so an external LP failure cannot corrupt Buyback or Core logic.

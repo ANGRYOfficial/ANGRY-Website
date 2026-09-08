@@ -1,4 +1,13 @@
 use anchor_lang::prelude::*;
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint as LegacyMint, Token, TokenAccount as LegacyTokenAccount},
+    token_interface::{
+        Mint as InterfaceMint,
+        TokenAccount as InterfaceTokenAccount,
+        TokenInterface,
+    },
+};
 
 pub mod accounting;
 pub mod constants;
@@ -7,7 +16,14 @@ pub mod events;
 pub mod instructions;
 pub mod state;
 
-use constants::{CONFIG_SEED, VAULT_SEED};
+use constants::{
+    BUYBACK_AUTHORITY_SEED,
+    CONFIG_SEED,
+    PUMP_FEE_PROGRAM_ID,
+    PUMPSWAP_PROGRAM_ID,
+    VAULT_SEED,
+    WSOL_MINT,
+};
 use errors::EngineError;
 use state::{EngineConfig, EngineVault};
 
@@ -62,6 +78,18 @@ pub mod angry_engine_clean {
 
     pub fn settle_development(ctx: Context<SettleDevelopment>) -> Result<()> {
         instructions::development::handler(ctx)
+    }
+
+    pub fn execute_buyback_burn(
+        ctx: Context<ExecuteBuybackBurn>,
+        quote_amount_in: u64,
+        min_base_amount_out: u64,
+    ) -> Result<()> {
+        instructions::buyback::handler(
+            ctx,
+            quote_amount_in,
+            min_base_amount_out,
+        )
     }
 }
 
@@ -249,4 +277,115 @@ pub struct SettleDevelopment<'info> {
         address = config.development_wallet @ EngineError::InvalidDevelopmentWallet
     )]
     pub development_wallet: SystemAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct ExecuteBuybackBurn<'info> {
+    #[account(
+        mut,
+        has_one = authority
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    #[account(
+        mut,
+        seeds = [
+            VAULT_SEED,
+            config.key().as_ref(),
+        ],
+        bump = config.vault_bump
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    pub authority: Signer<'info>,
+
+    /// CHECK: deterministic System-owned PDA used only as the PumpSwap user/
+    /// token-account authority. Its seeds and owner are verified by this program.
+    #[account(
+        mut,
+        seeds = [
+            BUYBACK_AUTHORITY_SEED,
+            config.key().as_ref(),
+        ],
+        bump
+    )]
+    pub buyback_authority: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates the Pool account; ANGRY additionally verifies
+    /// its owner and base/quote mint fields before moving creator-fee SOL.
+    #[account(mut)]
+    pub pool: UncheckedAccount<'info>,
+
+    /// CHECK: validated against PumpSwap's canonical global_config PDA.
+    pub global_config: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub base_mint: InterfaceAccount<'info, InterfaceMint>,
+
+    #[account(address = WSOL_MINT @ EngineError::InvalidBuybackQuoteMint)]
+    pub quote_mint: Account<'info, LegacyMint>,
+
+    #[account(mut)]
+    pub buyback_base_token_account: InterfaceAccount<'info, InterfaceTokenAccount>,
+
+    #[account(mut)]
+    pub buyback_wsol_account: Account<'info, LegacyTokenAccount>,
+
+    /// CHECK: PumpSwap validates these pool vaults against Pool state.
+    #[account(mut)]
+    pub pool_base_token_account: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates these pool vaults against Pool state.
+    #[account(mut)]
+    pub pool_quote_token_account: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates this recipient against GlobalConfig.
+    pub protocol_fee_recipient: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates/initializes the canonical quote ATA if needed.
+    #[account(mut)]
+    pub protocol_fee_recipient_token_account: UncheckedAccount<'info>,
+
+    pub base_token_program: Interface<'info, TokenInterface>,
+    pub quote_token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+
+    /// CHECK: validated against PumpSwap's __event_authority PDA.
+    pub pump_event_authority: UncheckedAccount<'info>,
+
+    /// CHECK: fixed official PumpSwap program ID and executable constraint.
+    #[account(address = PUMPSWAP_PROGRAM_ID, executable)]
+    pub pump_swap_program: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates/initializes the creator vault ATA if needed.
+    #[account(mut)]
+    pub coin_creator_vault_ata: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates the creator vault authority from Pool state.
+    pub coin_creator_vault_authority: UncheckedAccount<'info>,
+
+    /// CHECK: validated against PumpSwap global_volume_accumulator PDA.
+    pub global_volume_accumulator: UncheckedAccount<'info>,
+
+    /// CHECK: validated against the buyback PDA's user_volume_accumulator PDA.
+    #[account(mut)]
+    pub user_volume_accumulator: UncheckedAccount<'info>,
+
+    /// CHECK: validated against Pump Fee fee_config PDA for PumpSwap.
+    pub fee_config: UncheckedAccount<'info>,
+
+    /// CHECK: fixed official Pump Fee program ID and executable constraint.
+    #[account(address = PUMP_FEE_PROGRAM_ID, executable)]
+    pub fee_program: UncheckedAccount<'info>,
+
+    /// CHECK: validated as [b"pool-v2", base_mint] under PumpSwap.
+    pub pool_v2: UncheckedAccount<'info>,
+
+    /// CHECK: must be one of Pump's 8 official breaking fee recipients.
+    pub breaking_fee_recipient: UncheckedAccount<'info>,
+
+    /// CHECK: validated as the breaking recipient's canonical WSOL ATA.
+    #[account(mut)]
+    pub breaking_fee_recipient_quote_ata: UncheckedAccount<'info>,
 }
