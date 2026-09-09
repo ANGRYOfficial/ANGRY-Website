@@ -49,6 +49,7 @@ pub fn handler(
 
     config.buyback_reserve = 0;
     config.liquidity_reserve = 0;
+    config.liquidity_staged = 0;
     config.development_reserve = 0;
 
     config.accounted_balance = 0;
@@ -66,7 +67,7 @@ pub fn handler(
     config.version = ENGINE_VERSION;
     config.config_bump = ctx.bumps.config;
     config.vault_bump = ctx.bumps.vault;
-    config.reserved = [0u8; 256];
+    config.reserved = [0u8; 248];
 
     let vault = &mut ctx.accounts.vault;
     vault.version = ENGINE_VERSION;

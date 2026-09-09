@@ -136,4 +136,10 @@ pub enum EngineError {
 
     #[msg("The buyback authority operational buffer is smaller than the requested buyback batch.")]
     InsufficientBuybackOperationalBuffer,
+
+    #[msg("The liquidity reserve has not reached its configured threshold.")]
+    LiquidityThresholdNotReached,
+
+    #[msg("The liquidity authority PDA must remain a System Program account.")]
+    InvalidLiquidityAuthorityOwner,
 }

@@ -1,7 +1,11 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    accounting::{spendable_vault_balance, sync_pending_fees},
+    accounting::{
+        spendable_vault_balance,
+        sync_pending_fees,
+        vault_accounted_balance,
+    },
     errors::EngineError,
     events::DevelopmentSettled,
     instructions::sync_fees::emit_sync_event,
@@ -42,7 +46,7 @@ pub fn handler(ctx: Context<SettleDevelopment>) -> Result<()> {
     let spendable_balance = spendable_vault_balance(&vault_info)?;
 
     require!(
-        spendable_balance >= config.accounted_balance,
+        spendable_balance >= vault_accounted_balance(config)?,
         EngineError::AccountingBalanceExceedsVault
     );
 

@@ -22,6 +22,13 @@ pub fn spendable_vault_balance(vault_info: &AccountInfo) -> Result<u64> {
         .ok_or_else(|| EngineError::InsufficientSpendableVaultBalance.into())
 }
 
+pub fn vault_accounted_balance(config: &EngineConfig) -> Result<u64> {
+    config
+        .accounted_balance
+        .checked_sub(config.liquidity_staged)
+        .ok_or_else(|| EngineError::AccountingInvariantBroken.into())
+}
+
 pub fn assert_vault_backing(
     config: &EngineConfig,
     vault_info: &AccountInfo,
@@ -31,7 +38,7 @@ pub fn assert_vault_backing(
     let spendable = spendable_vault_balance(vault_info)?;
 
     require!(
-        spendable >= config.accounted_balance,
+        spendable >= vault_accounted_balance(config)?,
         EngineError::AccountingBalanceExceedsVault
     );
 
@@ -45,7 +52,7 @@ pub fn pending_fee_balance(
     let spendable = assert_vault_backing(config, vault_info)?;
 
     spendable
-        .checked_sub(config.accounted_balance)
+        .checked_sub(vault_accounted_balance(config)?)
         .ok_or_else(|| EngineError::MathOverflow.into())
 }
 

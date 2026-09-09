@@ -19,6 +19,7 @@ pub mod state;
 use constants::{
     BUYBACK_AUTHORITY_SEED,
     CONFIG_SEED,
+    LIQUIDITY_AUTHORITY_SEED,
     PUMP_FEE_PROGRAM_ID,
     PUMPSWAP_PROGRAM_ID,
     VAULT_SEED,
@@ -78,6 +79,12 @@ pub mod angry_engine_clean {
 
     pub fn settle_development(ctx: Context<SettleDevelopment>) -> Result<()> {
         instructions::development::handler(ctx)
+    }
+
+    pub fn stage_liquidity(
+        ctx: Context<StageLiquidity>,
+    ) -> Result<()> {
+        instructions::liquidity::handler(ctx)
     }
 
     pub fn execute_buyback_burn(
@@ -277,6 +284,40 @@ pub struct SettleDevelopment<'info> {
         address = config.development_wallet @ EngineError::InvalidDevelopmentWallet
     )]
     pub development_wallet: SystemAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct StageLiquidity<'info> {
+    #[account(
+        mut,
+        has_one = authority
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    #[account(
+        mut,
+        seeds = [
+            VAULT_SEED,
+            config.key().as_ref(),
+        ],
+        bump = config.vault_bump
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    pub authority: Signer<'info>,
+
+    /// CHECK: deterministic System-owned PDA used only to custody
+    /// staged liquidity SOL and later act as the PumpSwap LP authority.
+    /// The PDA seeds and System Program ownership are verified.
+    #[account(
+        mut,
+        seeds = [
+            LIQUIDITY_AUTHORITY_SEED,
+            config.key().as_ref(),
+        ],
+        bump
+    )]
+    pub liquidity_authority: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]

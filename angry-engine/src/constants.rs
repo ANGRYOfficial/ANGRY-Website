@@ -3,6 +3,7 @@ use anchor_lang::prelude::*;
 pub const CONFIG_SEED: &[u8] = b"angry-engine-config";
 pub const VAULT_SEED: &[u8] = b"angry-engine-vault";
 pub const BUYBACK_AUTHORITY_SEED: &[u8] = b"angry-engine-buyback";
+pub const LIQUIDITY_AUTHORITY_SEED: &[u8] = b"angry-engine-liquidity";
 
 pub const BPS_DENOMINATOR: u16 = 10_000;
 pub const ENGINE_VERSION: u8 = 1;

@@ -55,8 +55,12 @@ pub struct EngineConfig {
     pub config_bump: u8,
     pub vault_bump: u8,
 
-    // Pre-allocated room for future backwards-compatible state fields.
-    pub reserved: [u8; 256],
+    // Creator-fee SOL already moved out of EngineVault and locked under
+    // the Engine liquidity authority, but not yet deployed into LP.
+    pub liquidity_staged: u64,
+
+    // Remaining room for future backwards-compatible state fields.
+    pub reserved: [u8; 248],
 }
 
 impl EngineConfig {
@@ -82,11 +86,13 @@ impl EngineConfig {
         1 + // version
         1 + // config_bump
         1 + // vault_bump
-        256; // reserved
+        8 + // liquidity_staged
+        248; // reserved
 
     pub fn reserve_total(&self) -> Result<u64> {
         self.buyback_reserve
             .checked_add(self.liquidity_reserve)
+            .and_then(|v| v.checked_add(self.liquidity_staged))
             .and_then(|v| v.checked_add(self.development_reserve))
             .ok_or_else(|| EngineError::MathOverflow.into())
     }

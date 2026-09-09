@@ -107,3 +107,16 @@ pub struct BuybackBurnExecuted {
     pub total_buyback_processed: u64,
     pub timestamp: i64,
 }
+
+
+#[event]
+pub struct LiquidityStaged {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub liquidity_authority: Pubkey,
+    pub amount: u64,
+    pub liquidity_staged: u64,
+    pub remaining_liquidity_reserve: u64,
+    pub remaining_accounted_balance: u64,
+    pub timestamp: i64,
+}
