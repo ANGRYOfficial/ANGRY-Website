@@ -67,6 +67,20 @@ pub fn handler(
         EngineError::InvalidLiquidityAuthorityOwner
     );
 
+    // Rent is infrastructure funding and must remain separate from
+    // creator-fee liquidity accounting. Before accepting another staged
+    // batch, the PDA must already back both its rent buffer and every
+    // previously staged creator-fee lamport.
+    let minimum_rent = Rent::get()?.minimum_balance(0);
+    let required_before = minimum_rent
+        .checked_add(ctx.accounts.config.liquidity_staged)
+        .ok_or(EngineError::MathOverflow)?;
+
+    require!(
+        liquidity_authority_info.lamports() >= required_before,
+        EngineError::InsufficientLiquidityAuthorityRentBuffer
+    );
+
     // Direct lamport movement happens at the end of the instruction.
     // No CPI is performed after this point.
     **vault_info.try_borrow_mut_lamports()? = vault_info
@@ -88,6 +102,15 @@ pub fn handler(
         .liquidity_staged
         .checked_add(amount)
         .ok_or(EngineError::MathOverflow)?;
+
+    let required_after = minimum_rent
+        .checked_add(config.liquidity_staged)
+        .ok_or(EngineError::MathOverflow)?;
+
+    require!(
+        liquidity_authority_info.lamports() >= required_after,
+        EngineError::InsufficientLiquidityAuthorityRentBuffer
+    );
 
     // accounted_balance intentionally does NOT decrease here.
     // The creator-fee SOL is still controlled by ANGRY Engine,

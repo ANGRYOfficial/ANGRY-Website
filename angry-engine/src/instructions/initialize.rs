@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, system_program};
 
 use crate::{
     constants::ENGINE_VERSION,
@@ -29,6 +29,39 @@ pub fn handler(
         args.liquidity_threshold,
         args.development_threshold,
     )?;
+
+    // The Liquidity Authority is a deterministic, data-empty System PDA.
+    // It receives a one-time rent buffer paid by the Engine authority.
+    // This rent buffer is infrastructure funding and is NEVER included in
+    // creator-fee accounting or liquidity_staged.
+    let liquidity_authority_info =
+        ctx.accounts.liquidity_authority.to_account_info();
+
+    require!(
+        *liquidity_authority_info.owner == system_program::ID
+            && liquidity_authority_info.data_is_empty(),
+        EngineError::InvalidLiquidityAuthorityOwner
+    );
+
+    let minimum_rent = Rent::get()?.minimum_balance(0);
+    let current_balance = liquidity_authority_info.lamports();
+
+    if current_balance < minimum_rent {
+        let rent_top_up = minimum_rent
+            .checked_sub(current_balance)
+            .ok_or(EngineError::MathOverflow)?;
+
+        system_program::transfer(
+            CpiContext::new(
+                ctx.accounts.system_program.to_account_info(),
+                system_program::Transfer {
+                    from: ctx.accounts.authority.to_account_info(),
+                    to: liquidity_authority_info.clone(),
+                },
+            ),
+            rent_top_up,
+        )?;
+    }
 
     let config = &mut ctx.accounts.config;
 

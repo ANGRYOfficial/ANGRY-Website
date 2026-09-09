@@ -149,6 +149,18 @@ pub struct InitializeEngine<'info> {
     )]
     pub vault: Account<'info, EngineVault>,
 
+    /// CHECK: deterministic System-owned PDA used to hold the
+    /// liquidity rent buffer and staged liquidity SOL.
+    #[account(
+        mut,
+        seeds = [
+            LIQUIDITY_AUTHORITY_SEED,
+            config.key().as_ref(),
+        ],
+        bump
+    )]
+    pub liquidity_authority: UncheckedAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 

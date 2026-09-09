@@ -142,4 +142,7 @@ pub enum EngineError {
 
     #[msg("The liquidity authority PDA must remain a System Program account.")]
     InvalidLiquidityAuthorityOwner,
+
+    #[msg("The liquidity authority does not hold enough SOL to preserve its rent buffer plus staged liquidity.")]
+    InsufficientLiquidityAuthorityRentBuffer,
 }
