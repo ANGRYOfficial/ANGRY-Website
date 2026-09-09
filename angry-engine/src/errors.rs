@@ -133,4 +133,7 @@ pub enum EngineError {
 
     #[msg("The WSOL balance after the buyback did not return to its pre-buyback balance.")]
     BuybackWsolBalanceMismatch,
+
+    #[msg("The buyback authority operational buffer is smaller than the requested buyback batch.")]
+    InsufficientBuybackOperationalBuffer,
 }

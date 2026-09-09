@@ -436,20 +436,13 @@ pub fn handler(
     let buyback_authority_info =
         ctx.accounts.buyback_authority.to_account_info();
 
-    // Move only this batch out of the program-owned EngineVault.
-    // The System-owned buyback PDA may hold an externally funded operational
-    // buffer for one-time PumpSwap account rent. That buffer is not creator fee
-    // and is intentionally outside Engine accounting.
-    **vault_info.try_borrow_mut_lamports()? = vault_info
-        .lamports()
-        .checked_sub(quote_amount_in)
-        .ok_or(EngineError::MathOverflow)?;
-
-    **buyback_authority_info.try_borrow_mut_lamports()? =
-        buyback_authority_info
-            .lamports()
-            .checked_add(quote_amount_in)
-            .ok_or(EngineError::MathOverflow)?;
+    // Use the pre-funded System-owned PDA as a temporary operational bridge.
+    // EngineVault reimburses this exact creator-fee batch only after all CPIs
+    // (wrap + PumpSwap + burn) have completed successfully.
+    require!(
+        buyback_authority_info.lamports() >= quote_amount_in,
+        EngineError::InsufficientBuybackOperationalBuffer
+    );
 
     let config_key_for_seeds = ctx.accounts.config.key();
     let buyback_bump = ctx.bumps.buyback_authority;
@@ -560,6 +553,20 @@ pub fn handler(
         ctx.accounts.base_mint.supply == expected_supply_after,
         EngineError::BuybackMintSupplyMismatch
     );
+
+    // All CPIs are complete. Reimburse the temporary operational bridge
+    // from EngineVault. No CPI occurs after this direct lamport mutation.
+    **vault_info.try_borrow_mut_lamports()? = vault_info
+        .lamports()
+        .checked_sub(quote_amount_in)
+        .ok_or(EngineError::MathOverflow)?;
+
+    **buyback_authority_info.try_borrow_mut_lamports()? =
+        buyback_authority_info
+            .lamports()
+            .checked_add(quote_amount_in)
+            .ok_or(EngineError::MathOverflow)?;
+
 
     let event_authority = ctx.accounts.authority.key();
     let event_buyback_authority = ctx.accounts.buyback_authority.key();
