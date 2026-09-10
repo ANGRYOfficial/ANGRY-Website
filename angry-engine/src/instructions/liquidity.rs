@@ -261,11 +261,21 @@ fn validate_deploy_accounts(
     );
     msg!("ANGRY_DIAG_BASE_PROJECT_REQUIRE_OK");
 
+    msg!("ANGRY_DIAG_BEFORE_BASE_MINT_INFO");
+    let base_mint_info = ctx.accounts.base_mint.to_account_info();
+    msg!("ANGRY_DIAG_BASE_MINT_INFO_OK");
+
+    let base_mint_owner = *base_mint_info.owner;
+    msg!("ANGRY_DIAG_BASE_MINT_OWNER_READ_OK");
+
+    let base_token_program_key = ctx.accounts.base_token_program.key();
+    msg!("ANGRY_DIAG_BASE_TOKEN_PROGRAM_KEY_OK");
+
     require!(
-        *ctx.accounts.base_mint.to_account_info().owner
-            == ctx.accounts.base_token_program.key(),
+        base_mint_owner == base_token_program_key,
         EngineError::InvalidLiquidityBaseMint
     );
+    msg!("ANGRY_DIAG_BASE_MINT_OWNER_REQUIRE_OK");
 
     require!(
         quote_mint == WSOL_MINT,
