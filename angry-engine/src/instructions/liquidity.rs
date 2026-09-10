@@ -237,12 +237,19 @@ fn validate_deploy_accounts(
             .to_account_info();
     msg!("ANGRY_DIAG_AUTHORITY_INFO_OK");
 
+    let liquidity_owner_is_system =
+        *liquidity_authority_info.owner == system_program::ID;
+    msg!("ANGRY_DIAG_AUTHORITY_OWNER_READ_OK");
+
+    let liquidity_data_is_empty =
+        liquidity_authority_info.data_is_empty();
+    msg!("ANGRY_DIAG_AUTHORITY_DATA_READ_OK");
+
     require!(
-        *liquidity_authority_info.owner
-            == system_program::ID
-            && liquidity_authority_info.data_is_empty(),
+        liquidity_owner_is_system && liquidity_data_is_empty,
         EngineError::InvalidLiquidityAuthorityOwner
     );
+    msg!("ANGRY_DIAG_AUTHORITY_REQUIRE_OK");
 
     require!(
         base_mint == ctx.accounts.config.project,
