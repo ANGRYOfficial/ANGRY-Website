@@ -992,6 +992,8 @@ pub fn deploy_handler(
     quote_amount_to_deposit: u64,
     lp_token_amount_out: u64,
 ) -> Result<()> {
+    msg!("ANGRY_DIAG_DEPLOY_HANDLER_ENTER");
+
     require!(
         !ctx.accounts.config.paused,
         EngineError::EnginePaused
