@@ -213,6 +213,8 @@ pub fn handler(
 fn validate_deploy_accounts(
     ctx: &Context<DeployLiquidity>,
 ) -> Result<()> {
+    msg!("ANGRY_DIAG_VALIDATE_ENTER");
+
     let liquidity_authority =
         ctx.accounts.liquidity_authority.key();
 
@@ -355,6 +357,8 @@ fn validate_deploy_accounts(
         EngineError::InvalidLiquidityLpTokenAccount
     );
 
+    msg!("ANGRY_DIAG_VALIDATE_TOKEN_ACCOUNTS_OK");
+
     let pool_info =
         ctx.accounts.pool.to_account_info();
 
@@ -434,6 +438,8 @@ fn validate_deploy_accounts(
 
     drop(pool_data);
 
+    msg!("ANGRY_DIAG_VALIDATE_POOL_OK");
+
     let expected_protocol_fee_ata =
         get_associated_token_address_with_program_id(
             &ctx.accounts
@@ -484,6 +490,8 @@ fn validate_deploy_accounts(
             == expected_creator_vault_ata,
         EngineError::InvalidPumpSwapCreatorVault
     );
+
+    msg!("ANGRY_DIAG_VALIDATE_FEE_ACCOUNTS_OK");
 
     require_pda(
         ctx.accounts.global_config.key(),
@@ -536,6 +544,8 @@ fn validate_deploy_accounts(
         &PUMPSWAP_PROGRAM_ID,
         EngineError::InvalidPumpSwapPoolV2,
     )?;
+
+    msg!("ANGRY_DIAG_VALIDATE_PDAS_OK");
 
     let breaking_fee_recipient =
         ctx.accounts
