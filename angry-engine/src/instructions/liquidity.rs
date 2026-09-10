@@ -999,6 +999,8 @@ pub fn deploy_handler(
         EngineError::EnginePaused
     );
 
+    msg!("ANGRY_DIAG_AFTER_PAUSED");
+
     require!(
         quote_amount_to_buy > 0
             && expected_base_amount_out > 0
@@ -1007,7 +1009,9 @@ pub fn deploy_handler(
         EngineError::InvalidLiquidityExecutionAmount
     );
 
+    msg!("ANGRY_DIAG_BEFORE_VALIDATE");
     validate_deploy_accounts(&ctx)?;
+    msg!("ANGRY_DIAG_AFTER_VALIDATE");
 
     let total_quote_amount =
         quote_amount_to_buy
