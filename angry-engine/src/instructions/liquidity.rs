@@ -243,6 +243,12 @@ fn validate_deploy_accounts(
     );
 
     require!(
+        *ctx.accounts.base_mint.to_account_info().owner
+            == ctx.accounts.base_token_program.key(),
+        EngineError::InvalidLiquidityBaseMint
+    );
+
+    require!(
         quote_mint == WSOL_MINT,
         EngineError::InvalidLiquidityQuoteMint
     );
@@ -259,11 +265,20 @@ fn validate_deploy_accounts(
         EngineError::InvalidLiquidityBaseTokenAccount
     );
 
+    require!(
+        *ctx.accounts
+            .liquidity_base_token_account
+            .to_account_info()
+            .owner
+            == ctx.accounts.base_token_program.key(),
+        EngineError::InvalidLiquidityBaseTokenAccount
+    );
+
     let expected_base_ata =
         get_associated_token_address_with_program_id(
             &liquidity_authority,
             &base_mint,
-            &ctx.accounts.token_program.key(),
+            &ctx.accounts.base_token_program.key(),
         );
 
     require!(
@@ -640,7 +655,7 @@ fn pumpswap_buy_for_liquidity(
             false,
         ),
         AccountMeta::new_readonly(
-            ctx.accounts.token_program.key(),
+            ctx.accounts.base_token_program.key(),
             false,
         ),
         AccountMeta::new_readonly(
@@ -749,7 +764,7 @@ fn pumpswap_buy_for_liquidity(
         ctx.accounts
             .protocol_fee_recipient_token_account
             .to_account_info(),
-        ctx.accounts.token_program.to_account_info(),
+        ctx.accounts.base_token_program.to_account_info(),
         ctx.accounts.token_program.to_account_info(),
         ctx.accounts.system_program.to_account_info(),
         ctx.accounts

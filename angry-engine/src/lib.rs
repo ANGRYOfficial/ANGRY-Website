@@ -385,7 +385,7 @@ pub struct DeployLiquidity<'info> {
     /// CHECK: validated as PumpSwap global_config PDA.
     pub global_config: UncheckedAccount<'info>,
 
-    pub base_mint: Account<'info, LegacyMint>,
+    pub base_mint: InterfaceAccount<'info, InterfaceMint>,
 
     #[account(
         address = WSOL_MINT @ EngineError::InvalidLiquidityQuoteMint
@@ -399,7 +399,7 @@ pub struct DeployLiquidity<'info> {
 
     #[account(mut)]
     pub liquidity_base_token_account:
-        Account<'info, LegacyTokenAccount>,
+        InterfaceAccount<'info, InterfaceTokenAccount>,
 
     #[account(mut)]
     pub liquidity_wsol_account:
@@ -425,6 +425,10 @@ pub struct DeployLiquidity<'info> {
     pub protocol_fee_recipient_token_account:
         UncheckedAccount<'info>,
 
+    /// Token program owning the project/base mint.
+    pub base_token_program: Interface<'info, TokenInterface>,
+
+    /// Legacy SPL Token program used for WSOL and PumpSwap deposit.
     pub token_program: Program<'info, Token>,
 
     /// CHECK: fixed official SPL Token-2022 program.
