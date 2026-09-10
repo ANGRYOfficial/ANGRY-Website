@@ -217,20 +217,25 @@ fn validate_deploy_accounts(
 
     let liquidity_authority =
         ctx.accounts.liquidity_authority.key();
+    msg!("ANGRY_DIAG_KEY_LIQUIDITY_AUTHORITY_OK");
 
     let base_mint =
         ctx.accounts.base_mint.key();
+    msg!("ANGRY_DIAG_KEY_BASE_MINT_OK");
 
     let quote_mint =
         ctx.accounts.quote_mint.key();
+    msg!("ANGRY_DIAG_KEY_QUOTE_MINT_OK");
 
     let lp_mint =
         ctx.accounts.lp_mint.key();
+    msg!("ANGRY_DIAG_KEY_LP_MINT_OK");
 
     let liquidity_authority_info =
         ctx.accounts
             .liquidity_authority
             .to_account_info();
+    msg!("ANGRY_DIAG_AUTHORITY_INFO_OK");
 
     require!(
         *liquidity_authority_info.owner
