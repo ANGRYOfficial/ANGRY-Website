@@ -268,8 +268,12 @@ fn validate_deploy_accounts(
     let base_mint_owner = *base_mint_info.owner;
     msg!("ANGRY_DIAG_BASE_MINT_OWNER_READ_OK");
 
-    let base_token_program_key = ctx.accounts.base_token_program.key();
-    msg!("ANGRY_DIAG_BASE_TOKEN_PROGRAM_KEY_OK");
+    msg!("ANGRY_DIAG_BEFORE_BASE_TOKEN_PROGRAM_INFO");
+    let base_token_program_info = ctx.accounts.base_token_program.to_account_info();
+    msg!("ANGRY_DIAG_BASE_TOKEN_PROGRAM_INFO_OK");
+
+    let base_token_program_key = *base_token_program_info.key;
+    msg!("ANGRY_DIAG_BASE_TOKEN_PROGRAM_KEY_READ_OK");
 
     require!(
         base_mint_owner == base_token_program_key,
