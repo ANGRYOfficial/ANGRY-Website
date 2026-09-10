@@ -251,10 +251,15 @@ fn validate_deploy_accounts(
     );
     msg!("ANGRY_DIAG_AUTHORITY_REQUIRE_OK");
 
+    msg!("ANGRY_DIAG_BEFORE_CONFIG_PROJECT_READ");
+    let config_project = ctx.accounts.config.project;
+    msg!("ANGRY_DIAG_CONFIG_PROJECT_READ_OK");
+
     require!(
-        base_mint == ctx.accounts.config.project,
+        base_mint == config_project,
         EngineError::InvalidLiquidityBaseMint
     );
+    msg!("ANGRY_DIAG_BASE_PROJECT_REQUIRE_OK");
 
     require!(
         *ctx.accounts.base_mint.to_account_info().owner
