@@ -145,4 +145,43 @@ pub enum EngineError {
 
     #[msg("The liquidity authority does not hold enough SOL to preserve its rent buffer plus staged liquidity.")]
     InsufficientLiquidityAuthorityRentBuffer,
+
+    #[msg("The liquidity execution amounts must all be greater than zero.")]
+    InvalidLiquidityExecutionAmount,
+
+    #[msg("The requested liquidity execution exceeds staged liquidity.")]
+    LiquidityAmountExceedsStaged,
+
+    #[msg("The supplied liquidity base mint is invalid.")]
+    InvalidLiquidityBaseMint,
+
+    #[msg("The supplied liquidity quote mint must be wrapped SOL.")]
+    InvalidLiquidityQuoteMint,
+
+    #[msg("The liquidity base token account is invalid.")]
+    InvalidLiquidityBaseTokenAccount,
+
+    #[msg("The liquidity wrapped SOL account is invalid.")]
+    InvalidLiquidityWsolAccount,
+
+    #[msg("The PumpSwap LP mint is invalid.")]
+    InvalidLiquidityLpMint,
+
+    #[msg("The liquidity LP token account is invalid.")]
+    InvalidLiquidityLpTokenAccount,
+
+    #[msg("The liquidity wrapped SOL balance did not match the expected value.")]
+    LiquidityWsolBalanceMismatch,
+
+    #[msg("The amount of base tokens bought for liquidity did not match the execution plan.")]
+    LiquidityBaseAmountMismatch,
+
+    #[msg("The PumpSwap deposit did not consume the expected base-token amount.")]
+    LiquidityDepositBaseBalanceMismatch,
+
+    #[msg("The PumpSwap deposit did not consume the expected quote-token amount.")]
+    LiquidityDepositQuoteBalanceMismatch,
+
+    #[msg("The PumpSwap LP token amount did not match the execution plan.")]
+    LiquidityLpAmountMismatch,
 }

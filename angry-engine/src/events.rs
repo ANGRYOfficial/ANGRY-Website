@@ -120,3 +120,23 @@ pub struct LiquidityStaged {
     pub remaining_accounted_balance: u64,
     pub timestamp: i64,
 }
+
+#[event]
+pub struct LiquidityDeployed {
+    pub config: Pubkey,
+    pub vault: Pubkey,
+    pub authority: Pubkey,
+    pub liquidity_authority: Pubkey,
+    pub pool: Pubkey,
+    pub base_mint: Pubkey,
+    pub lp_mint: Pubkey,
+    pub quote_amount_to_buy: u64,
+    pub base_amount_bought: u64,
+    pub quote_amount_to_deposit: u64,
+    pub lp_tokens_received: u64,
+    pub processed_quote_amount: u64,
+    pub remaining_liquidity_staged: u64,
+    pub remaining_accounted_balance: u64,
+    pub total_liquidity_deployed: u64,
+    pub timestamp: i64,
+}

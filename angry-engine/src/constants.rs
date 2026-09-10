@@ -40,6 +40,11 @@ pub const PUMPSWAP_BUY_EXACT_QUOTE_IN_DISCRIMINATOR: [u8; 8] = [
     198, 46, 21, 82, 180, 217, 232, 112,
 ];
 
+pub const PUMPSWAP_DEPOSIT_DISCRIMINATOR: [u8; 8] = [
+    242, 35, 198, 137, 82, 225, 242, 182,
+];
+
+
 // Official breaking fee recipients announced by Pump for the April 2026 AMM upgrade.
 pub const PUMPSWAP_BREAKING_FEE_RECIPIENTS: [Pubkey; 8] = [
     Pubkey::new_from_array([

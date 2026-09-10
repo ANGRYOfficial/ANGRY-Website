@@ -87,6 +87,22 @@ pub mod angry_engine_clean {
         instructions::liquidity::handler(ctx)
     }
 
+    pub fn deploy_liquidity(
+        ctx: Context<DeployLiquidity>,
+        quote_amount_to_buy: u64,
+        expected_base_amount_out: u64,
+        quote_amount_to_deposit: u64,
+        lp_token_amount_out: u64,
+    ) -> Result<()> {
+        instructions::liquidity::deploy_handler(
+            ctx,
+            quote_amount_to_buy,
+            expected_base_amount_out,
+            quote_amount_to_deposit,
+            lp_token_amount_out,
+        )
+    }
+
     pub fn execute_buyback_burn(
         ctx: Context<ExecuteBuybackBurn>,
         quote_amount_in: u64,
@@ -330,6 +346,140 @@ pub struct StageLiquidity<'info> {
         bump
     )]
     pub liquidity_authority: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct DeployLiquidity<'info> {
+    #[account(
+        mut,
+        has_one = authority
+    )]
+    pub config: Account<'info, EngineConfig>,
+
+    #[account(
+        seeds = [
+            VAULT_SEED,
+            config.key().as_ref(),
+        ],
+        bump = config.vault_bump
+    )]
+    pub vault: Account<'info, EngineVault>,
+
+    pub authority: Signer<'info>,
+
+    /// CHECK: deterministic System-owned ANGRY liquidity PDA.
+    #[account(
+        mut,
+        seeds = [
+            LIQUIDITY_AUTHORITY_SEED,
+            config.key().as_ref(),
+        ],
+        bump
+    )]
+    pub liquidity_authority: UncheckedAccount<'info>,
+
+    /// CHECK: validated against PumpSwap Pool state.
+    #[account(mut)]
+    pub pool: UncheckedAccount<'info>,
+
+    /// CHECK: validated as PumpSwap global_config PDA.
+    pub global_config: UncheckedAccount<'info>,
+
+    pub base_mint: Account<'info, LegacyMint>,
+
+    #[account(
+        address = WSOL_MINT @ EngineError::InvalidLiquidityQuoteMint
+    )]
+    pub quote_mint: Account<'info, LegacyMint>,
+
+    /// CHECK: PumpSwap validates the pool LP mint;
+    /// ANGRY verifies that it is owned by Token-2022.
+    #[account(mut)]
+    pub lp_mint: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub liquidity_base_token_account:
+        Account<'info, LegacyTokenAccount>,
+
+    #[account(mut)]
+    pub liquidity_wsol_account:
+        Account<'info, LegacyTokenAccount>,
+
+    #[account(mut)]
+    pub liquidity_lp_token_account:
+        InterfaceAccount<'info, InterfaceTokenAccount>,
+
+    /// CHECK: validated against Pool state.
+    #[account(mut)]
+    pub pool_base_token_account: UncheckedAccount<'info>,
+
+    /// CHECK: validated against Pool state.
+    #[account(mut)]
+    pub pool_quote_token_account: UncheckedAccount<'info>,
+
+    /// CHECK: PumpSwap validates the recipient.
+    pub protocol_fee_recipient: UncheckedAccount<'info>,
+
+    /// CHECK: canonical fee-recipient quote ATA is validated.
+    #[account(mut)]
+    pub protocol_fee_recipient_token_account:
+        UncheckedAccount<'info>,
+
+    pub token_program: Program<'info, Token>,
+
+    /// CHECK: fixed official SPL Token-2022 program.
+    #[account(address = anchor_spl::token_2022::ID)]
+    pub token_2022_program: UncheckedAccount<'info>,
+
+    pub system_program: Program<'info, System>,
+
+    pub associated_token_program:
+        Program<'info, AssociatedToken>,
+
+    /// CHECK: validated as PumpSwap __event_authority PDA.
+    pub pump_event_authority: UncheckedAccount<'info>,
+
+    /// CHECK: fixed official PumpSwap program.
+    #[account(
+        address = PUMPSWAP_PROGRAM_ID,
+        executable
+    )]
+    pub pump_swap_program: UncheckedAccount<'info>,
+
+    /// CHECK: canonical creator vault ATA validated by ANGRY.
+    #[account(mut)]
+    pub coin_creator_vault_ata: UncheckedAccount<'info>,
+
+    /// CHECK: canonical creator vault authority validated by ANGRY.
+    pub coin_creator_vault_authority: UncheckedAccount<'info>,
+
+    /// CHECK: validated as PumpSwap global volume accumulator.
+    pub global_volume_accumulator: UncheckedAccount<'info>,
+
+    /// CHECK: validated for the ANGRY liquidity PDA.
+    #[account(mut)]
+    pub user_volume_accumulator: UncheckedAccount<'info>,
+
+    /// CHECK: validated as Pump Fee fee_config PDA.
+    pub fee_config: UncheckedAccount<'info>,
+
+    /// CHECK: fixed official Pump Fee program.
+    #[account(
+        address = PUMP_FEE_PROGRAM_ID,
+        executable
+    )]
+    pub fee_program: UncheckedAccount<'info>,
+
+    /// CHECK: validated as [b"pool-v2", base_mint].
+    pub pool_v2: UncheckedAccount<'info>,
+
+    /// CHECK: must be in PumpSwap's official breaking-fee list.
+    pub breaking_fee_recipient: UncheckedAccount<'info>,
+
+    /// CHECK: canonical breaking-fee WSOL ATA.
+    #[account(mut)]
+    pub breaking_fee_recipient_quote_ata:
+        UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
