@@ -1,0 +1,32 @@
+# === ANGRY SECURITY: NEVER COMMIT SECRETS ===
+.env
+.env.*
+!.env.example
+
+# Private keys / certificates
+*.pem
+*.p12
+*.pfx
+*.key
+
+# Solana / Anchor private keypairs
+program-keypair.json
+program-keypair*.json
+*-keypair.json
+keypair.json
+target/deploy/*-keypair.json
+
+# Credentials / service accounts
+credentials.json
+credentials.*.json
+service-account.json
+service-account*.json
+secrets/
+.secrets/
+
+# Local development artifacts
+node_modules/
+target/
+
+# Local ANGRY safety backups
+*.part3a-backup
