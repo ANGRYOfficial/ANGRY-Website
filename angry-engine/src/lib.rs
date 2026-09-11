@@ -354,7 +354,7 @@ pub struct DeployLiquidity<'info> {
         mut,
         has_one = authority
     )]
-    pub config: Account<'info, EngineConfig>,
+    pub config: Box<Account<'info, EngineConfig>>,
 
     #[account(
         seeds = [
