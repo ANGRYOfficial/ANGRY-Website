@@ -43,6 +43,8 @@ const PUMPSWAP_POOL_LP_MINT_OFFSET: usize = 107;
 const PUMPSWAP_POOL_BASE_TOKEN_ACCOUNT_OFFSET: usize = 139;
 const PUMPSWAP_POOL_QUOTE_TOKEN_ACCOUNT_OFFSET: usize = 171;
 const PUMPSWAP_POOL_COIN_CREATOR_OFFSET: usize = 211;
+const PUMPSWAP_POOL_IS_MAYHEM_MODE_OFFSET: usize = 243;
+const PUMPSWAP_POOL_IS_CASHBACK_COIN_OFFSET: usize = 244;
 const PUBKEY_BYTES: usize = 32;
 
 fn account_pubkey_at(
@@ -445,6 +447,26 @@ fn validate_deploy_accounts(
         )?;
 
     require!(
+        pool_data.len()
+            > PUMPSWAP_POOL_IS_CASHBACK_COIN_OFFSET,
+        EngineError::InvalidPumpSwapPool
+    );
+
+    let pool_is_mayhem_mode =
+        pool_data[PUMPSWAP_POOL_IS_MAYHEM_MODE_OFFSET]
+            != 0;
+
+    let pool_is_cashback_coin =
+        pool_data[PUMPSWAP_POOL_IS_CASHBACK_COIN_OFFSET]
+            != 0;
+
+    require!(
+        !pool_is_mayhem_mode
+            && !pool_is_cashback_coin,
+        EngineError::UnsupportedPumpSwapPoolMode
+    );
+
+    require!(
         pool_base_mint == base_mint
             && pool_quote_mint == quote_mint,
         EngineError::InvalidPumpSwapPool
@@ -831,7 +853,6 @@ fn pumpswap_buy_for_liquidity(
             .to_account_info(),
         ctx.accounts.fee_config.to_account_info(),
         ctx.accounts.fee_program.to_account_info(),
-        ctx.accounts.pool_v2.to_account_info(),
         ctx.accounts.pool_v2.to_account_info(),
         ctx.accounts
             .breaking_fee_recipient

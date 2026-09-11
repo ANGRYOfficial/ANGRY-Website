@@ -184,4 +184,7 @@ pub enum EngineError {
 
     #[msg("The PumpSwap LP token amount did not match the execution plan.")]
     LiquidityLpAmountMismatch,
+
+    #[msg("PumpSwap Mayhem and Cashback pools are not supported for ANGRY liquidity deployment.")]
+    UnsupportedPumpSwapPoolMode,
 }
