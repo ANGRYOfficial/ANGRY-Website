@@ -30,3 +30,7 @@ target/
 
 # Local ANGRY safety backups
 *.part3a-backup
+
+# Part 3B verifier runtime/local artifacts
+angry-engine/client/part3b/part2-plan.json
+angry-engine/client/part3b/*.before-part3b-fix

@@ -1,0 +1,16 @@
+{
+  "name": "angry-part3-liquidity-verifier-r1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "precheck": "node verify-part3.mjs precheck",
+    "verify": "node verify-part3.mjs verify",
+    "stage-only": "node verify-part3.mjs stage-only",
+    "deploy-only": "node verify-part3.mjs deploy-only"
+  },
+  "dependencies": {
+    "@pump-fun/pump-swap-sdk": "1.19.0",
+    "@solana/spl-token": "0.4.14",
+    "@solana/web3.js": "1.98.4"
+  }
+}

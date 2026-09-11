@@ -1,0 +1,20 @@
+ANGRY ENGINE PART 3B — VERIFIED DEVNET BASELINE
+Created: Sat Sep 12 00:41:14 +08 2026
+
+=== ENVIRONMENT ===
+Node: v26.3.1
+npm : 11.17.0
+
+=== SHA256 ===
+75e809208564aef15849c6d942a8ef753ff4d98a66c5010e23c49138d0808e9e  verify-part3.mjs
+6842bb176a2025e42e5ce897a57b5709192732e9976dce9adb6fd163882f1587  verify-part3.mjs.bak-user-volume-20260912-000906
+97d20023d49bc4bbc17d9fc5544fc75476cc777b98952a67bf2713360da3151b  part3b-deploy.log
+d7c12037310a9abccc8a3d48b23aa2a90c932376384c32f31b59841ce3a9d727  package.json
+e3d4f00bb6d4e55ebdf54a2be02dd9a5f572bceab9bc5496276cf2265c79c33e  package-lock.json
+
+=== VERIFIED RESULT MARKERS ===
+✅ PumpSwap user volume accumulator initialized
+✅ Candidate 1 FULL SIMULATION PASSED
+✅ real Part 3B PumpSwap liquidity deploy confirmed on-chain: 4nm19WAA9iRdchnrVUAH3pAaWiyLTY9q4j3rTjcf7hPresHXtLWcYBfzMf4aMa9upME9fvFBAGwRhRX3Y8kZsU2J
+✅ reserve + lifetime accounting conservation passed
+✅ ANGRY PART 3B DEVNET VERIFIED — BUY → PUMPSWAP LP DEPLOY PASSED
