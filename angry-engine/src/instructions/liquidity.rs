@@ -215,73 +215,54 @@ pub fn handler(
 fn validate_deploy_accounts(
     ctx: &Context<DeployLiquidity>,
 ) -> Result<()> {
-    msg!("ANGRY_DIAG_VALIDATE_ENTER");
 
     let liquidity_authority =
         ctx.accounts.liquidity_authority.key();
-    msg!("ANGRY_DIAG_KEY_LIQUIDITY_AUTHORITY_OK");
 
     let base_mint =
         ctx.accounts.base_mint.key();
-    msg!("ANGRY_DIAG_KEY_BASE_MINT_OK");
 
     let quote_mint =
         ctx.accounts.quote_mint.key();
-    msg!("ANGRY_DIAG_KEY_QUOTE_MINT_OK");
 
     let lp_mint =
         ctx.accounts.lp_mint.key();
-    msg!("ANGRY_DIAG_KEY_LP_MINT_OK");
 
     let liquidity_authority_info =
         ctx.accounts
             .liquidity_authority
             .to_account_info();
-    msg!("ANGRY_DIAG_AUTHORITY_INFO_OK");
 
     let liquidity_owner_is_system =
         *liquidity_authority_info.owner == system_program::ID;
-    msg!("ANGRY_DIAG_AUTHORITY_OWNER_READ_OK");
 
     let liquidity_data_is_empty =
         liquidity_authority_info.data_is_empty();
-    msg!("ANGRY_DIAG_AUTHORITY_DATA_READ_OK");
 
     require!(
         liquidity_owner_is_system && liquidity_data_is_empty,
         EngineError::InvalidLiquidityAuthorityOwner
     );
-    msg!("ANGRY_DIAG_AUTHORITY_REQUIRE_OK");
 
-    msg!("ANGRY_DIAG_BEFORE_CONFIG_PROJECT_READ");
     let config_project = ctx.accounts.config.project;
-    msg!("ANGRY_DIAG_CONFIG_PROJECT_READ_OK");
 
     require!(
         base_mint == config_project,
         EngineError::InvalidLiquidityBaseMint
     );
-    msg!("ANGRY_DIAG_BASE_PROJECT_REQUIRE_OK");
 
-    msg!("ANGRY_DIAG_BEFORE_BASE_MINT_INFO");
     let base_mint_info = ctx.accounts.base_mint.to_account_info();
-    msg!("ANGRY_DIAG_BASE_MINT_INFO_OK");
 
     let base_mint_owner = *base_mint_info.owner;
-    msg!("ANGRY_DIAG_BASE_MINT_OWNER_READ_OK");
 
-    msg!("ANGRY_DIAG_BEFORE_BASE_TOKEN_PROGRAM_INFO");
     let base_token_program_info = ctx.accounts.base_token_program.to_account_info();
-    msg!("ANGRY_DIAG_BASE_TOKEN_PROGRAM_INFO_OK");
 
     let base_token_program_key = *base_token_program_info.key;
-    msg!("ANGRY_DIAG_BASE_TOKEN_PROGRAM_KEY_READ_OK");
 
     require!(
         base_mint_owner == base_token_program_key,
         EngineError::InvalidLiquidityBaseMint
     );
-    msg!("ANGRY_DIAG_BASE_MINT_OWNER_REQUIRE_OK");
 
     require!(
         quote_mint == WSOL_MINT,
@@ -390,7 +371,6 @@ fn validate_deploy_accounts(
         EngineError::InvalidLiquidityLpTokenAccount
     );
 
-    msg!("ANGRY_DIAG_VALIDATE_TOKEN_ACCOUNTS_OK");
 
     let pool_info =
         ctx.accounts.pool.to_account_info();
@@ -491,7 +471,6 @@ fn validate_deploy_accounts(
 
     drop(pool_data);
 
-    msg!("ANGRY_DIAG_VALIDATE_POOL_OK");
 
     let expected_protocol_fee_ata =
         get_associated_token_address_with_program_id(
@@ -544,7 +523,6 @@ fn validate_deploy_accounts(
         EngineError::InvalidPumpSwapCreatorVault
     );
 
-    msg!("ANGRY_DIAG_VALIDATE_FEE_ACCOUNTS_OK");
 
     require_pda(
         ctx.accounts.global_config.key(),
@@ -598,7 +576,6 @@ fn validate_deploy_accounts(
         EngineError::InvalidPumpSwapPoolV2,
     )?;
 
-    msg!("ANGRY_DIAG_VALIDATE_PDAS_OK");
 
     let breaking_fee_recipient =
         ctx.accounts
@@ -1054,14 +1031,12 @@ pub fn deploy_handler(
     quote_amount_to_deposit: u64,
     lp_token_amount_out: u64,
 ) -> Result<()> {
-    msg!("ANGRY_DIAG_DEPLOY_HANDLER_ENTER");
 
     require!(
         !ctx.accounts.config.paused,
         EngineError::EnginePaused
     );
 
-    msg!("ANGRY_DIAG_AFTER_PAUSED");
 
     require!(
         quote_amount_to_buy > 0
@@ -1071,9 +1046,7 @@ pub fn deploy_handler(
         EngineError::InvalidLiquidityExecutionAmount
     );
 
-    msg!("ANGRY_DIAG_BEFORE_VALIDATE");
     validate_deploy_accounts(&ctx)?;
-    msg!("ANGRY_DIAG_AFTER_VALIDATE");
 
     let total_quote_amount =
         quote_amount_to_buy
