@@ -14,7 +14,6 @@ import {
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
-  sendAndConfirmTransaction,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
@@ -568,21 +567,168 @@ function deriveEngine(authority, project) {
   return { config, vault, buybackAuthority, liquidityAuthority };
 }
 
-async function sendTx(mainWallet, instructions, extraSigners = [], label = "transaction") {
-  return await retry(label, async () => {
-    const tx = new Transaction().add(...instructions);
-    tx.feePayer = mainWallet.publicKey;
-    return await sendAndConfirmTransaction(
-      connection,
-      tx,
-      [mainWallet, ...extraSigners],
-      {
-        commitment: "confirmed",
-        preflightCommitment: "confirmed",
-        maxRetries: 5,
-      }
+async function waitForSignatureStatus(
+  signature,
+  label,
+  raw,
+  skipPreflight = false
+) {
+  const resendOptions =
+    skipPreflight
+      ? {
+          skipPreflight: true,
+          maxRetries: 0,
+        }
+      : {
+          skipPreflight: false,
+          preflightCommitment: "confirmed",
+          maxRetries: 0,
+        };
+
+  for (let attempt = 1; attempt <= 90; attempt++) {
+    const statuses = await retry(
+      `${label}: signature status`,
+      () =>
+        connection.getSignatureStatuses(
+          [signature],
+          { searchTransactionHistory: true }
+        ),
+      8
     );
-  });
+
+    const status = statuses.value[0];
+
+    // Failed transactions also have a durable signature status.
+    if (status?.err) {
+      return status;
+    }
+
+    if (
+      status &&
+      (
+        status.confirmationStatus === "confirmed" ||
+        status.confirmationStatus === "finalized"
+      )
+    ) {
+      return status;
+    }
+
+    /*
+     * Public Devnet RPC can acknowledge sendRawTransaction and still
+     * fail to propagate the transaction. Re-broadcast the SAME signed
+     * bytes periodically. Same raw bytes => same transaction signature.
+     */
+    if (raw && attempt % 5 === 0) {
+      let rebroadcastSignature = null;
+
+      try {
+        rebroadcastSignature =
+          await connection.sendRawTransaction(
+            raw,
+            resendOptions
+          );
+      } catch (error) {
+        console.log(
+          `ℹ️ ${label}: same-tx rebroadcast warning: ${
+            error?.message ?? error
+          }`
+        );
+      }
+
+      if (
+        rebroadcastSignature &&
+        rebroadcastSignature !== signature
+      ) {
+        throw new Error(
+          `${label}: rebroadcast signature mismatch: ` +
+          `${rebroadcastSignature} != ${signature}`
+        );
+      }
+
+      if (rebroadcastSignature === signature) {
+        console.log(
+          `ℹ️ ${label}: rebroadcast SAME transaction: ${signature}`
+        );
+      }
+    }
+
+    await sleep(1500);
+  }
+
+  throw new Error(
+    `${label}: confirmation timeout for ${signature}`
+  );
+}
+
+async function fetchFailureLogs(signature, label) {
+  const txInfo = await retry(
+    `${label}: fetch failed tx`,
+    () =>
+      connection.getTransaction(signature, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      }),
+    8
+  );
+
+  return txInfo?.meta?.logMessages ?? [];
+}
+
+async function sendTx(mainWallet, instructions, extraSigners = [], label = "transaction") {
+  /*
+   * Build/sign exactly once. On transient Devnet RPC failure we resend
+   * the SAME serialized transaction, so retry cannot create a second
+   * logically distinct transaction with a fresh blockhash.
+   */
+  const latest = await retry(
+    `${label}: latest blockhash`,
+    () => connection.getLatestBlockhash("confirmed"),
+    8
+  );
+
+  const tx = new Transaction({
+    feePayer: mainWallet.publicKey,
+    recentBlockhash: latest.blockhash,
+  }).add(...instructions);
+
+  tx.sign(
+    mainWallet,
+    ...extraSigners
+  );
+
+  const raw = tx.serialize();
+
+  const signature = await retry(
+    `${label}: send`,
+    () =>
+      connection.sendRawTransaction(raw, {
+        skipPreflight: false,
+        preflightCommitment: "confirmed",
+        maxRetries: 0,
+      }),
+    8
+  );
+
+  const status =
+    await waitForSignatureStatus(
+      signature,
+      label,
+      raw,
+      false
+    );
+
+  if (status.err) {
+    const error = new Error(
+      `${label} failed on-chain: ${JSON.stringify(status.err)}`
+    );
+    error.logs =
+      await fetchFailureLogs(signature, label);
+    throw error;
+  }
+
+  pass(`${label} confirmed on-chain: ${signature}`);
+  await sleep(750);
+  return signature;
 }
 
 function uniquePubkeys(addresses) {
@@ -748,7 +894,7 @@ async function sendV0Success(
   lookupTable,
   label
 ) {
-  const { tx, latest } = await buildV0Transaction(
+  const { tx } = await buildV0Transaction(
     mainWallet,
     instructions,
     extraSigners,
@@ -756,41 +902,38 @@ async function sendV0Success(
     label
   );
 
-  const signature = await retry(`${label}: send`, () =>
-    connection.sendTransaction(tx, {
-      skipPreflight: false,
-      preflightCommitment: "confirmed",
-      maxRetries: 5,
-    })
+  const raw = tx.serialize();
+
+  const signature = await retry(
+    `${label}: send`,
+    () =>
+      connection.sendRawTransaction(raw, {
+        skipPreflight: false,
+        preflightCommitment: "confirmed",
+        maxRetries: 0,
+      }),
+    8
   );
 
-  const confirmation = await retry(`${label}: confirm`, () =>
-    connection.confirmTransaction(
-      {
-        signature,
-        blockhash: latest.blockhash,
-        lastValidBlockHeight: latest.lastValidBlockHeight,
-      },
-      "confirmed"
-    )
-  );
-
-  if (confirmation.value.err) {
-    const txInfo = await retry(`${label}: fetch failed tx`, () =>
-      connection.getTransaction(signature, {
-        commitment: "confirmed",
-        maxSupportedTransactionVersion: 0,
-      })
+  const status =
+    await waitForSignatureStatus(
+      signature,
+      label,
+      raw,
+      false
     );
 
+  if (status.err) {
     const error = new Error(
-      `${label} failed on-chain: ${JSON.stringify(confirmation.value.err)}`
+      `${label} failed on-chain: ${JSON.stringify(status.err)}`
     );
-    error.logs = txInfo?.meta?.logMessages ?? [];
+    error.logs =
+      await fetchFailureLogs(signature, label);
     throw error;
   }
 
   pass(`${label} confirmed on-chain: ${signature}`);
+  await sleep(750);
   return signature;
 }
 
@@ -801,7 +944,7 @@ async function sendV0ExpectedFailure(
   lookupTable,
   label
 ) {
-  const { tx, latest } = await buildV0Transaction(
+  const { tx } = await buildV0Transaction(
     mainWallet,
     instructions,
     extraSigners,
@@ -809,38 +952,41 @@ async function sendV0ExpectedFailure(
     label
   );
 
-  // skipPreflight=true is deliberate here: we want a real failed transaction
-  // recorded by the runtime so atomic rollback can be checked afterward.
-  const signature = await retry(`${label}: send expected failure`, () =>
-    connection.sendTransaction(tx, {
-      skipPreflight: true,
-      maxRetries: 5,
-    })
+  /*
+   * skipPreflight=true is deliberate: the failed transaction must reach
+   * the runtime so we can prove atomic rollback. Retry always resends the
+   * same serialized transaction/signature.
+   */
+  const raw = tx.serialize();
+
+  const signature = await retry(
+    `${label}: send expected failure`,
+    () =>
+      connection.sendRawTransaction(raw, {
+        skipPreflight: true,
+        maxRetries: 0,
+      }),
+    8
   );
 
-  const confirmation = await retry(`${label}: confirm expected failure`, () =>
-    connection.confirmTransaction(
-      {
-        signature,
-        blockhash: latest.blockhash,
-        lastValidBlockHeight: latest.lastValidBlockHeight,
-      },
-      "confirmed"
-    )
-  );
+  const status =
+    await waitForSignatureStatus(
+      signature,
+      label,
+      raw,
+      true
+    );
 
-  if (!confirmation.value.err) {
+  if (!status.err) {
     fail(`${label}: transaksi seharusnya gagal tetapi sukses.`);
   }
 
-  const txInfo = await retry(`${label}: fetch failure logs`, () =>
-    connection.getTransaction(signature, {
-      commitment: "confirmed",
-      maxSupportedTransactionVersion: 0,
-    })
-  );
+  const logs =
+    await fetchFailureLogs(
+      signature,
+      `${label}: expected failure`
+    );
 
-  const logs = txInfo?.meta?.logMessages ?? [];
   const stage = stageFromLogs(logs);
 
   console.log(`ℹ️ expected-failure signature: ${signature}`);
