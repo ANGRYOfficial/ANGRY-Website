@@ -160,6 +160,18 @@ const optionalPubkeys = [
     "engine.liquidityAuthorityPda",
     config.engine?.liquidityAuthorityPda,
   ],
+  [
+    "authorities.programUpgradeAuthority",
+    config.authorities?.programUpgradeAuthority,
+  ],
+  [
+    "authorities.engineAuthority",
+    config.authorities?.engineAuthority,
+  ],
+  [
+    "authorities.developmentWallet",
+    config.authorities?.developmentWallet,
+  ],
 ];
 
 for (const [label, value] of optionalPubkeys) {
@@ -224,6 +236,18 @@ const requiredForExecution = [
   [
     "liquidityAuthorityPda",
     config.engine?.liquidityAuthorityPda,
+  ],
+  [
+    "programUpgradeAuthority",
+    config.authorities?.programUpgradeAuthority,
+  ],
+  [
+    "engineAuthority",
+    config.authorities?.engineAuthority,
+  ],
+  [
+    "developmentWallet",
+    config.authorities?.developmentWallet,
   ],
 ];
 

@@ -35,5 +35,10 @@
     "transactionsEnabled": false,
     "productionSenderCreated": false,
     "mainnetDeploymentConfirmed": false
+  },
+  "authorities": {
+    "programUpgradeAuthority": null,
+    "engineAuthority": null,
+    "developmentWallet": null
   }
 }
