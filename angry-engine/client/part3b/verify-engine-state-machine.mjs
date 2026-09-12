@@ -12,7 +12,6 @@ import {
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
-  sendAndConfirmTransaction,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 
@@ -390,23 +389,88 @@ async function sendTx(
   extraSigners = [],
   label = "transaction"
 ) {
-  return await retry(label, async () => {
-    const tx =
-      new Transaction().add(...instructions);
+  /*
+   * Avoid sendAndConfirmTransaction here.
+   * Public Devnet RPC can heavily rate-limit websocket/internal
+   * confirmation calls. Build/sign once, resend the SAME raw
+   * transaction on transient RPC errors, then poll status over HTTP.
+   */
+  const latest = await retry(
+    `${label}: blockhash`,
+    () => connection.getLatestBlockhash("confirmed"),
+    8
+  );
 
-    tx.feePayer = mainWallet.publicKey;
+  const tx =
+    new Transaction({
+      feePayer: mainWallet.publicKey,
+      recentBlockhash: latest.blockhash,
+    }).add(...instructions);
 
-    return await sendAndConfirmTransaction(
-      connection,
-      tx,
-      [mainWallet, ...extraSigners],
-      {
-        commitment: "confirmed",
-        preflightCommitment: "confirmed",
-        maxRetries: 5,
-      }
+  tx.sign(
+    mainWallet,
+    ...extraSigners
+  );
+
+  const raw = tx.serialize();
+
+  const signature = await retry(
+    `${label}: send`,
+    () =>
+      connection.sendRawTransaction(
+        raw,
+        {
+          skipPreflight: false,
+          preflightCommitment: "confirmed",
+          maxRetries: 0,
+        }
+      ),
+    8
+  );
+
+  for (let i = 1; i <= 90; i++) {
+    const statuses = await retry(
+      `${label}: signature status`,
+      () =>
+        connection.getSignatureStatuses(
+          [signature]
+        ),
+      8
     );
-  });
+
+    const status = statuses.value[0];
+
+    if (status?.err) {
+      const error = new Error(
+        `${label} failed on-chain: ${JSON.stringify(status.err)}`
+      );
+      error.signature = signature;
+      throw error;
+    }
+
+    if (
+      status &&
+      (
+        status.confirmationStatus === "confirmed" ||
+        status.confirmationStatus === "finalized"
+      )
+    ) {
+      pass(
+        `${label} confirmed on-chain: ${signature}`
+      );
+
+      // Small pacing delay for public Devnet RPC.
+      await sleep(750);
+
+      return signature;
+    }
+
+    await sleep(1500);
+  }
+
+  throw new Error(
+    `${label}: confirmation timeout for ${signature}`
+  );
 }
 
 async function expectSimulationFailure(
