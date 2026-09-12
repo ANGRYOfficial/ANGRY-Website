@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 import {
   Connection,
   PublicKey,
@@ -5,11 +7,13 @@ import {
 
 import {
   TOKEN_PROGRAM_ID,
-  NATIVE_MINT,
 } from "@solana/spl-token";
 
 /*
- * ANGRY MAINNET READ-ONLY PREFLIGHT
+ * ANGRY ENGINE — MAINNET READ-ONLY PREFLIGHT
+ *
+ * Mainnet addresses/config are loaded from:
+ *   ./mainnet-config.json
  *
  * SAFETY:
  * - no Keypair
@@ -21,37 +25,73 @@ import {
  * - no confirmTransaction
  */
 
-const DEFAULT_PUBLIC_RPC =
-  "https://api.mainnet.solana.com";
+const CONFIG_FILE = "./mainnet-config.json";
 
-const RPC =
-  process.env.ANGRY_MAINNET_RPC ||
-  DEFAULT_PUBLIC_RPC;
-
-const MAINNET_GENESIS_HASH =
-  "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
-
-const ANGRY_PROGRAM_ID =
-  new PublicKey(
-    "NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C"
-  );
-
-const PUMPSWAP_PROGRAM_ID =
-  new PublicKey(
-    "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
-  );
-
-const PUMP_FEE_PROGRAM_ID =
-  new PublicKey(
-    "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
-  );
-
-function pass(text) {
-  console.log(`✅ ${text}`);
+function pass(message) {
+  console.log(`✅ ${message}`);
 }
 
-function fail(text) {
-  throw new Error(text);
+function fail(message) {
+  throw new Error(message);
+}
+
+function pubkey(value, label) {
+  if (typeof value !== "string" || value.length === 0) {
+    fail(`${label} missing from Mainnet config`);
+  }
+
+  try {
+    return new PublicKey(value);
+  } catch {
+    fail(`${label} is not a valid Solana public key`);
+  }
+}
+
+if (!fs.existsSync(CONFIG_FILE)) {
+  fail(`${CONFIG_FILE} not found`);
+}
+
+const config =
+  JSON.parse(
+    fs.readFileSync(CONFIG_FILE, "utf8")
+  );
+
+if (config.network !== "mainnet-beta") {
+  fail(
+    `Refusing network: ${String(config.network)}`
+  );
+}
+
+if (
+  config.safety?.transactionsEnabled !== false
+) {
+  fail(
+    "Mainnet planning safety lock is not OFF"
+  );
+}
+
+if (
+  config.safety?.productionSenderCreated !== false
+) {
+  fail(
+    "productionSenderCreated must remain false during read-only planning"
+  );
+}
+
+pass("Mainnet planning safety locks are OFF");
+
+const RPC =
+  process.env[
+    config.rpc?.environmentVariable ??
+    "ANGRY_MAINNET_RPC"
+  ] ||
+  config.rpc?.publicFallback;
+
+if (
+  typeof RPC !== "string" ||
+  RPC.length === 0
+) {
+  fail("No Mainnet RPC configured");
 }
 
 if (/devnet|testnet/i.test(RPC)) {
@@ -59,6 +99,30 @@ if (/devnet|testnet/i.test(RPC)) {
     `Refusing non-mainnet RPC: ${RPC}`
   );
 }
+
+const ANGRY_PROGRAM_ID =
+  pubkey(
+    config.programs?.angryEngine,
+    "ANGRY Program ID"
+  );
+
+const PUMPSWAP_PROGRAM_ID =
+  pubkey(
+    config.programs?.pumpSwap,
+    "PumpSwap Program ID"
+  );
+
+const PUMP_FEE_PROGRAM_ID =
+  pubkey(
+    config.programs?.pumpFee,
+    "Pump Fee Program ID"
+  );
+
+const WSOL_MINT =
+  pubkey(
+    config.tokens?.wsol,
+    "WSOL mint"
+  );
 
 const connection =
   new Connection(RPC, "confirmed");
@@ -72,7 +136,22 @@ console.log(
 console.log(
   "=============================================="
 );
-console.log("RPC:", RPC);
+
+console.log(
+  "Config:",
+  CONFIG_FILE
+);
+
+console.log(
+  "Network:",
+  config.network
+);
+
+console.log(
+  "RPC:",
+  RPC
+);
+
 console.log("");
 
 const genesisHash =
@@ -84,14 +163,16 @@ console.log(
 );
 
 if (
-  genesisHash !== MAINNET_GENESIS_HASH
+  genesisHash !== config.genesisHash
 ) {
   fail(
-    "RPC is not Solana Mainnet. Genesis hash mismatch."
+    `RPC genesis mismatch: ${genesisHash} != ${config.genesisHash}`
   );
 }
 
-pass("RPC genesis hash = Solana Mainnet");
+pass(
+  "RPC genesis hash matches Mainnet config"
+);
 
 const slot =
   await connection.getSlot("confirmed");
@@ -101,7 +182,10 @@ console.log(
   slot
 );
 
-if (!Number.isSafeInteger(slot) || slot <= 0) {
+if (
+  !Number.isSafeInteger(slot) ||
+  slot <= 0
+) {
   fail("Invalid Mainnet slot");
 }
 
@@ -148,7 +232,7 @@ await assertExecutable(
 
 const wsolInfo =
   await connection.getAccountInfo(
-    NATIVE_MINT,
+    WSOL_MINT,
     "confirmed"
   );
 
@@ -167,7 +251,7 @@ if (
 }
 
 pass(
-  `WSOL mint verified: ${NATIVE_MINT.toBase58()}`
+  `WSOL mint verified: ${WSOL_MINT.toBase58()}`
 );
 
 const angryMainnetInfo =
@@ -182,9 +266,11 @@ if (!angryMainnetInfo) {
   console.log(
     "ℹ️ ANGRY Program ID is NOT currently deployed on Mainnet:"
   );
+
   console.log(
     `   ${ANGRY_PROGRAM_ID.toBase58()}`
   );
+
   console.log(
     "   This is expected before the planned Mainnet deployment."
   );
@@ -192,17 +278,78 @@ if (!angryMainnetInfo) {
   console.log(
     "⚠️ ANGRY Program ID ALREADY EXISTS on Mainnet:"
   );
+
   console.log(
     `   ${ANGRY_PROGRAM_ID.toBase58()}`
   );
+
   console.log(
     `   executable=${angryMainnetInfo.executable}`
   );
+
   console.log(
     `   owner=${angryMainnetInfo.owner.toBase58()}`
   );
+
   console.log(
-    "   Do not deploy until ownership/upgrade authority is investigated."
+    "   Stop and investigate before any deployment."
+  );
+}
+
+console.log("");
+console.log(
+  "=== PRODUCTION CONFIG READINESS ==="
+);
+
+const productionFields = [
+  [
+    "projectMint",
+    config.tokens?.projectMint,
+  ],
+  [
+    "lpMint",
+    config.tokens?.lpMint,
+  ],
+  [
+    "pool",
+    config.pumpSwap?.pool,
+  ],
+  [
+    "configPda",
+    config.engine?.configPda,
+  ],
+  [
+    "vaultPda",
+    config.engine?.vaultPda,
+  ],
+];
+
+const missing =
+  productionFields
+    .filter(([, value]) => value === null)
+    .map(([name]) => name);
+
+if (missing.length > 0) {
+  console.log(
+    "🔒 Production execution remains intentionally unavailable."
+  );
+
+  console.log(
+    `Missing ${missing.length} core production value(s):`
+  );
+
+  for (const name of missing) {
+    console.log(
+      `  - ${name}`
+    );
+  }
+} else {
+  console.log(
+    "⚠️ Core production addresses are populated."
+  );
+
+  console.log(
+    "Transactions are STILL disabled by Mainnet safety policy."
   );
 }
 
@@ -212,6 +359,9 @@ console.log(
 );
 console.log(
   "✅ MAINNET READ-ONLY PREFLIGHT COMPLETED"
+);
+console.log(
+  "✅ CONFIG SOURCE: mainnet-config.json"
 );
 console.log(
   "✅ NO TRANSACTION WAS CREATED OR SENT"
