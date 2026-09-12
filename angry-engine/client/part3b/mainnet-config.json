@@ -1,0 +1,39 @@
+{
+  "network": "mainnet-beta",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "rpc": {
+    "environmentVariable": "ANGRY_MAINNET_RPC",
+    "publicFallback": "https://api.mainnet.solana.com"
+  },
+  "programs": {
+    "angryEngine": "NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C",
+    "pumpSwap": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+    "pumpFee": "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
+  },
+  "tokens": {
+    "wsol": "So11111111111111111111111111111111111111112",
+    "projectMint": null,
+    "lpMint": null
+  },
+  "pumpSwap": {
+    "pool": null,
+    "poolBaseTokenAccount": null,
+    "poolQuoteTokenAccount": null,
+    "globalConfig": null,
+    "protocolFeeRecipient": null,
+    "feeConfig": null,
+    "coinCreator": null,
+    "coinCreatorVaultAuthority": null
+  },
+  "engine": {
+    "configPda": null,
+    "vaultPda": null,
+    "buybackAuthorityPda": null,
+    "liquidityAuthorityPda": null
+  },
+  "safety": {
+    "transactionsEnabled": false,
+    "productionSenderCreated": false,
+    "mainnetDeploymentConfirmed": false
+  }
+}
