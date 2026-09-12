@@ -1,6 +1,6 @@
 # ANGRY Engine Security Review
 
-**Status:** Devnet security-review checkpoint  
+**Status:** Post-cleanup Devnet security-review checkpoint
 **Review date:** 2026-09-12  
 **Network tested:** Solana Devnet  
 **Program ID:** `NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C`  
@@ -358,20 +358,188 @@ Retries completed successfully and did not invalidate the passing invariants.
 
 ## 15. Other Verifier Evidence
 
-Part 3 verifier:
-client/part3b/verify-part3.mjs
-SHA-256: 75e809208564aef15849c6d942a8ef753ff4d98a66c5010e23c49138d0808e9e
+### Post-cleanup deployment checkpoint
 
-Known successful Part 3B Devnet transaction:
-3SdVMyHdP85KpczZBGyV15aKWK48o8YTua8Xwfx3uU4eH23sEXzmyYxdPhBVYBuLPUuZ7rkGJTLUNq1UGR7Sk8iw
+Cleanup source commit deployed to Devnet:
 
-Production buyback verifier:
-client/part3b/verify-buyback-production-slippage.mjs
-SHA-256: 1bb6abdac3591ed5c76bd4807c46f4ee2e4811c720a0581194f07131af5f5fc6
+`6d4db23f4eae118ea80be1bdbf36476c82275f41`
+
+Program ID remained:
+
+`NmWNEKmU9N7YWKB2QeBMUAJC1NxuiYwSo1dX4NrKo6C`
+
+ProgramData account:
+
+`DpNQ6n8CTbG1du3v6ADfSC4tWadyGFh9B87yAamwQrhr`
+
+Post-cleanup deployment slot:
+
+`497073535`
+
+Upgrade authority remained:
+
+`GJScfY4ZwpsDyLTFzNEzNBA4iWKfUSduKNQwQzT7mGYT`
+
+The post-cleanup SBF build completed successfully in Solana Playground before
+the Devnet upgrade. No contract source changes were made after cleanup commit
+`6d4db23`; later commits in this branch modify verifier/test harness code only.
+
+### Post-cleanup state-machine regression
+
+Final state-machine verifier:
+
+`client/part3b/verify-engine-state-machine.mjs`
+
+SHA-256:
+
+`17eb2b63eeb639ac573e2c0b4a10c2e20bce5fecb5ac52f0b56399b44ecbdc50`
+
+Verifier RPC-hardening commit:
+
+`17809f5d68592ed7302b60a0085eb868e678c579`
+
+Post-cleanup runtime result:
+
+- pause/unpause passed
+- settings update and old-BPS lazy sync passed
+- authority propose/cancel/accept passed
+- old authority rejected after rotation
+- new authority accepted after rotation
+- accounting and epoch rounding passed
+- development settlement passed
+- staged liquidity survived authority rotation
+- final EngineVault and Liquidity PDA backing passed
+
+Final banners:
+
+`ANGRY ENGINE DEVNET STATE-MACHINE VERIFIED`
+
+`PAUSE / SETTINGS / AUTHORITY / ACCOUNTING / DEVELOPMENT / STAGING PASSED`
+
+### Post-cleanup production Buyback/Burn regression
+
+Production Buyback verifier:
+
+`client/part3b/verify-buyback-production-slippage.mjs`
+
+SHA-256:
+
+`e1f27b380e11aa31d05cf39ec3214045c8d004fe65178adb05a40b950d40a72f`
+
+Verifier RPC/rebroadcast-hardening commit:
+
+`c2164f92572cf1bcacaa03bf16d83251281b36e0`
+
+Production slippage policy remained:
+
+- default: 200 bps (2%)
+- no automatic slippage widening
+- fresh live quote immediately before real send
+
+The deliberate impossible-minimum rollback transaction was recorded on-chain
+after same-signed-transaction rebroadcast and reached ANGRY -> PumpSwap before
+failing.
+
+Rollback transaction:
+
+`3PGDi49TQhVq9DWuTpzwpaaWb9v3nrgwmFNqLbkjjCjmszMevELDHjEFXhsGuKksciVkw3KJS1eVA3evd52s5GGY`
+
+Atomic rollback was verified across:
+
+- Engine accounting
+- EngineVault SOL
+- project-token balance
+- WSOL balance
+- mint supply
+
+Post-cleanup real Buyback -> PumpSwap -> Burn transaction:
+
+`t6mZsjajKfVQmnTAcWb254ev14PPYC4XG8ShP5eTYtkRMQeYYHnFeaAZruZLCG7B8PE3gpMWtCUbg3LvPS3ogaW`
+
+Observed burn:
+
+`1166166762163` raw project-token units
+
+The mint supply decreased on-chain, the Buyback token ATA and WSOL ATA returned
+to their original balances, Buyback reserve accounting changed only after the
+successful swap+burn, and 25/15/60 accounting remained conserved.
+
+Final banners:
+
+`ANGRY PART 3 R1 DEVNET VERIFIED — LIQUIDITY STAGING PASSED`
+
+`ANGRY PART 2 DEVNET VERIFIED — PUMPSWAP -> BUYBACK -> BURN PASSED`
+
+### Post-cleanup Part 3B liquidity deployment regression
+
+Part 3B verifier:
+
+`client/part3b/verify-part3.mjs`
+
+SHA-256:
+
+`d7976a7848e0a30e94752b75fd4a639dfdee9b42de2ce8ad2df58fbb633994ba`
+
+Verifier RPC/rebroadcast-hardening commit:
+
+`5966e8f2a75587b00259cb4e4b9ca05c939a6600`
+
+Real post-cleanup PumpSwap liquidity deployment transaction:
+
+`5La7wpuWkwTSpx9Mu3Du6EbEskXW8c3as2PsstPGin3ZGWdBmRTFdCXho6tjTVrDvXQsFTVHHBQXtuWDuJNHAyFt`
+
+Observed deployment:
+
+- quote used for buy: `211740` lamports
+- project token bought and fully deposited: `246504160971` raw units
+- quote deposited to LP: `209186` lamports
+- Token-2022 LP received: `226212933` raw units
+- total staged liquidity processed: `420926` lamports
+- remaining liquidityStaged: `179074` lamports
+- base ATA returned exactly to its pre-deploy balance
+- WSOL ATA returned exactly to its pre-deploy balance
+- Buyback and Development reserves were untouched
+- reserve and lifetime accounting conservation passed
+- PumpSwap LP mint supply increased exactly by LP received
+
+Final banner:
+
+`ANGRY PART 3B DEVNET VERIFIED — BUY -> PUMPSWAP LP DEPLOY PASSED`
+
+### Post-cleanup unsupported pool-mode regression
+
+Real Devnet Mayhem pool:
+
+`91KCx8VWb8fVTGTjgExFWuXaP9BoJjgAGfx37b9aRJn`
+
+Real Devnet Cashback pool:
+
+`12BKwF4BCneqB2ZicinDXCq9jcFLQop4ByDnb9jABimD`
+
+Part 3B results:
+
+- Mayhem: error 6061 `UnsupportedPumpSwapPoolMode`
+- Cashback: error 6061 `UnsupportedPumpSwapPoolMode`
+- both: `ANGRY=true`, `PUMPSWAP=false`
+- passed: 2/2
+
+Buyback results:
+
+- Mayhem: error 6061 `UnsupportedPumpSwapPoolMode`
+- Cashback: error 6061 `UnsupportedPumpSwapPoolMode`
+- both: `ANGRY=true`, `PUMPSWAP=false`
+- passed: 2/2
+
+All four negative tests were simulation-only and confirmed ANGRY rejected the
+unsupported pool mode before PumpSwap CPI.
 
 Production quote helper:
-client/part3b/buyback-production-quote.mjs
-SHA-256: c0bd7c129a13a9ec4f68fea2fc6d0a736be49dbcde8ab4cd91f1f1ebbc5dbecb
+
+`client/part3b/buyback-production-quote.mjs`
+
+SHA-256:
+
+`c0bd7c129a13a9ec4f68fea2fc6d0a736be49dbcde8ab4cd91f1f1ebbc5dbecb`
 
 The production quote helper is read-only and does not expose send APIs.
 
@@ -397,6 +565,21 @@ Production buyback slippage verifier:
 Final state-machine verifier:
 e3b2c9cd4a87f11c1faba02af3f3fa89370b37e4
 
+Final security-review document:
+c311856dc47900dff73bcea3bba461829e3a3b6f
+
+Cleanup diagnostic-log removal:
+6d4db23f4eae118ea80be1bdbf36476c82275f41
+
+State-machine verifier RPC confirmation hardening:
+17809f5d68592ed7302b60a0085eb868e678c579
+
+Buyback verifier RPC/rebroadcast hardening:
+c2164f92572cf1bcacaa03bf16d83251281b36e0
+
+Part 3B verifier RPC/rebroadcast hardening:
+5966e8f2a75587b00259cb4e4b9ca05c939a6600
+
 ---
 
 ## 17. Informational and Operational Considerations
@@ -419,11 +602,11 @@ not a universal guarantee for every market condition.
 I-06: Buyback Authority requires an operational SOL buffer.
 Insufficient buffer can stop execution but does not change reserve ownership.
 
-I-07: ANGRY_DIAG_* development logs should be reviewed and unnecessary
-diagnostic logging removed before the final mainnet build.
+I-07: RESOLVED IN CLEANUP — active `ANGRY_DIAG_*` development logs were
+removed from the tracked contract source in cleanup commit `6d4db23`.
 
-I-08: liquidity.rs.part3a-backup is not compiled, but it should be moved
-out of src or deleted before mainnet to avoid reviewer/scanner ambiguity.
+I-08: RESOLVED IN CLEANUP — `liquidity.rs.part3a-backup` is not tracked
+under `angry-engine/src`; the local backup was relocated outside active source.
 
 ---
 
@@ -452,20 +635,31 @@ or deterministic address constraints before CPI.
 
 ## 19. Mainnet Cleanup Checklist
 
-- [ ] Remove or relocate liquidity.rs.part3a-backup from src.
-- [ ] Review and remove unnecessary ANGRY_DIAG_* logs.
-- [ ] Confirm cleanup introduces no accounting/state changes.
-- [ ] Re-run static source sweep.
-- [ ] Rebuild the Solana SBF program from clean source.
-- [ ] Confirm Program ID.
-- [ ] Confirm upgrade authority.
-- [ ] Re-run state-machine verifier after cleanup.
-- [ ] Re-run Buyback/Burn verifier after cleanup.
-- [ ] Re-run Part 3B liquidity verifier after cleanup.
-- [ ] Re-run unsupported pool-mode negative tests.
-- [ ] Record final source commit used for deployment.
-- [ ] Record final binary/build provenance.
+- [x] Remove or relocate liquidity.rs.part3a-backup from active src.
+- [x] Review and remove unnecessary ANGRY_DIAG_* logs.
+- [x] Confirm cleanup introduces no accounting/state changes.
+- [x] Re-run static source sweep.
+- [x] Rebuild the Solana SBF program from clean source.
+- [x] Confirm Program ID.
+- [x] Confirm upgrade authority.
+- [x] Re-run state-machine verifier after cleanup.
+- [x] Re-run Buyback/Burn verifier after cleanup.
+- [x] Re-run Part 3B liquidity verifier after cleanup.
+- [x] Re-run unsupported pool-mode negative tests.
+- [x] Record final source commit used for the Devnet cleanup deployment.
+- [ ] Record an independent final binary artifact hash/build provenance package.
 - [ ] Consider independent third-party audit before material mainnet value.
+
+Cleanup source deployed to Devnet:
+
+`6d4db23f4eae118ea80be1bdbf36476c82275f41`
+
+Current branch checkpoint after verifier-only hardening:
+
+`5966e8f2a75587b00259cb4e4b9ca05c939a6600`
+
+There are no tracked contract-source differences between the deployed cleanup
+commit and the current branch checkpoint.
 
 ---
 
@@ -491,12 +685,24 @@ re-review and regression testing.
 
 Within the reviewed scope and tested Devnet configuration, ANGRY Engine
 completed source-level security review, adversarial regression testing,
-and real runtime verification without a known open Critical, High, or
-Medium severity finding at this checkpoint.
+cleanup, a fresh SBF build, a Devnet upgrade, and a full post-cleanup
+runtime regression cycle without a known open Critical, High, or Medium
+severity finding at this checkpoint.
+
+The post-cleanup regression cycle covered the Engine state machine,
+production-style Buyback -> PumpSwap -> Burn with 2% slippage policy,
+actual PumpSwap liquidity deployment and Token-2022 LP accounting, and
+real Devnet Mayhem/Cashback rejection for both liquidity deployment and
+Buyback paths.
+
+The deployed cleanup contract source is commit
+`6d4db23f4eae118ea80be1bdbf36476c82275f41`. Later commits through
+`5966e8f2a75587b00259cb4e4b9ca05c939a6600` modify verifier/test harness
+code only; the tracked contract source is unchanged from the deployed
+cleanup commit.
 
 This is not a claim of perfect security and is not a replacement for an
-independent professional audit.
-
-The next phase is mainnet cleanup, followed by a fresh build and full
-post-cleanup regression cycle before any mainnet deployment decision.
+independent professional audit. A reproducible final binary artifact
+hash/build provenance package and independent third-party review remain
+recommended before placing material mainnet value at risk.
 
